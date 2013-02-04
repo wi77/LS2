@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Ls2 : The FU Berlin parallel lateration-algorithm simulation and visualization engine" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Ls2</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/wi77/LS2">View on GitHub</a>
+
+          <h1 id="project_title">Ls2</h1>
+          <h2 id="project_tagline">The FU Berlin parallel lateration-algorithm simulation and visualization engine</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/wi77/LS2/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/wi77/LS2/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>We introduce a simulation engine to visually evaluate and compare distance based lateration algorithms and deployments called the FU Berlin Parallel Lateration-Algorithm Simulation and Visualization Engine (LS²}. Our engine simulates a scenario which consists of given anchor positions and evaluates all positions of a playing field in parallel, instead of only randomly selected positions. At the end of a simulation run, the user is able to judge the strengths and weaknesses of the algorithm in a picture that displays the spatial position error distribution, a representation of positions in a plane with their errors. Understanding spacial distribution of error is especially valuable, because we observed that it depends on the placement of anchor nodes. This enables the developer to optimize his algorithm or aid him in selecting an algorithm for his application.</p>
+
+<p>The simulator's design separates the simulation engine, the lateration algorithms, and the error models. The simulator can be easily extended with additional lateration algorithms and error models. The engine is written in GNU C99 and uses the SSE or AVX vector extensions of modern microprocessors. Thus, it is able to scale fully to all cores. Beside extendability, the main focus is set on execution speed.
+Support
+Please join our mailing list for support or discussion: <a href="http://lists.spline.inf.fu-berlin.de/mailman/listinfo/ls2">http://lists.spline.inf.fu-berlin.de/mailman/listinfo/ls2</a></p>
+
+<h2>Downloads</h2>
+
+<h3>Software</h3>
+
+<ul>
+<li>LS² v.0.2 Simulation Environment</li>
+<li>Latmath Java Library v0.1
+This library contains all localization algorithms found in the LS² package in the Java programming language for use in different projects. For more information see the included readme file.</li>
+<li>Lateration Shooter GUI v0.1
+This is a graphical user interface for LS² written in Java. This program works also standalone if the shared library is not available and falls back to the Java implementation by using the build in "verify method". For more information see the included readme file.</li>
+</ul><h3>Real World Measurement Data</h3>
+
+<p>All runs have been collected with an autonomous robot in our office building. The ground truth is included in the files and has a maximum error of 6 cm. Each file has a header with the x and y value of the anchor positions in meter, separated by a colon. The rest of the file is csv with the following values: timestamp in milliseconds, n times the anchor distances in meter, ground truth x value in meter, ground truth y value in meter.</p>
+
+<ul>
+<li>    Run through our office building</li>
+<li>    2nd run through our office building </li>
+</ul><h3>Related Publications</h3>
+
+<ul>
+<li>    Heiko Will, Thomas Hillebrandt and Marcel Kyas. 2012. The Geo-n Localization Algorithm In proceedings, IPIN 2012, Sydney - PDF</li>
+<li>    Heiko Will, Thomas Hillebrandt, Yang Yuan, Zhao Yubin and Marcel Kyas. 2012. The Membership Degree Min-Max Localization Algorithm.The International Conference on Ubiquitous Positioning, Indoor Navigation and Location-Based Service 2012 (UPINLBS)Helsinki, Finland PDF</li>
+<li>    Thomas Hillebrandt, Heiko Will and Marcel Kyas. 2012. Quantitative and Spatial Evaluation of distance-based Localization Algorithms, In Lecture Notes in Geoinformation and Cartography - Progress in Location-Based Services, Springer, 2012. - PDF</li>
+<li>    Heiko Will, Thomas Hillebrandt, and Marcel Kyas. 2012. The FU Berlin Parallel Lateration-Algorithm Simulation and Visualization Engine, 9th Workshop on Positioning, Navigation and Communication 2012 (WPNC'12), Dresden, Germany - PDF</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Ls2 maintained by <a href="https://github.com/wi77">wi77</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
