@@ -1,0 +1,17 @@
+
+When you check out the project from a git repository, you have to build
+all autoconf files. This may be done by executing the script
+
+autogen.sh
+
+From now on, you can execute
+
+./configure && make && sudo make install
+
+to build and install the lateration shooter.
+
+More information on compiling and running the shooter can be found in
+the file README.
+
+When you add an algorithm or an error model, you have to add its source
+files to src/Makefile.am and rebuild.

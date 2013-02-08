@@ -1,0 +1,16 @@
+
+
+
+
+Dependencies:
+
+To build ls2, you will need to have the following programs, libraries
+and their development files:
+
+* gcc (version 4.6 or later)
+* python
+* GNU Scientific Library (version 1.13 or later)
+* HDF5 (version 1.8.4 or later)
+* OpenEXR (version 1.6.1 or later)
+* cairo (version 1.8.0 or later)
+* popt

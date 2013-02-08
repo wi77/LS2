@@ -1,0 +1,109 @@
+# This file is part of LS² - the Localization Simulation Engine of FU Berlin.
+#
+# Copyright 2011-2013   Heiko Will, Marcel Kyas, Thomas Hillebrandt,
+# Stefan Adler, Malte Rohde, Jonathan Gunthermann
+#
+# LS² is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# LS² is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with LS².  If not, see <http://www.gnu.org/licenses/>.
+#
+
+Name:           ls2
+Version:        @VERSION@
+Release:        1%{?dist}
+Summary:        Estimate spacial distribution of location estimation erros.
+
+License:        GPLv3+
+URL:            http://www.inf.fu-berlin.de/groups/ag-tech/projects/ls2/index.html
+Source0:        http://www.inf.fu-berlin.de/groups/ag-tech/projects/ls2/ls2-%{version}.tar.gz
+
+BuildRequires:  gcc >= 4.6.0
+BuildRequires:  cairo-devel >= 1.8
+BuildRequires:	OpenEXR-devel >= 1.6
+BuildRequires:	gsl-devel >= 1.13
+BuildRequires:	hdf5-devel >= 1.8
+Requires:       %{name}-libs = %{version}-%{release}
+
+%description
+LS2 estimates the spacial distribution of location estimation errors by
+simulation.
+
+
+%package devel
+
+Summary:        Header files for LS2
+Requires:       %{name}-libs = %{version}-%{release}
+
+
+%description devel
+Development files for LS2
+
+
+%package libs
+
+Summary:        Libraries of LS2
+
+
+%description libs
+Libraries for LS2
+
+
+%post libs
+/sbin/ldconfig
+
+
+%postun libs
+/sbin/ldconfig
+
+
+%package static
+
+Summary:        Static libraries for LS2
+
+
+%description static
+Static libraries for LS2
+
+
+%prep
+%setup -q
+
+
+%build
+CFLAGS="${CFLAGS:-%optflags} -msse4.1" ; export CFLAGS
+%configure --enable-static
+make %{?_smp_mflags}
+
+
+%install
+make install DESTDIR=%{buildroot}
+rm %{buildroot}%{_libdir}/libls2*.la
+
+
+%files
+%doc README COPYING ChangeLog
+%{_bindir}/*
+
+
+%files devel
+%{_includedir}/*
+%{_libdir}/*.so
+
+
+%files libs
+%{_libdir}/*.so.*
+
+
+%files static
+%{_libdir}/*.a
+
+%changelog
