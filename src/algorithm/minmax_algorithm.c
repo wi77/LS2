@@ -34,8 +34,17 @@
 
 /* @algorithm_name: Min-Max aka Bounding Box algorithm*/
 
-static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-minmax_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
+#ifndef LS2_MINMAX_ALGORITHM_C_INCLUDED
+#define LS2_MINMAX_ALGORITHM_C_INCLUDED 1
+
+static inline void
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
+minmax_run (const VECTOR *restrict vx, const VECTOR *restrict vy,
+            const VECTOR *restrict r, size_t num_anchors,
+            int width __attribute__((__unused__)),
+            int height __attribute__((__unused__)),
+            VECTOR *restrict resx, VECTOR *restrict resy)
+{
     VECTOR east  = vx[0] + r[0];
     VECTOR west  = vx[0] - r[0];
     VECTOR south = vy[0] + r[0];
@@ -46,6 +55,8 @@ minmax_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t
         south = VECTOR_MIN(south, vy[i] + r[i]);
         north = VECTOR_MAX(north, vy[i] - r[i]);
     }
-    *resx = east * half + west* half;
+    *resx = east * half + west * half;
     *resy = north * half + south * half;
 }
+
+#endif
