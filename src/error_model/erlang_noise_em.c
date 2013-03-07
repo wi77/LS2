@@ -35,8 +35,8 @@
 #include "../util/util_random.c"
 
 static int erlang_shape = 3;
-static float erlang_rate = -0.5228819579F;
-static float erlang_offset = -3.31060119642765F;
+static float erlang_rate = 0.5228819579F;
+static float erlang_offset = 3.31060119642765F;
 static float erlang_scale = 50.0f / 2.85f;
 
 #if defined(HAVE_POPT_H)
@@ -78,8 +78,8 @@ erlang_noise_error(__m128i* seed,
 	VECTOR x = VECTOR_BROADCASTF(1.0F);
 	for (int i = 0; i < erlang_shape; i++)
 	    x *= rnd(seed);
-        x = VECTOR_LOG(x) / VECTOR_BROADCASTF(erlang_rate);
-        x += VECTOR_BROADCASTF(erlang_offset);
+        x = VECTOR_LOG(x) / VECTOR_BROADCASTF(-erlang_rate);
+        x -= VECTOR_BROADCASTF(erlang_offset);
 
 	// HACK: Scale it to an expected value of 50.
         x *= VECTOR_BROADCASTF(erlang_scale);

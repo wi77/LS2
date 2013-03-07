@@ -50,10 +50,11 @@
 
 #include "algorithm/llsq_algorithm.c"
 
-static double mle_gamma_shape = 5.0;
-static double mle_gamma_rate = 50.0 * 5.0;
+static double mle_gamma_shape = 3.0;
+static double mle_gamma_rate = 4.0 / 50.0;
 static double mle_gamma_offset = 0.0;
 static double mle_gamma_epsilon = 1e-2;
+static double mle_gamma_step = 5e1;
 static int mle_gamma_iterations = 100;
 
 
@@ -69,6 +70,9 @@ struct poptOption mle_gamma_arguments[] = {
           "offset to the gamma distribution", NULL },
         { "mle-gamma-epsilon", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
           &mle_gamma_epsilon, 0,
+          "maximum size of the simplex for termination", NULL },
+        { "mle-gamma-step", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+          &mle_gamma_step, 0,
           "maximum size of the simplex for termination", NULL },
         { "mle-gamma-iterations", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
           &mle_gamma_iterations, 0,
@@ -154,7 +158,7 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         for (size_t j = 0; j < no_anchors; j++) {
             p.ranges[j] = r[j][i];
         }
-        gsl_vector_set_all(ss, 1.0);
+        gsl_vector_set_all(ss, 50.0);
         gsl_vector_set(x, 0, sx[i]);
         gsl_vector_set(x, 1, sy[i]);
 

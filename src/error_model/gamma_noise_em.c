@@ -19,7 +19,7 @@
 
  */
 
-/* @error_model_name: Erlang error */
+/* @error_model_name: Gamma error (buggy) */
 
 #ifdef HAVE_CONFIG_H
 # include "ls2/ls2-config.h"
@@ -34,9 +34,9 @@
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
 
-static float gamma_shape = 1.0;
-static float gamma_rate = 1.0;
-static float gamma_offset = 0.0;
+static float gamma_shape = 3.0f;
+static float gamma_rate = 3.0f / 50.0f;   // mean = shape / rate
+static float gamma_offset = 0.0f;
 
 
 #if defined(HAVE_POPT_H)
@@ -73,15 +73,15 @@ gamma_noise_error(__m128i* seed,
                   VECTOR *restrict result)
 {
     for (size_t k=0; k < anchors ; k++) {
-        float alpha;
         VECTOR x = VECTOR_BROADCASTF(1.0F);
+        float alpha;
 	for (alpha = gamma_shape; alpha >= 1.0F; alpha -= 1.0F) {
             x *= rnd(seed);
         }
         if (alpha > 0.0F) {
-            // TODO: Find a random number for shape 0 < alpha < 1
+            // TODO: Find a random number for shape 0 <= alpha < 1
         }
-        x = VECTOR_LOG(x) / VECTOR_BROADCASTF(gamma_rate) +
+        x = (VECTOR_LOG(x) / VECTOR_BROADCASTF(-gamma_rate)) -
               VECTOR_BROADCASTF(gamma_offset);
 
       	result[k] = distances[k] + x;
