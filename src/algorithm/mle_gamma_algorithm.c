@@ -51,7 +51,7 @@
 #include "algorithm/llsq_algorithm.c"
 
 static double mle_gamma_shape = 3.0;
-static double mle_gamma_rate = 4.0 / 50.0;
+static double mle_gamma_rate = 3.0 / 50.0;
 static double mle_gamma_offset = 0.0;
 static double mle_gamma_epsilon = 1e-2;
 static double mle_gamma_step = 5e1;
