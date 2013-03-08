@@ -50,12 +50,36 @@
 
 #include "algorithm/llsq_algorithm.c"
 
-static double mle_gamma_shape = 3.0;
-static double mle_gamma_rate = 3.0 / 50.0;
-static double mle_gamma_offset = 0.0;
-static double mle_gamma_epsilon = 1e-2;
-static double mle_gamma_step = 5e1;
-static int mle_gamma_iterations = 100;
+#ifndef MLE_GAMMA_DEFAULT_SHAPE
+#define MLE_GAMMA_DEFAULT_SHAPE 3.0
+#endif
+
+#ifndef MLE_GAMMA_DEFAULT_RATE
+#define MLE_GAMMA_DEFAULT_RATE (MLE_GAMMA_DEFAULT_SHAPE / 50.0)
+#endif
+
+#ifndef MLE_GAMMA_DEFAULT_OFFSET
+#define MLE_GAMMA_DEFAULT_OFFSET 0.0
+#endif
+
+#ifndef MLE_GAMMA_DEFAULT_STEP
+#define MLE_GAMMA_DEFAULT_STEP 50.0
+#endif
+
+#ifndef MLE_GAMMA_DEFAULT_EPSILON
+#define MLE_GAMMA_DEFAULT_EPSILON 1e-2
+#endif
+
+#ifndef MLE_GAMMA_DEFAULT_ITERATIONS
+#define MLE_GAMMA_DEFAULT_ITERATIONS 200
+#endif
+
+static double mle_gamma_shape      = MLE_GAMMA_DEFAULT_SHAPE;
+static double mle_gamma_rate       = MLE_GAMMA_DEFAULT_RATE;
+static double mle_gamma_offset     = MLE_GAMMA_DEFAULT_OFFSET;
+static double mle_gamma_step       = MLE_GAMMA_DEFAULT_STEP;
+static double mle_gamma_epsilon    = MLE_GAMMA_DEFAULT_EPSILON;
+static    int mle_gamma_iterations = MLE_GAMMA_DEFAULT_ITERATIONS;
 
 
 struct poptOption mle_gamma_arguments[] = {
@@ -68,11 +92,11 @@ struct poptOption mle_gamma_arguments[] = {
         { "mle-gamma-offset", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
           &mle_gamma_offset, 0,
           "offset to the gamma distribution", NULL },
-        { "mle-gamma-epsilon", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gamma_epsilon, 0,
-          "maximum size of the simplex for termination", NULL },
         { "mle-gamma-step", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
           &mle_gamma_step, 0,
+          "size of the initial line search step vector", NULL },
+        { "mle-gamma-epsilon", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+          &mle_gamma_epsilon, 0,
           "maximum size of the simplex for termination", NULL },
         { "mle-gamma-iterations", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
           &mle_gamma_iterations, 0,
