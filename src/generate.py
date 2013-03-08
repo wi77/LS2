@@ -162,10 +162,11 @@ lib.writelines([ "    NULL\n",
                  "}\n",
                  "\n" ])
 
-lib.writelines([ 'static inline void __attribute__((__always_inline__,__nonnull__,__pure__))\n',
-                 'algorithm(algorithm_t alg, const VECTOR* vx, const VECTOR* vy, const VECTOR* r,\n',
+lib.writelines([ 'static inline void __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))\n',
+                 'algorithm(algorithm_t alg,\n',
+                 '          const VECTOR *restrict vx, const VECTOR *restrict vy, const VECTOR *restrict r,\n',
                  '          size_t no_anchors, int width, int height,\n',
-                 '          VECTOR* resx, VECTOR* resy)\n',
+                 '          VECTOR *restrict resx, VECTOR *restrict resy)\n',
                  '{\n',
                  '    switch (alg) {\n',
                 ])
@@ -269,10 +270,10 @@ lib.writelines([ "    }\n",
                  "\n",
                ])
 
-lib.writelines([ 'static inline void __attribute__((__always_inline__))\n',
-                 'error_model(error_model_t model, __m128i *seed, const VECTOR* dist,\n',
-                 '            const VECTOR* vx, const VECTOR* vy, size_t no_anchors,\n'
-                 '            const VECTOR tagx, const VECTOR tagy, VECTOR* result)\n',
+lib.writelines([ 'static inline void __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))\n',
+                 'error_model(error_model_t model, __m128i *restrict seed, const VECTOR *restrict dist,\n',
+                 '            const VECTOR *restrict vx, const VECTOR *restrict vy, size_t no_anchors,\n'
+                 '            const VECTOR tagx, const VECTOR tagy, VECTOR *restrict result)\n',
                  '{\n',
                  '    switch (model) {\n',
                 ])

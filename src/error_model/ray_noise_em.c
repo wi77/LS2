@@ -754,7 +754,8 @@ ray_noise_isWall(int wall[][SIZE], int zahl) {
 
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-ray_noise_error(__m128i* seed, const size_t anchors,
+ray_noise_error(__m128i *restrict seed,
+                const size_t anchors,
                 const VECTOR *restrict distances __attribute__((__unused__)),
                 const VECTOR *restrict  vx __attribute__((__unused__)),
 		const VECTOR *restrict  vy __attribute__((__unused__)),

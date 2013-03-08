@@ -48,7 +48,7 @@ static float bahillo_ub = 3.0f;
 /* NLOS Error model proposed by Bahillo. 
  */
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-bahillo_error(__m128i* seed,
+bahillo_error(__m128i *restrict seed,
               const size_t no_anchors,
               const VECTOR *restrict distances,
               const VECTOR *restrict vx __attribute__((__unused__)),

@@ -56,7 +56,7 @@ nlosp_setup(const vector2 *anchors __attribute__((__unused__)),
 }
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-nlosp_error(__m128i* seed,
+nlosp_error(__m128i *restrict seed,
             const size_t anchors,
             const VECTOR *restrict distances,
             const VECTOR *restrict vx __attribute__((__unused__)),

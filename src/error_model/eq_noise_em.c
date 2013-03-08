@@ -56,7 +56,7 @@ eq_noise_setup(const vector2 *anchors __attribute__((__unused__)),
 
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-eq_noise_error(__m128i* seed,
+eq_noise_error(__m128i *restrict seed,
                const size_t anchors,
 	       const VECTOR *restrict  const distances,
 	       const VECTOR __attribute__((unused)) vx[MAX_ANCHORS],
