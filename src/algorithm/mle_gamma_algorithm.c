@@ -63,15 +63,15 @@
 #endif
 
 #ifndef MLE_GAMMA_DEFAULT_STEP
-#define MLE_GAMMA_DEFAULT_STEP 50.0
+#define MLE_GAMMA_DEFAULT_STEP 25.0
 #endif
 
 #ifndef MLE_GAMMA_DEFAULT_EPSILON
-#define MLE_GAMMA_DEFAULT_EPSILON 1e-2
+#define MLE_GAMMA_DEFAULT_EPSILON 1e-5
 #endif
 
 #ifndef MLE_GAMMA_DEFAULT_ITERATIONS
-#define MLE_GAMMA_DEFAULT_ITERATIONS 200
+#define MLE_GAMMA_DEFAULT_ITERATIONS 100
 #endif
 
 static double mle_gamma_shape      = MLE_GAMMA_DEFAULT_SHAPE;
@@ -131,7 +131,7 @@ mle_gamma_likelihood_function(const gsl_vector *X, void *restrict params)
                           (gsl_vector_get(X, 1) - p->anchors[j].y) *
                           (gsl_vector_get(X, 1) - p->anchors[j].y);
         const double x = p->ranges[j] + mle_gamma_offset - sqrt(d2);
-        if (x < mle_gamma_epsilon) {
+        if (x < 10.0 * DBL_MIN) {
             result = 0.0;
             break;
         }
