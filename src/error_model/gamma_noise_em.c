@@ -62,10 +62,11 @@ gamma_noise_setup(const vector2 *anchors __attribute__((__unused__)),
   // No setup needed.
 }
 
-static inline void __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
+static inline void
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,3,8)))
 gamma_noise_error(__m128i *restrict seed,
                   const size_t anchors,
-                  const VECTOR *restrict distances __attribute__((__unused__)),
+                  const VECTOR *restrict distances,
                   const VECTOR *restrict vx __attribute__((__unused__)),
                   const VECTOR *restrict vy __attribute__((__unused__)),
                   const VECTOR tagx __attribute__((__unused__)),

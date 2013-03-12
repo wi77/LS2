@@ -55,7 +55,8 @@ nlosp_setup(const vector2 *anchors __attribute__((__unused__)),
     r_error = VECTOR_BROADCASTF(ERROR);    
 }
 
-static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+static inline void
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,3,8)))
 nlosp_error(__m128i *restrict seed,
             const size_t anchors,
             const VECTOR *restrict distances,
@@ -69,7 +70,7 @@ nlosp_error(__m128i *restrict seed,
         VECTOR rn = gaussrand(seed, 50, 15);
         VECTOR help = VECTOR_LT(rnd(seed), VECTOR_BROADCASTF(NLOS));
         VECTOR nlos = exp_rand(seed, VECTOR_BROADCASTF(Distribution)) *
-                      VECTOR_BROADCASTF(100);
+                          VECTOR_BROADCASTF(100);
 	rn += VECTOR_AND(nlos, help);  // Mask out members without nlos error
         result[k] = distances[k] + rn;
     }

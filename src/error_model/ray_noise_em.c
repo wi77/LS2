@@ -96,7 +96,7 @@ float rz;
 
 //Calculate the Path Loss
 static inline void
-__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 pathloss(VECTOR length, VECTOR *restrict ploss)
 {
     float help = 300000000;
@@ -111,7 +111,7 @@ pathloss(VECTOR length, VECTOR *restrict ploss)
 
 //Tags every point that is part of a wall
 static inline void
-__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 strength_on_hit(const VECTOR length, VECTOR strength, VECTOR *restrict sleft,
                 VECTOR *restrict sreflect, int wnum, VECTOR angle)
 {
@@ -164,7 +164,7 @@ get(int x, int y, int a)
 
 //tags every Point by rewriting the length and strength arrays if neccesary
 static inline void
-__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 tag(const VECTOR ax, const VECTOR ay, const VECTOR dx, const VECTOR dy,
     const VECTOR cx __attribute__((unused)),
     const VECTOR cy __attribute__((unused)),
@@ -206,7 +206,7 @@ tag(const VECTOR ax, const VECTOR ay, const VECTOR dx, const VECTOR dy,
 
 //calculate the direction of the reflected ray
 static inline void
-__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 ray_reflect(const VECTOR dx, const VECTOR dy, VECTOR *restrict dcx,
             VECTOR *restrict dcy, VECTOR *restrict angle)
 {
@@ -237,7 +237,7 @@ ray_reflect(const VECTOR dx, const VECTOR dy, VECTOR *restrict dcx,
 
 //Checks if and where a ray hits a wall
 static inline int
-__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 ray_wall(const VECTOR ax, const VECTOR ay, const VECTOR dx, const VECTOR dy,
          VECTOR *restrict cx1, VECTOR *restrict cy1, VECTOR *restrict dcx1,
          VECTOR *restrict dcy1, VECTOR *restrict dist)
@@ -340,7 +340,7 @@ ray_wall(const VECTOR ax, const VECTOR ay, const VECTOR dx, const VECTOR dy,
 
 //calls ray_walls for all walls and ray_reflection
 static inline int
-__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 ray_cross(const VECTOR ax, const VECTOR ay, const VECTOR dx, const VECTOR dy,
           VECTOR *restrict cx2, VECTOR *restrict cy2, VECTOR *restrict dcx2,
           VECTOR *restrict dcy2, VECTOR *restrict distance2,
@@ -605,7 +605,7 @@ tag_wall(void)
 
 //called from vector_shooter, initialize lenght and strength arrays, starts ray calculation for every anchor
 static inline void
-__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 ray_noise_anchors(const vector2 vv[], size_t num)
 {
     VECTOR anchornumber;
@@ -639,7 +639,7 @@ ray_noise_anchors(const vector2 vv[], size_t num)
     }
 }
 
-void __attribute__((__nonnull__))
+void
 ray_noise_setup(const vector2 *vv __attribute__((__unused__)),
                 size_t num __attribute__((__unused__)))
 {
@@ -741,7 +741,7 @@ ray_noise_setup(const vector2 *vv __attribute__((__unused__)),
 
 
 static inline void
-__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 ray_noise_isWall(int wall[][SIZE], int zahl) {
     for (int i = 0; i<zahl; i++) {
    	    for(int j = 0; j<zahl;j++) {
@@ -753,7 +753,7 @@ ray_noise_isWall(int wall[][SIZE], int zahl) {
 
 
 static inline void
-__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,8)))
 ray_noise_error(__m128i *restrict seed,
                 const size_t anchors,
                 const VECTOR *restrict distances __attribute__((__unused__)),

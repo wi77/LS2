@@ -270,7 +270,7 @@ lib.writelines([ "    }\n",
                  "\n",
                ])
 
-lib.writelines([ 'static inline void __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))\n',
+lib.writelines([ 'static inline void __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(2,3,9)))\n',
                  'error_model(error_model_t model, __m128i *restrict seed, const VECTOR *restrict dist,\n',
                  '            const VECTOR *restrict vx, const VECTOR *restrict vy, size_t no_anchors,\n'
                  '            const VECTOR tagx, const VECTOR tagy, VECTOR *restrict result)\n',
