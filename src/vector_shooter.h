@@ -27,6 +27,16 @@
 #undef GCC_VERSION
 #define GCC_VERSION NUM_VERSION(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
 
+/*!
+ * The cache line alignement.
+ */
+#ifndef CACHE_ALIGNMENT_BITS
+#  define CACHE_ALIGNMENT_BITS 64
+#endif
+
+#undef CACHE_ALIGNMENT
+#define CACHE_ALIGNMENT ((CACHE_ALIGNMENT_BITS)/sizeof(unsigned char))
+
 /*! The default number of threads can be defined in the makefile - ignored by
  * library version, configurable.
  */

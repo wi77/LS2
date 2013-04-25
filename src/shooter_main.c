@@ -346,7 +346,7 @@ int main(int argc, const char* argv[])
     for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
         if ((output[var] != NULL && *output[var] != '\0') ||
             (output_hdf5 != NULL && *output_hdf5 != '\0')) {
-            if (posix_memalign((void**)&(results[var]), 64, sz)) {
+            if (posix_memalign((void**)&(results[var]), CACHE_ALIGNMENT, sz) != 0) {
 	        perror("posix_memalign()");
 	        exit(EXIT_FAILURE);
             }
@@ -357,11 +357,11 @@ int main(int argc, const char* argv[])
     }
 #else
     memset(results, 0, sizeof(results));
-    if (posix_memalign((void**)&(results[MEAN_SQUARED_ERROR]), 64, sz)) {
+    if (posix_memalign((void**)&(results[MEAN_SQUARED_ERROR]), CACHE_ALIGNMENT, sz) != 0) {
       perror("posix_memalign()");
       exit(EXIT_FAILURE);
     }
-    if (posix_memalign((void**)&(results[ROOT_MEAN_SQUARED_ERROR]), 64, sz)) {
+    if (posix_memalign((void**)&(results[ROOT_MEAN_SQUARED_ERROR]), CACHE_ALIGNMENT, sz) != 0) {
       perror("posix_memalign()");
       exit(EXIT_FAILURE);
     }
