@@ -623,7 +623,7 @@ ls2_distribute_work_inverted(const int alg, const int em,
 	params[t].runs = runs;
 	params[t].algorithm = alg;
 	params[t].error_model = em;
-        if (posix_memalign((void **) &(params[t].result), CACHE_ALIGNMENT, sz) != 0) {
+        if (posix_memalign((void **) &(params[t].result), ALIGNMENT, sz) != 0) {
             fprintf(stderr, "allocate result\n");
             exit(EXIT_FAILURE);
         }

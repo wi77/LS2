@@ -286,7 +286,7 @@ vble_opt_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size
     const VECTOR sqrtTwo = VECTOR_BROADCASTF(sqrtf(2.0f));
     
     // concentrate anchor information in a struct to increase data locality
-    anchor_info_t anchors[num_anchors] __attribute__ ((aligned(16)));
+    anchor_info_t anchors[num_anchors] __attribute__ ((aligned(ALIGNMENT)));
     
     // step 1: find minimum rectangle that covers all anchors
     VECTOR maxRanging = VECTOR_BROADCASTF(FLT_MIN);

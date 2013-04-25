@@ -51,11 +51,11 @@ rand_sse(__m128i* cur_seed)
     __m128i adder;
     __m128i mod_mask;
 
-    static const unsigned int __attribute__((__aligned__(32),__may_alias__))
+    static const unsigned int __attribute__((__aligned__(ALIGNMENT),__may_alias__))
         gadd[4] = { 2531011, 10395331, 13737667, 1 };
-    static const unsigned int __attribute__((__aligned__(32),__may_alias__))
+    static const unsigned int __attribute__((__aligned__(ALIGNMENT),__may_alias__))
         mult[4] = { 214013, 17405, 214013, 69069 };
-    static const unsigned int __attribute__((__aligned__(32),__may_alias__))
+    static const unsigned int __attribute__((__aligned__(ALIGNMENT),__may_alias__))
         mask[4] = { 0xFFFFFFFF, 0, 0xFFFFFFFF, 0 };
 
     adder = _mm_load_si128( (__m128i*) gadd);

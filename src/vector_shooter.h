@@ -28,14 +28,15 @@
 #define GCC_VERSION NUM_VERSION(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
 
 /*!
- * The cache line alignement.
+ * Number of bits used to align our memory. Should be divisible by cachline
+ * size and the constraints of SSE/AVX registers.
  */
-#ifndef CACHE_ALIGNMENT_BITS
-#  define CACHE_ALIGNMENT_BITS 64
+#ifndef ALIGNMENT_BITS
+#  define ALIGNMENT_BITS 256
 #endif
 
-#undef CACHE_ALIGNMENT
-#define CACHE_ALIGNMENT ((CACHE_ALIGNMENT_BITS)/sizeof(unsigned char))
+#undef ALIGNMENT
+#define ALIGNMENT ((ALIGNMENT_BITS)/sizeof(unsigned char))
 
 /*! The default number of threads can be defined in the makefile - ignored by
  * library version, configurable.
