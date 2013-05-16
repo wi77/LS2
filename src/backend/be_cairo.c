@@ -303,27 +303,25 @@ ls2_cairo_pick_color_diff(double sample,
     static const double dynamic = 180.0; // Scale errors to a suitable range
 
     if (sample < -similar) {                     // First was better
-	/* The color ranges from yellow to orange to a dark red. */
+	/* The color is green and gets darker. */
 	assert(sample < 0);
-	*hue = MAX(0.0, 90.0 + 90.0 * (sample / dynamic));
-	assert(0 <= *hue && *hue <= 90.0);
-	*saturation = MAX(0.0, 0.5 + sample / dynamic);
-	assert(0 <= *saturation && *saturation <= 0.5);
+	*hue = 120.0;
+	*saturation = MAX(0.125, 0.5 + sample / dynamic);
+	assert(0.125 <= *saturation && *saturation <= 0.5);
 	*lightness = MAX(0.0, 0.5 + sample / dynamic);
 	assert(0 <= *lightness && *lightness <= 0.5);
     } else if (-similar <= sample && sample <= similar) {    // Similar
-	*hue = 120.0;  // This is the color green
+	*hue = 60.0;  // This is the color yellow
 	*lightness = 0.5;
 	*saturation = 0.5;
     } else if (similar < sample) {              // Second was better
-	/* The color ranges from cyan to light blue to purplish white. */
+	/* We start with red and get brighter. */
 	assert (0 < sample);
-	*hue = MIN(180.0 + 90.0 * (sample / dynamic), 270.0);
-	assert(180.0 <= *hue && *hue <= 270.0);
-	*saturation = MIN(0.5 + sample / dynamic, 1.0);
-	assert(0.5 <= *saturation && *saturation <= 1.0);
-	*lightness = MIN(0.5 + sample / dynamic, 1.0);
-	assert(0.5 <= *lightness && *lightness <= 1.0);
+	*hue = 0.0;
+	*saturation = MIN(0.5 + sample / dynamic, 0.875);
+	assert(0.5 <= *saturation && *saturation <= 0.875);
+	*lightness = MIN(0.5 + sample / dynamic, 0.875);
+	assert(0.5 <= *lightness && *lightness <= 0.875);
     } else {
 	assert(false);
     }
