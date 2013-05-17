@@ -43,7 +43,8 @@
 
 // calculate four 32 bit random integer between -RAN_DMAX and RAN_DMAX in a vector
 // based on http://software.intel.com/en-us/articles/fast-random-number-generator-on-the-intel-pentiumr-4-processor/
-static inline __m128 __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+static inline
+__m128 __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__,__hot__))
 rand_sse(__m128i* cur_seed)
 {
     __m128i cur_seed_split;
@@ -78,7 +79,8 @@ rand_sse(__m128i* cur_seed)
 // Returns a vector of random numbers between 0..1
 #if !defined(__RDRND__)
 #  if defined(__AVX__)
-static inline VECTOR __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+static inline VECTOR
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__,__hot__,__flatten__))
 rnd(__m128i *seed)
 {
     __m128 tmp[2];
@@ -90,7 +92,8 @@ rnd(__m128i *seed)
     return ret;
 }
 #  else
-static inline VECTOR __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+static inline VECTOR
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__,__hot__,__flatten__))
 rnd(__m128i *seed)
 {
     VECTOR ret = rand_sse(seed);
@@ -102,7 +105,7 @@ rnd(__m128i *seed)
 #else /* defined(__RDRAND__) */
 
 static inline void
-__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__,__hot__,__flatten__))
 // __attribute__((optimize(0)))
 rand64(unsigned long long *result)
 {
@@ -113,7 +116,7 @@ rand64(unsigned long long *result)
 }
 
 static inline VECTOR
-__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__,__hot__,__flatten__))
 rnd(__m128i *seed __attribute__((__unused__)))
 {
     static const VECTOR rnd_divisor = VECTOR_CONST_BROADCAST((float) UINT_MAX);
@@ -147,18 +150,49 @@ rnd(__m128i *seed __attribute__((__unused__)))
 #  define NSUM 25
 #endif
 
+#ifndef BOX_MULLER
+#  define BOX_MULLER 0
+#endif
+
 static inline VECTOR
-__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__flatten__))
+normal_rand(__m128i* seed)
+{
+    VECTOR result;
+
+#if BOX_MULLER
+    // This method actually generates a pair of independent normal distributed
+    // pseudo-random numbers. 
+    VECTOR u = rnd(seed);
+    VECTOR v = rnd(seed);
+    VECTOR s, c;
+
+    VECTOR_SINCOS(VECTOR_BROADCASTF(((float)(M_PI + M_PI))) * v, &s, &c);
+    VECTOR t = VECTOR_SQRT(VECTOR_BROADCASTF(-2.0f) * VECTOR_LOG(u));
+
+    result = t * s;
+    // second number would be t * c;
+
+#else
+
+    result = VECTOR_ZERO();
+    for(register int i = 0; i < NSUM; i++) {
+        result += rnd(seed);
+    }
+    result -= VECTOR_BROADCASTF(NSUM / 2.0f);
+    result /= VECTOR_SQRT(VECTOR_BROADCASTF(NSUM / 12.0f));
+
+#endif
+
+    return result;
+}
+
+static inline VECTOR
+__attribute__((__always_inline__,__gnu_inline__,__flatten__,__nonnull__))
 gaussrand(__m128i* seed, float mean, float sdev)
 {
-    VECTOR gauss = VECTOR_ZERO();
-    int i;
+    VECTOR gauss = normal_rand(seed);
 
-    for(i = 0; i < NSUM; i++){
-        gauss += rnd(seed);
-    }
-    gauss -= VECTOR_BROADCASTF(NSUM / 2.0f);
-    gauss /= VECTOR_SQRT(VECTOR_BROADCASTF(NSUM / 12.0f));
     // Multiply with desired standard deviation
     gauss *= VECTOR_BROADCASTF(sdev);
     // Add mean
@@ -167,10 +201,12 @@ gaussrand(__m128i* seed, float mean, float sdev)
     return gauss;
 }
 
+
+
 // Creates a exponential distribution with rate,
 // also shifts the rate, see parameter help
 static inline VECTOR
-__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__))
 exp_rand(__m128i* seed, VECTOR rate)
 {
     VECTOR result = rnd(seed);
