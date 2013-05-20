@@ -294,14 +294,13 @@ ls2_cairo_write_pdf_phase_portrait(const char* filename,
 
 static inline void
 __attribute__((nonnull,gnu_inline,always_inline,artificial))
-ls2_cairo_pick_color_diff(double sample,
+ls2_cairo_pick_color_diff(const double sample,
+                          const double similar,
+                          const double dynamic,
 			  double *restrict hue,
 			  double *restrict saturation,
 			  double *restrict lightness)
 {
-    static const double similar = 3.0;    // Absolute threshold for similarity
-    static const double dynamic = 180.0; // Scale errors to a suitable range
-
     if (sample < -similar) {                     // First was better
 	/* The color is green and gets darker. */
 	assert(sample < 0);
@@ -332,7 +331,8 @@ static void
 ls2_cairo_draw_diff(cairo_surface_t *surface,
 		    const vector2 *anchors, const size_t no_anchors,
                     const float* result, const uint16_t width,
-		    const uint16_t height)
+		    const uint16_t height, const double similar,
+                    const double dynamic)
 {
     cairo_t *cr;
 
@@ -348,7 +348,8 @@ ls2_cairo_draw_diff(cairo_surface_t *surface,
 	for (uint16_t x = 0; x < width; x++) {
             double r, g, b, lightness, saturation, hue;
 	    const float sample = result[y * width + x];
-	    ls2_cairo_pick_color_diff(sample, &hue, &saturation, &lightness);
+	    ls2_cairo_pick_color_diff(sample, similar, dynamic,
+                                      &hue, &saturation, &lightness);
             hsl_to_rgb(hue, lightness, saturation, &r, &g, &b);
 	    cairo_set_source_rgb(cr, r, g, b);
 	    cairo_rectangle(cr, x, y, 1.0, 1.0);
@@ -368,11 +369,13 @@ void
 ls2_cairo_write_png_diff(const char* filename,
 		         const vector2 *anchors, const size_t no_anchors, 
 		         const float* result, const uint16_t width,
-		         const uint16_t height)
+		         const uint16_t height, const double similar,
+                         const double dynamic)
 {
     cairo_surface_t *surface =
         cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-    ls2_cairo_draw_diff(surface, anchors, no_anchors, result, width, height);
+    ls2_cairo_draw_diff(surface, anchors, no_anchors, result, width, height,
+                        similar, dynamic);
     cairo_surface_write_to_png(surface, filename);
     cairo_surface_destroy(surface);
 }

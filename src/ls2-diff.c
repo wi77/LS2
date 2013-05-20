@@ -167,7 +167,7 @@ main(int argc, const char **argv)
 		  "max = %f\n", mu, sigma, min, max);
 	  
 	  ls2_cairo_write_png_diff(compare[var], a_anchors, a_no_anchors,
-				   results, a_width, a_height);
+				   results, a_width, a_height, 3.0, 150.0);
      }
      exit(EXIT_SUCCESS);
 }
