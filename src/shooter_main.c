@@ -179,6 +179,10 @@ int main(int argc, const char* argv[])
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[ROOT_MEAN_SQUARED_ERROR]), 0,
           "name of the root mean squared error output image", "file name" },
+        { "output-bias", 'b',
+          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
+          &(output[BIAS]), 0,
+          "name of the bias output image", "file name" },
 #else
         { "output", 'o',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,

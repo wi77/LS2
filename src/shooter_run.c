@@ -326,6 +326,10 @@ ls2_shooter_run(void *rr)
 	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] =
                 sqrtf(mse / (float) params->runs);
         }
+        if (params->results[BIAS] != NULL) {
+	    params->results[BIAS][pos] = 
+                sqrtf((mse / (float) params->runs) - (S / (cnt - 1.0F)));
+        }
         if (params->results[AVERAGE_X_DEVIATION] != NULL) {
 	    params->results[AVERAGE_X_DEVIATION][pos] = M_X;
         }
