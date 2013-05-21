@@ -228,8 +228,8 @@ ls2_shooter_run(void *rr)
         }
 
         float M = 0.0F, M_old, S = 0.0F, cnt = 0.0F, mse = 0.0F;
-        float M_X = 0.0F, M_X_old, C_X = 0.0F;
-        float M_Y = 0.0F, M_Y_old, C_Y = 0.0F;
+        float M_X = 0.0F, M_X_old, S_X = 0.0F, C_X = 0.0F;
+        float M_Y = 0.0F, M_Y_old, S_Y = 0.0F, C_Y = 0.0F;
         VECTOR min_error = VECTOR_BROADCASTF(FLT_MAX),
                max_error = VECTOR_BROADCASTF(0.0F);
 
@@ -289,6 +289,7 @@ ls2_shooter_run(void *rr)
                         C_X += 1.0F;
                         M_X_old = M_X;
                         M_X += ((resx[k] - x) - M_X_old) / C_X;
+                        S_X += (resx[k] - M) * (resx[k] - M_X_old);
                      }
                 }
             }
@@ -298,6 +299,7 @@ ls2_shooter_run(void *rr)
                         C_Y += 1.0F;
                         M_Y_old = M_Y;
                         M_Y += ((resy[k] - y) - M_Y_old) / C_Y;
+                        S_Y += (resy[k] - M) * (resy[k] - M_Y_old);
                      }
                 }
             }
@@ -335,6 +337,12 @@ ls2_shooter_run(void *rr)
         }
         if (params->results[AVERAGE_Y_DEVIATION] != NULL) {
 	    params->results[AVERAGE_Y_DEVIATION][pos] = M_Y;
+        }
+        if (params->results[VARIANCE_X_DEVIATION] != NULL) {
+	    params->results[VARIANCE_X_DEVIATION][pos] = S_X / (C_X - 1.0F);
+        }
+        if (params->results[VARIANCE_Y_DEVIATION] != NULL) {
+	    params->results[VARIANCE_Y_DEVIATION][pos] = S_Y / (C_Y - 1.0F); 
         }
     }
     running--;

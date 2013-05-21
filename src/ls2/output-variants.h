@@ -32,3 +32,5 @@ LS2OUT_VARIANT(ROOT_MEAN_SQUARED_ERROR, "Root Mean Square Error", "Root_mean_squ
 LS2OUT_VARIANT(BIAS, "Bias", "Bias")
 LS2OUT_VARIANT(AVERAGE_X_DEVIATION, "Average X Deviation", "Average_X_deviation")
 LS2OUT_VARIANT(AVERAGE_Y_DEVIATION, "Average Y Deviation", "Average_Y_deviation")
+LS2OUT_VARIANT(VARIANCE_X_DEVIATION, "Variance X Deviation", "Variance_X_deviation")
+LS2OUT_VARIANT(VARIANCE_Y_DEVIATION, "Variance Y Deviation", "Variance_Y_deviation")
