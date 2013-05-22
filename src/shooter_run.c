@@ -188,7 +188,8 @@ typedef struct locbased_runparams_t {
  * line would start on a cache line. Alas, default SIZE is 8 * 125.
  * SIZE = 1024 might be much better.
  */
-static void* __attribute__((__nonnull__))
+static void*
+__attribute__((__nonnull__,__hot__,__flatten__))
 ls2_shooter_run(void *rr)
 {
     assert(rr != NULL);
@@ -214,6 +215,18 @@ ls2_shooter_run(void *rr)
         vx[i] = VECTOR_BROADCASTF(params->anchors[i].x);
         vy[i] = VECTOR_BROADCASTF(params->anchors[i].y);
     }
+
+    // Precalculate whether we are in the common case of running for the
+    // common case.
+    const long shortcut =
+        (params->results[AVERAGE_ERROR] || params->results[VARIANCE]) &&
+        !(params->results[MEAN_SQUARED_ERROR] ||
+          params->results[ROOT_MEAN_SQUARED_ERROR] ||
+          params->results[BIAS] ||
+          params->results[AVERAGE_X_DEVIATION] ||
+          params->results[VARIANCE_X_DEVIATION] ||
+          params->results[AVERAGE_Y_DEVIATION] ||
+          params->results[VARIANCE_Y_DEVIATION]);
 
     // Calculation for every pixel
     for (size_t j = params->from; j < params->from + params->count; j++) {
@@ -270,6 +283,11 @@ ls2_shooter_run(void *rr)
                 }
             }
 
+            // The common case is to compute the average error, so we
+            // optimise for this case by not testing all cases below.
+            if (shortcut)
+                continue;
+
             if (params->results[MEAN_SQUARED_ERROR] != NULL ||
                   params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
                 VECTOR tmp = errors;
@@ -283,23 +301,27 @@ ls2_shooter_run(void *rr)
 	        mse += tmp[0];
             }
 
-            if (params->results[AVERAGE_X_DEVIATION] != NULL) {
+            if (params->results[AVERAGE_X_DEVIATION] != NULL ||
+                params->results[VARIANCE_X_DEVIATION] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
                     if (!isnan(resx[k])) {
                         C_X += 1.0F;
                         M_X_old = M_X;
                         M_X += ((resx[k] - x) - M_X_old) / C_X;
-                        S_X += (resx[k] - M) * (resx[k] - M_X_old);
+                        if (params->results[VARIANCE_X_DEVIATION] != NULL)
+                            S_X += (resx[k] - M) * (resx[k] - M_X_old);
                      }
                 }
             }
-            if (params->results[AVERAGE_Y_DEVIATION] != NULL) {
+            if (params->results[AVERAGE_Y_DEVIATION] != NULL ||
+                params->results[VARIANCE_Y_DEVIATION] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
                     if (!isnan(resy[k])) {
                         C_Y += 1.0F;
                         M_Y_old = M_Y;
                         M_Y += ((resy[k] - y) - M_Y_old) / C_Y;
-                        S_Y += (resy[k] - M) * (resy[k] - M_Y_old);
+                        if (params->results[VARIANCE_Y_DEVIATION] != NULL)
+                            S_Y += (resy[k] - M) * (resy[k] - M_Y_old);
                      }
                 }
             }
