@@ -307,9 +307,10 @@ ls2_shooter_run(void *rr)
                     if (!isnan(resx[k])) {
                         C_X += 1.0F;
                         M_X_old = M_X;
-                        M_X += ((resx[k] - x) - M_X_old) / C_X;
+			const float dx = resx[k] - x;
+                        M_X += (dx - M_X_old) / C_X;
                         if (params->results[VARIANCE_X_DEVIATION] != NULL)
-                            S_X += (resx[k] - M) * (resx[k] - M_X_old);
+                            S_X += (dx - M_X) * (dx - M_X_old);
                      }
                 }
             }
@@ -319,9 +320,10 @@ ls2_shooter_run(void *rr)
                     if (!isnan(resy[k])) {
                         C_Y += 1.0F;
                         M_Y_old = M_Y;
-                        M_Y += ((resy[k] - y) - M_Y_old) / C_Y;
+			const float dy = resy[k] - y;
+                        M_Y += (dy - M_Y_old) / C_Y;
                         if (params->results[VARIANCE_Y_DEVIATION] != NULL)
-                            S_Y += (resy[k] - M) * (resy[k] - M_Y_old);
+                            S_Y += (dy - M_X) * (dy - M_Y_old);
                      }
                 }
             }
