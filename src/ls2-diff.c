@@ -60,11 +60,9 @@ static struct poptOption cli_options[] = {
        "compare maximum values.", NULL },
      { "minimum", 'm', POPT_ARG_STRING, &(compare[MINIMUM_ERROR]), 0,
        "compare minimum values.", NULL },
-     { "variance", 's', POPT_ARG_STRING, &(compare[VARIANCE]), 0,
+     { "standard-deviation", 's', POPT_ARG_STRING, &(compare[STANDARD_DEVIATION]), 0,
        "compare variances.", NULL },
-     { "mse", 'n', POPT_ARG_STRING, &(compare[MEAN_SQUARED_ERROR]), 0,
-       "compare mean squared errors.", NULL },
-     { "rmse", 'p', POPT_ARG_STRING, &(compare[ROOT_MEAN_SQUARED_ERROR]), 0,
+     { "rmse", 'r', POPT_ARG_STRING, &(compare[ROOT_MEAN_SQUARED_ERROR]), 0,
        "compare root mean squared errors.", NULL },
      POPT_AUTOHELP
      POPT_TABLEEND
