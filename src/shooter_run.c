@@ -221,11 +221,11 @@ ls2_shooter_run(void *rr)
     const long shortcut =
         (params->results[AVERAGE_ERROR] ||
           params->results[STANDARD_DEVIATION]) &&
-          (params->results[ROOT_MEAN_SQUARED_ERROR] ||
-          params->results[AVERAGE_X_ERROR] ||
-          params->results[STANDARD_DEVIATION_X_ERROR] ||
-          params->results[AVERAGE_Y_ERROR] ||
-          params->results[STANDARD_DEVIATION_Y_ERROR]);
+          !(params->results[ROOT_MEAN_SQUARED_ERROR] ||
+            params->results[AVERAGE_X_ERROR] ||
+            params->results[STANDARD_DEVIATION_X_ERROR] ||
+            params->results[AVERAGE_Y_ERROR] ||
+            params->results[STANDARD_DEVIATION_Y_ERROR]);
 
     // Calculation for every pixel
     for (size_t j = params->from; j < params->from + params->count; j++) {
@@ -264,7 +264,7 @@ ls2_shooter_run(void *rr)
 #endif
 
             // Get Errors
-	    VECTOR errors = distance(resx, resy, tagx, tagy);
+	    const VECTOR errors = distance(resx, resy, tagx, tagy);
 
             max_error = VECTOR_MAX(errors, max_error);
 	    min_error = VECTOR_MIN(errors, min_error);
@@ -288,14 +288,14 @@ ls2_shooter_run(void *rr)
                 continue;
 
             if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
-                VECTOR tmp = errors;
-                tmp *= tmp;
+                VECTOR tmp = errors * errors;
 
 	        tmp = VECTOR_HADD(tmp, tmp);
 	        tmp = VECTOR_HADD(tmp, tmp);
 #  ifdef __AVX__
 	        tmp = VECTOR_HADD(tmp, tmp);
 #  endif
+
 	        mse += tmp[0];
             }
 
@@ -321,7 +321,7 @@ ls2_shooter_run(void *rr)
 			const float dy = resy[k] - y;
                         M_Y += (dy - M_Y_old) / C_Y;
                         if (params->results[STANDARD_DEVIATION_Y_ERROR] != NULL)
-                            S_Y += (dy - M_X) * (dy - M_Y_old);
+                            S_Y += (dy - M_Y) * (dy - M_Y_old);
                      }
                 }
             }
@@ -343,20 +343,22 @@ ls2_shooter_run(void *rr)
                 vector_min_ps(min_error, FLT_MAX);
         }
         if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
-	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] =
-                sqrtf(mse / (float) params->runs);
+            const float __r = (float) params->runs;
+	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(mse / __r);
         }
         if (params->results[AVERAGE_X_ERROR] != NULL) {
 	    params->results[AVERAGE_X_ERROR][pos] = M_X;
         }
         if (params->results[STANDARD_DEVIATION_X_ERROR] != NULL) {
-	    params->results[STANDARD_DEVIATION_X_ERROR][pos] = sqrtf(S_X / (C_X - 1.0F));
+	    params->results[STANDARD_DEVIATION_X_ERROR][pos] =
+                sqrtf(S_X / (C_X - 1.0F));
         }
         if (params->results[AVERAGE_Y_ERROR] != NULL) {
 	    params->results[AVERAGE_Y_ERROR][pos] = M_Y;
         }
         if (params->results[STANDARD_DEVIATION_Y_ERROR] != NULL) {
-	    params->results[STANDARD_DEVIATION_Y_ERROR][pos] = sqrtf(S_Y / (C_Y - 1.0F)); 
+	    params->results[STANDARD_DEVIATION_Y_ERROR][pos] =
+                sqrtf(S_Y / (C_Y - 1.0F)); 
         }
     }
     running--;
