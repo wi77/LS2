@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: ls2be
+Description: Backend library for LS2
+Version: @VERSION@
+URL: https://github.com/wi77/LS2
+Requires: cairo >= 1.8, OpenEXR >= 1.6
+Libs: -L${libdir} -lls2be -lhdf5
+Cflags: -I${includedir}/ls2

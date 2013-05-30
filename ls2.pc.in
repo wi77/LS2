@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: ls2
+Description: The LS2 library
+Version: @VERSION@
+URL: https://github.com/wi77/LS2
+Requires: cairo >= 1.8, gsl >= 1.13, OpenEXR >= 1.6
+Libs: -L${libdir} -lls2
+Cflags: -I${includedir}/ls2
