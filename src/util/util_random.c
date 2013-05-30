@@ -43,8 +43,8 @@
 
 // calculate four 32 bit random integer between -RAN_DMAX and RAN_DMAX in a vector
 // based on http://software.intel.com/en-us/articles/fast-random-number-generator-on-the-intel-pentiumr-4-processor/
-static inline
-__m128 __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__,__hot__))
+static inline __m128
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__hot__,__artificial__))
 rand_sse(__m128i* cur_seed)
 {
     __m128i cur_seed_split;
@@ -116,7 +116,7 @@ rand64(unsigned long long *result)
 }
 
 static inline VECTOR
-__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__,__hot__,__flatten__))
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__hot__,__flatten__,__nonnull__))
 rnd(__m128i *seed __attribute__((__unused__)))
 {
     static const VECTOR rnd_divisor = VECTOR_CONST_BROADCAST((float) UINT_MAX);

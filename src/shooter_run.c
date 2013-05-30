@@ -518,7 +518,6 @@ typedef struct inverted_runparams_t {
     int_fast64_t runs;
     uint_fast64_t *result;
     float cx, sx, cy, sy, cn;
-    float *results;
     int width, height;
     algorithm_t algorithm;
     error_model_t error_model;
@@ -625,7 +624,7 @@ ls2_distribute_work_inverted(const int alg, const int em,
                              const long seed,
                              const float tag_x, const float tag_y,
 			     const vector2 *restrict anchors, const size_t no_anchors,
-			     float *restrict results, const int width, const int height,
+			     uint64_t *restrict results, const int width, const int height,
 			     float *restrict center_x, float *restrict sdev_x,
                              float *center_y, float *restrict sdev_y)
 {
@@ -659,7 +658,6 @@ ls2_distribute_work_inverted(const int alg, const int em,
 	params[t].tag_y = tag_y;
 	params[t].anchors = anchors;
 	params[t].no_anchors = no_anchors;
-	params[t].results = results;
 	params[t].width = width;
 	params[t].height = height;
 	params[t].runs = runs;
@@ -697,41 +695,31 @@ ls2_distribute_work_inverted(const int alg, const int em,
      * Evaluate the results.
      */
 
-   *center_x = *sdev_x = *center_y = *sdev_y = 0.0F;
+   *center_x = params[0].cx;
+   *sdev_x   = params[0].sx;
+   *center_y = params[0].cy;
+   *sdev_y   = params[0].sy;
 
     /* Accumulate all results and store them in the first thread's image. */
-    uint_fast64_t max_val = 0;
     for (int t = 1; t < num_threads; t++) {
-	*center_x += params[t].cx;
-        *sdev_x += params[t].sx;
-	*center_y += params[t].cy;
-        *sdev_y += params[t].sy;
         for (int i = 0; i < width * height; i++) {
             params[0].result[i] += params[t].result[i];
-            if (params[0].result[i] > max_val) max_val = params[0].result[i];
         }
+	*center_x += params[t].cx;
+        *sdev_x   += params[t].sx;
+	*center_y += params[t].cy;
+        *sdev_y   += params[t].sy;
     }
     *center_x /= ((float) num_threads);
     *sdev_x = sqrtf(*sdev_x / (float) num_threads);
     *center_y /= ((float) num_threads);
     *sdev_y = sqrtf(*sdev_y / (float) num_threads);
 
-    fprintf(stderr, "Maximum value: %" PRIuFAST64 "\n", max_val);
-
-    /* After having counted the hits per positions, convert them to an
-     * array of doubles from [0; 1.0], indicating the relative number of
-     * hits in a location.
-     */
-    const double f_max_val = (double) max_val;
     for (int y = 0; y < params->height; y++) {
         for (int x = 0; x < params->width; x++) {
 	    const int pos = x + params->width * y;
-            const double samples = (double) params[0].result[pos];
-            if (max_val > 0) {
-	        params->results[pos] = (float) (samples / f_max_val);
-	    } else {
-		params->results[pos] = 0.0;
-	    }
+            const uint64_t samples = (uint64_t) params[0].result[pos];
+	    results[pos] = samples;
 	}
     }
     for (int t = 0; t < num_threads; t++) {
@@ -749,7 +737,7 @@ compute_inverse(const int alg, const int em, const int num_threads,
                 const int64_t runs, const float *restrict anchor_x,
                 const float *restrict anchor_y, const int no_anchors,
                 const float tag_x, const float tag_y,
-		float *restrict results, const int width, const int height,
+		uint64_t *restrict result, const int width, const int height,
 		float *restrict center_x, float *restrict sdev_x,
                 float *restrict center_y, float *restrict sdev_y)
 {
@@ -771,7 +759,7 @@ compute_inverse(const int alg, const int em, const int num_threads,
 
     ls2_distribute_work_inverted(alg, em, num_threads, runs, time(NULL),
 				 tag_x, tag_y, anchors, (size_t) no_anchors,
-                                 results, width, height,
+                                 result, width, height,
                                  center_x, sdev_x, center_y, sdev_y);
 
     free(anchors);

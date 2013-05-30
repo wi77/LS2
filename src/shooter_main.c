@@ -110,6 +110,9 @@ int main(int argc, const char* argv[])
     poptContext opt_con;        /* context for parsing command-line options */
     char const* anchor[MAX_ANCHORS*2+1];/* anchor parameters                */
     float *results[NUM_VARIANTS]; /* Array holding the results. */
+#if !defined(ESITMATOR)
+    uint64_t *result = NULL;  /* Array holding the result of inverted calculation. */
+#endif
     uint16_t no_anchor_args = 0; /* number of anchor parameters seen.       */
 #if !defined(ESTIMATOR)
     /* Center of mass of estimations (inverted only) */
@@ -341,21 +344,26 @@ int main(int argc, const char* argv[])
     uint16_t width = (uint16_t) arg_width;
     uint16_t height = (uint16_t) arg_height;
     const size_t sz = ((size_t) width) * ((size_t) height) * sizeof(float);
+    memset(results, 0, sizeof(results));
 #if !defined(ESTIMATOR)
-    for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
-        if ((output[var] != NULL && *output[var] != '\0') ||
-            (output_hdf5 != NULL && *output_hdf5 != '\0')) {
-            if (posix_memalign((void**)&(results[var]), ALIGNMENT, sz) != 0) {
-	        perror("posix_memalign()");
-	        exit(EXIT_FAILURE);
+    if (inverted == 0) {
+        for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
+            if ((output[var] != NULL && *output[var] != '\0') ||
+                (output_hdf5 != NULL && *output_hdf5 != '\0')) {
+                if (posix_memalign((void**)&(results[var]), ALIGNMENT, sz) != 0) {
+	            perror("posix_memalign()");
+	            exit(EXIT_FAILURE);
+                }
             }
-        } else {
-            results[var] = NULL;
         }
-
+    } else {
+        const size_t s = (size_t) width * (size_t) height * sizeof(uint64_t);
+        if (posix_memalign((void**)&(result), ALIGNMENT, s) != 0) {
+	    perror("posix_memalign()");
+	    exit(EXIT_FAILURE);
+        }
     }
 #else
-    memset(results, 0, sizeof(results));
     if (posix_memalign((void**)&(results[ROOT_MEAN_SQUARED_ERROR]), ALIGNMENT, sz) != 0) {
       perror("posix_memalign()");
       exit(EXIT_FAILURE);
@@ -380,7 +388,7 @@ int main(int argc, const char* argv[])
 
 	ls2_distribute_work_inverted(alg, em, num_threads, runs, seed,
                                      tag_x, tag_y,
-				     anchors, no_anchors, results[0], width,
+				     anchors, no_anchors, result, width,
 				     height, &center_x, &sdev_x,
                                      &center_y, &sdev_y);
     }
@@ -435,13 +443,19 @@ int main(int argc, const char* argv[])
     } else {
 	ls2_write_inverted(get_output_format(output_format), output[0],
 			   tag_x, tag_y, anchors, no_anchors,
-			   results[0], width, height, center_x, center_y);
+			   result, width, height, center_x, center_y);
+        if (output_hdf5 != NULL && *output_hdf5 != '\0') {
+	    ls2_hdf5_write_inverted(output_hdf5, tag_x, tag_y, anchors,
+                                    no_anchors, result, width, height,
+                                    center_x, center_y);
+        }
     }
 #endif
     // clean-ups.
     free(anchors);
     for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++)
         free(results[var]);
+    free(result);
     poptFreeContext(opt_con);
     exit(EXIT_SUCCESS);
 }

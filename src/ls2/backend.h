@@ -50,8 +50,8 @@ ls2_write_locbased(ls2_output_format_t format, const char *filename,
 extern void
 ls2_write_inverted(ls2_output_format_t format, const char *filename,
 		   const float tag_x, float tag_y,
-		   const vector2 *anchors, const size_t num_anchors,
-		   const float *results, const uint16_t width,
+		   const vector2 *restrict anchors, const size_t num_anchors,
+		   const uint64_t *restrict results, const uint16_t width,
 		   const uint16_t height,
     		   const float center_x, float center_y);
 
@@ -143,8 +143,8 @@ ls2_hdf5_write_locbased(const char *filename, const vector2 *anchors,
 extern void 
 ls2_hdf5_write_inverted(const char* filename,
                         const float tag_x, const float tag_y,
-			const vector2 *anchors, const size_t no_anchors,
-                        const float* result,
+			const vector2 *restrict anchors, const size_t no_anchors,
+                        const uint64_t *restrict result,
                         const uint16_t dim_x, const uint16_t dim_y,
     			const double center_x, const double center_y);
 

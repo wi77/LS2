@@ -167,3 +167,68 @@ ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
     H5Fclose(file);
     return 0;
 }
+
+
+
+
+void
+ls2_hdf5_write_inverted(const char *filename,
+			const float tag_x, const float tag_y,
+			const vector2 *restrict anchors, const size_t no_anchors,
+			const uint64_t *restrict result,
+			const uint16_t width, const uint16_t height,
+			const double center_x, const double center_y)
+{
+    hid_t file_id, grp, dataset, dataspace, plist_id;
+    hsize_t dims[2];
+    hsize_t chunk_dims[2] = { width, height };
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    grp = H5Gcreate(file_id, "/Result", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dims[0] = no_anchors;
+    dims[1] = 2;
+    dataspace = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate(file_id, "/Anchors", H5T_NATIVE_FLOAT,
+                        dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             anchors);
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+
+    dims[0] = 2;
+    dims[1] = 1;
+    dataspace = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate(file_id, "/Tag", H5T_NATIVE_FLOAT,
+                        dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    float tag[2] = {tag_x, tag_y};
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, tag);
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+
+    dims[0] = 2;
+    dims[1] = 1;
+    dataspace = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate(file_id, "/Result/Center", H5T_NATIVE_FLOAT,
+                        dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    float center[2] = { (float) center_x, (float) center_y};
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, center);
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+
+    dims[0] = height;
+    dims[1] = width;
+
+    dataspace = H5Screate_simple(2, dims, NULL);
+    plist_id = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_chunk(plist_id, 2, chunk_dims);
+    H5Pset_deflate (plist_id, 9);
+    // BUG: should be a native type, but what is uint64_t?
+    dataset = H5Dcreate(file_id, "/Result/Frequencies", H5T_STD_U64LE,
+			dataspace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    H5Dwrite(dataset, H5T_STD_U64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+	     result);
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+    H5Gclose(grp);
+    H5Fclose(file_id);
+}

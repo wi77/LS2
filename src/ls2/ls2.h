@@ -140,7 +140,7 @@ ls2_distribute_work_inverted(const int alg, const int em,
                              const long seed, const float tag_x,
                              const float tag_y,
 			     const vector2 *restrict anchors, const size_t no_anchors,
-			     float *restrict results, const int width, const int height,
+			     uint64_t *restrict result, const int width, const int height,
 			     float *restrict center_x, float *restrict sdev_x,
                              float *restrict center_y, float *restrict sdev_y);
 
@@ -168,7 +168,7 @@ compute_inverse(const int alg, const int em, const int num_threads,
 		const int64_t runs, const float *restrict anchor_x,
 		const float *restrict anchor_y, const int no_anchors,
 		const float tag_x, const float tag_y,
-                float *restrict result, const int width, const int height,
+                uint64_t *restrict result, const int width, const int height,
 		float *restrict center_x, float *restrict sdev_x,
                 float *restrict center_y, float *restrict sdev_y);
 

@@ -404,12 +404,12 @@ ls2_draw_inverted_result_to_cairo(cairo_surface_t *surface,
     for (uint16_t y = 0; y < height; y++) {
 	for (uint16_t x = 0; x < width; x++) {
 	    const double sample = result[y * width + x];
-	    const double color = 1.0F - sample;
-            if (sample > 0.0F) {
-	        if (sample < 0.97F) {
+	    const double color = 1.0 - cbrt(sample);
+            if (sample > 0.0) {
+	        if (sample < 0.97) {
 		    cairo_set_source_rgb(cr, color, color, color);
 	        } else {
-		    cairo_set_source_rgb(cr, color, color, sample);
+		    cairo_set_source_rgb(cr, cbrt(sample), color, color);
 	        }
 	        cairo_rectangle(cr, (double) x, (double) y, 1.0, 1.0);
 	        cairo_fill(cr);

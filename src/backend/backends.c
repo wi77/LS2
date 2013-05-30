@@ -89,28 +89,48 @@ ls2_write_locbased(ls2_output_format_t format, const char *filename,
 void
 ls2_write_inverted(ls2_output_format_t format, const char *filename,
 		   const float tag_x, float tag_y,
-		   const vector2 *anchors, const size_t num_anchors,
-		   const float *results, const uint16_t width,
+		   const vector2 *restrict anchors, const size_t num_anchors,
+		   const uint64_t *restrict result, const uint16_t width,
 		   const uint16_t height,
     		   const float center_x, float center_y)
-{	
+{
+    uint64_t maxval = 0.0;
+    for (size_t i = 0; i < (size_t)(width * height); i++) {
+        maxval = (result[i] > maxval) ? result[i] : maxval;
+    }
+
+    float *converted;
+    converted = malloc((size_t)(width * height) * sizeof(float));
+    if (converted == NULL) {
+        perror(__FUNCTION__);
+        exit(EXIT_FAILURE);
+    }
+    for (size_t i = 0; i < (size_t)width * height; i++) {
+        if (maxval > 0) {
+            converted[i] = ((float) result[i] / (float) maxval);
+        } else {
+            converted[i] = 0.0;
+        }
+    }
+    // Switch on format.
     switch (format) {
     case OUTPUT_PNG:
 	ls2_cairo_write_png_inverted(filename, tag_x, tag_y, anchors,
-				     num_anchors, results, width, height,
+				     num_anchors, converted, width, height,
 				     center_x, center_y);
 	break;
     case OUTPUT_PDF:
 	ls2_cairo_write_pdf_inverted(filename, tag_x, tag_y,
-				     anchors, num_anchors, results,
+				     anchors, num_anchors, converted,
 				     width, height, center_x, center_y);
 	break;
     case OUTPUT_OPENEXR:
 	ls2_openexr_write_inverted(filename, tag_x, tag_y,
-				   anchors, num_anchors, results,
+				   anchors, num_anchors, converted,
 				   width, height, center_x, center_y);
 	break;
     case NUM_OUTPUT_FORMATS:
 	break;
     }
+    free(converted);
 }
