@@ -27,6 +27,17 @@
 #undef GCC_VERSION
 #define GCC_VERSION NUM_VERSION(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
 
+/*!
+ * Number of bits used to align our memory. Should be divisible by cachline
+ * size and the constraints of SSE/AVX registers.
+ */
+#ifndef ALIGNMENT_BITS
+#  define ALIGNMENT_BITS 256
+#endif
+
+#undef ALIGNMENT
+#define ALIGNMENT ((ALIGNMENT_BITS)/sizeof(unsigned char))
+
 /*! The default number of threads can be defined in the makefile - ignored by
  * library version, configurable.
  */
@@ -110,6 +121,7 @@ extern "C" {
 #  define VECTOR_LOG(x)            log256_ps(x)
 #  define VECTOR_SIN(x)            sin256_ps(x)
 #  define VECTOR_COS(x)            cos256_ps(x)
+#  define VECTOR_SINCOS(x,y,z)     sincos256_ps(x,y,z)
 
 #else
 
@@ -146,8 +158,9 @@ extern "C" {
 #  define VECTOR_XOR(x, y)        _mm_xor_ps(x, y)
 #  define VECTOR_HADD(x, y)       _mm_hadd_ps(x, y)
 #  define VECTOR_LOG(x)           log_ps(x)
-#  define VECTOR_SIN(x)            sin_ps(x)
-#  define VECTOR_COS(x)            cos_ps(x)
+#  define VECTOR_SIN(x)           sin_ps(x)
+#  define VECTOR_COS(x)           cos_ps(x)
+#  define VECTOR_SINCOS(x,y,z)    sincos_ps(x,y,z)
 
 #ifdef __SSE4_1__
 #  define VECTOR_BLENDV(x, y, z)  _mm_blendv_ps(x, y, z)

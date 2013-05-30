@@ -188,7 +188,8 @@ typedef struct locbased_runparams_t {
  * line would start on a cache line. Alas, default SIZE is 8 * 125.
  * SIZE = 1024 might be much better.
  */
-static void* __attribute__((__nonnull__))
+static void*
+__attribute__((__nonnull__,__hot__,__flatten__))
 ls2_shooter_run(void *rr)
 {
     assert(rr != NULL);
@@ -215,6 +216,17 @@ ls2_shooter_run(void *rr)
         vy[i] = VECTOR_BROADCASTF(params->anchors[i].y);
     }
 
+    // Precalculate whether we are in the common case of running for the
+    // common case.
+    const long shortcut =
+        (params->results[AVERAGE_ERROR] ||
+          params->results[STANDARD_DEVIATION]) &&
+          !(params->results[ROOT_MEAN_SQUARED_ERROR] ||
+            params->results[AVERAGE_X_ERROR] ||
+            params->results[STANDARD_DEVIATION_X_ERROR] ||
+            params->results[AVERAGE_Y_ERROR] ||
+            params->results[STANDARD_DEVIATION_Y_ERROR]);
+
     // Calculation for every pixel
     for (size_t j = params->from; j < params->from + params->count; j++) {
 	const uint16_t x = (uint16_t) (j % params->width);
@@ -228,8 +240,8 @@ ls2_shooter_run(void *rr)
         }
 
         float M = 0.0F, M_old, S = 0.0F, cnt = 0.0F, mse = 0.0F;
-        float M_X = 0.0F, M_X_old, C_X = 0.0F;
-        float M_Y = 0.0F, M_Y_old, C_Y = 0.0F;
+        float M_X = 0.0F, M_X_old, S_X = 0.0F, C_X = 0.0F;
+        float M_Y = 0.0F, M_Y_old, S_Y = 0.0F, C_Y = 0.0F;
         VECTOR min_error = VECTOR_BROADCASTF(FLT_MAX),
                max_error = VECTOR_BROADCASTF(0.0F);
 
@@ -252,52 +264,64 @@ ls2_shooter_run(void *rr)
 #endif
 
             // Get Errors
-	    VECTOR errors = distance(resx, resy, tagx, tagy);
+	    const VECTOR errors = distance(resx, resy, tagx, tagy);
 
             max_error = VECTOR_MAX(errors, max_error);
 	    min_error = VECTOR_MIN(errors, min_error);
 
             if (params->results[AVERAGE_ERROR] != NULL ||
-                params->results[VARIANCE] != NULL) {
+                params->results[STANDARD_DEVIATION] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
                     if (!isnan(errors[k])) {
                         cnt += 1.0F;
                         M_old = M;
                         M += (errors[k] - M) / cnt;
-                        if (params->results[VARIANCE] != NULL)
+                        if (params->results[STANDARD_DEVIATION] != NULL)
                             S += (errors[k] - M) * (errors[k] - M_old);
                      }
                 }
             }
 
-            if (params->results[MEAN_SQUARED_ERROR] != NULL ||
-                  params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
-                VECTOR tmp = errors;
-                tmp *= tmp;
+            // The common case is to compute the average error, so we
+            // optimise for this case by not testing all cases below.
+            if (shortcut)
+                continue;
+
+            if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
+                VECTOR tmp = errors * errors;
 
 	        tmp = VECTOR_HADD(tmp, tmp);
 	        tmp = VECTOR_HADD(tmp, tmp);
 #  ifdef __AVX__
 	        tmp = VECTOR_HADD(tmp, tmp);
 #  endif
+
 	        mse += tmp[0];
             }
 
-            if (params->results[AVERAGE_X_DEVIATION] != NULL) {
+            if (params->results[AVERAGE_X_ERROR] != NULL ||
+                params->results[STANDARD_DEVIATION_X_ERROR] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
                     if (!isnan(resx[k])) {
                         C_X += 1.0F;
                         M_X_old = M_X;
-                        M_X += ((resx[k] - x) - M_X_old) / C_X;
+			const float dx = resx[k] - x;
+                        M_X += (dx - M_X_old) / C_X;
+                        if (params->results[STANDARD_DEVIATION_X_ERROR] != NULL)
+                            S_X += (dx - M_X) * (dx - M_X_old);
                      }
                 }
             }
-            if (params->results[AVERAGE_Y_DEVIATION] != NULL) {
+            if (params->results[AVERAGE_Y_ERROR] != NULL ||
+                params->results[STANDARD_DEVIATION_Y_ERROR] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
                     if (!isnan(resy[k])) {
                         C_Y += 1.0F;
                         M_Y_old = M_Y;
-                        M_Y += ((resy[k] - y) - M_Y_old) / C_Y;
+			const float dy = resy[k] - y;
+                        M_Y += (dy - M_Y_old) / C_Y;
+                        if (params->results[STANDARD_DEVIATION_Y_ERROR] != NULL)
+                            S_Y += (dy - M_Y) * (dy - M_Y_old);
                      }
                 }
             }
@@ -307,8 +331,8 @@ ls2_shooter_run(void *rr)
         if (params->results[AVERAGE_ERROR] != NULL) {
 	    params->results[AVERAGE_ERROR][pos] = M;
         }
-        if (params->results[VARIANCE] != NULL) {
-            params->results[VARIANCE][pos] = S / (cnt - 1.0F);
+        if (params->results[STANDARD_DEVIATION] != NULL) {
+            params->results[STANDARD_DEVIATION][pos] = sqrtf(S / (cnt - 1.0F));
         }
         if (params->results[MAXIMUM_ERROR] != NULL) {
 	    params->results[MAXIMUM_ERROR][pos] =
@@ -318,19 +342,23 @@ ls2_shooter_run(void *rr)
 	    params->results[MINIMUM_ERROR][pos] =
                 vector_min_ps(min_error, FLT_MAX);
         }
-        if (params->results[MEAN_SQUARED_ERROR] != NULL) {
-	    params->results[MEAN_SQUARED_ERROR][pos] = 
-                mse / (float) params->runs;
-        }
         if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
-	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] =
-                sqrtf(mse / (float) params->runs);
+            const float __r = (float) params->runs;
+	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(mse / __r);
         }
-        if (params->results[AVERAGE_X_DEVIATION] != NULL) {
-	    params->results[AVERAGE_X_DEVIATION][pos] = M_X;
+        if (params->results[AVERAGE_X_ERROR] != NULL) {
+	    params->results[AVERAGE_X_ERROR][pos] = M_X;
         }
-        if (params->results[AVERAGE_Y_DEVIATION] != NULL) {
-	    params->results[AVERAGE_Y_DEVIATION][pos] = M_Y;
+        if (params->results[STANDARD_DEVIATION_X_ERROR] != NULL) {
+	    params->results[STANDARD_DEVIATION_X_ERROR][pos] =
+                sqrtf(S_X / (C_X - 1.0F));
+        }
+        if (params->results[AVERAGE_Y_ERROR] != NULL) {
+	    params->results[AVERAGE_Y_ERROR][pos] = M_Y;
+        }
+        if (params->results[STANDARD_DEVIATION_Y_ERROR] != NULL) {
+	    params->results[STANDARD_DEVIATION_Y_ERROR][pos] =
+                sqrtf(S_Y / (C_Y - 1.0F)); 
         }
     }
     running--;
@@ -636,7 +664,7 @@ ls2_distribute_work_inverted(const int alg, const int em,
 	params[t].runs = runs;
 	params[t].algorithm = alg;
 	params[t].error_model = em;
-        if (posix_memalign((void **) &(params[t].result), 64, sz) != 0) {
+        if (posix_memalign((void **) &(params[t].result), ALIGNMENT, sz) != 0) {
             fprintf(stderr, "allocate result\n");
             exit(EXIT_FAILURE);
         }
@@ -798,9 +826,6 @@ ls2_estimator_run(void *rr)
 	result = estimate(params->estimator, params->anchors,
                           params->no_anchors, &location);
 
-        if (params->results[MEAN_SQUARED_ERROR] != NULL) {
-	    params->results[MEAN_SQUARED_ERROR][pos] = result;
-        }
         if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
 	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(result);
         }

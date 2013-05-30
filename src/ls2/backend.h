@@ -107,12 +107,14 @@ ls2_cairo_write_pdf_phase_portrait(const char* filename,
 extern void
 ls2_cairo_write_pdf_diff(const char* filename, const vector2 *anchors,
                          const size_t no_anchors, const float* result,
-                         const uint16_t width, const uint16_t height);
+                         const uint16_t width, const uint16_t height,
+                         const double similar, const double dynamic);
 
 extern void
 ls2_cairo_write_png_diff(const char* filename, const vector2 *anchors,
                          const size_t no_anchors, const float* result,
-                         const uint16_t width, const uint16_t height);
+                         const uint16_t width, const uint16_t height,
+                         const double similar, const double dynamic);
 
 extern void
 ls2_openexr_write_locbased(const char* filename,

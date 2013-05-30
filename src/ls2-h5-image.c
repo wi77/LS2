@@ -75,24 +75,20 @@ int main(int argc, const char* argv[])
           &(output[MINIMUM_ERROR]), 0,
           "name of the minimum error output image file", "file name" },
         { "output-variance", 's',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &(output[VARIANCE]), 0,
-          "name of the variance output image file", "file name" },
-        { "output-mse", 'n',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[MEAN_SQUARED_ERROR]), 0,
-          "name of the mean squared error output image file", "file name" },
+          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &(output[STANDARD_DEVIATION]), 0,
+          "name of the output image file of the standard deviation", "file name" },
         { "output-rmse", 'p',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[ROOT_MEAN_SQUARED_ERROR]), 0,
           "name of the root mean squared error output image", "file name" },
         { "output-phase", 'z',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[AVERAGE_X_DEVIATION]), 0,
+          &(output[AVERAGE_X_ERROR]), 0,
           "name of the phase portrait output image", "file name" },
         { "stride", 'S',
           POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
           &stride, 0,
-          "stride of the phase portrait", "file name" },
+          "stride of the phase portrait", "steps" },
         POPT_AUTOHELP
         POPT_TABLEEND
     };
@@ -140,14 +136,14 @@ int main(int argc, const char* argv[])
     // calculate average
     for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
         if (output[var] != NULL && *(output[var]) != '\0') {
-            if (var == AVERAGE_Y_DEVIATION)
+            if (var == AVERAGE_Y_ERROR)
                 continue;
-            if (var == AVERAGE_X_DEVIATION) {
+            if (var == AVERAGE_X_ERROR) {
                 float *dx, *dy;
-                ls2_hdf5_read_locbased(input_hdf5, AVERAGE_X_DEVIATION,
+                ls2_hdf5_read_locbased(input_hdf5, AVERAGE_X_ERROR,
                                        &anchors, &no_anchors, &dx,
                                        &width, &height);
-                ls2_hdf5_read_locbased(input_hdf5, AVERAGE_Y_DEVIATION,
+                ls2_hdf5_read_locbased(input_hdf5, AVERAGE_Y_ERROR,
                                        &anchors, &no_anchors, &dy,
                                        &width, &height);
                 ls2_cairo_write_pdf_phase_portrait(output[var], anchors,

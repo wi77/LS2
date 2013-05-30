@@ -292,14 +292,48 @@ ls2_cairo_write_pdf_phase_portrait(const char* filename,
 
 
 
+static inline void
+__attribute__((nonnull,gnu_inline,always_inline,artificial))
+ls2_cairo_pick_color_diff(const double sample,
+                          const double similar,
+                          const double dynamic,
+			  double *restrict hue,
+			  double *restrict saturation,
+			  double *restrict lightness)
+{
+    if (sample < -similar) {                     // First was better
+	/* The color is green and gets darker. */
+	assert(sample < 0);
+	*hue = 120.0;
+	*saturation = MAX(0.125, 0.5 + sample / dynamic);
+	assert(0.125 <= *saturation && *saturation <= 0.5);
+	*lightness = MAX(0.0, 0.5 + sample / dynamic);
+	assert(0 <= *lightness && *lightness <= 0.5);
+    } else if (-similar <= sample && sample <= similar) {    // Similar
+	*hue = 60.0;  // This is the color yellow
+	*lightness = 0.5;
+	*saturation = 0.5;
+    } else if (similar < sample) {              // Second was better
+	/* We start with red and get brighter. */
+	assert (0 < sample);
+	*hue = 0.0;
+	*saturation = MIN(0.5 + sample / dynamic, 0.875);
+	assert(0.5 <= *saturation && *saturation <= 0.875);
+	*lightness = MIN(0.5 + sample / dynamic, 0.875);
+	assert(0.5 <= *lightness && *lightness <= 0.875);
+    } else {
+	assert(false);
+    }
+}
+
+
 static void
 ls2_cairo_draw_diff(cairo_surface_t *surface,
 		    const vector2 *anchors, const size_t no_anchors,
                     const float* result, const uint16_t width,
-		    const uint16_t height)
+		    const uint16_t height, const double similar,
+                    const double dynamic)
 {
-    static const float similar = 4.0F;             // Threshold for similarity
-    static const double dynamic = 180.0F;
     cairo_t *cr;
 
     // Create a drawing buffer.
@@ -314,21 +348,8 @@ ls2_cairo_draw_diff(cairo_surface_t *surface,
 	for (uint16_t x = 0; x < width; x++) {
             double r, g, b, lightness, saturation, hue;
 	    const float sample = result[y * width + x];
-	    if (sample <= -similar) {                     // First was better
-                lightness = MAX(0.0, 0.5 + sample / dynamic);
-                saturation = MAX(0.0, 0.5 + sample / dynamic);
-                hue = MIN(0.0, 90.0 + 90.0 * (sample / dynamic));
-	    } else if (-similar < sample && sample < similar) {    // Similar
-                lightness = MIN(1.0, 0.5 - fabs(sample) / (similar * 5.0));
-                saturation = MIN(1.0, 0.5 - fabs(sample) / (similar * 5.0));
-                hue = 120.0;
-	    } else if (similar <= sample) {              // Second was better
-                lightness = MIN(1.0, 0.5 + sample / dynamic);
-                saturation = MIN(1.0, 0.5 + sample / dynamic);
-                hue = MAX(240.0, 150.0 + 90.0 * (sample / dynamic));
-	    } else {
-                assert(false);
-            }
+	    ls2_cairo_pick_color_diff(sample, similar, dynamic,
+                                      &hue, &saturation, &lightness);
             hsl_to_rgb(hue, lightness, saturation, &r, &g, &b);
 	    cairo_set_source_rgb(cr, r, g, b);
 	    cairo_rectangle(cr, x, y, 1.0, 1.0);
@@ -348,11 +369,13 @@ void
 ls2_cairo_write_png_diff(const char* filename,
 		         const vector2 *anchors, const size_t no_anchors, 
 		         const float* result, const uint16_t width,
-		         const uint16_t height)
+		         const uint16_t height, const double similar,
+                         const double dynamic)
 {
     cairo_surface_t *surface =
         cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-    ls2_cairo_draw_diff(surface, anchors, no_anchors, result, width, height);
+    ls2_cairo_draw_diff(surface, anchors, no_anchors, result, width, height,
+                        similar, dynamic);
     cairo_surface_write_to_png(surface, filename);
     cairo_surface_destroy(surface);
 }

@@ -168,13 +168,11 @@ int main(int argc, const char* argv[])
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[MINIMUM_ERROR]), 0,
           "name of the minimum error output image file", "file name" },
-        { "output-variance", 's',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &(output[VARIANCE]), 0,
-          "name of the variance output image file", "file name" },
-        { "output-mse", 'n',
+        { "output-sdev", 's',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[MEAN_SQUARED_ERROR]), 0,
-          "name of the mean squared error output image file", "file name" },
+          &(output[STANDARD_DEVIATION]), 0,
+          "name of the output image file for the standard deviation",
+          "file name" },
         { "output-rmse", 'p',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[ROOT_MEAN_SQUARED_ERROR]), 0,
@@ -182,7 +180,7 @@ int main(int argc, const char* argv[])
 #else
         { "output", 'o',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[MEAN_SQUARED_ERROR]), 0,
+          &(output[ROOT_MEAN_SQUARED_ERROR]), 0,
           "name of the output image file", "file name" },
 #endif
         { "output-hdf5", 'H',
@@ -235,7 +233,7 @@ int main(int argc, const char* argv[])
     seed = time(NULL);
 #else
     estimator = ESTIMATOR_DEFAULT;
-    output[MEAN_SQUARED_ERROR] = OUTPUT_DEFAULT;
+    output[ROOT_MEAN_SQUARED_ERROR] = OUTPUT_DEFAULT;
 #endif
 
     opt_con = poptGetContext(NULL, argc, argv, cli_options, 0);
@@ -346,7 +344,7 @@ int main(int argc, const char* argv[])
     for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
         if ((output[var] != NULL && *output[var] != '\0') ||
             (output_hdf5 != NULL && *output_hdf5 != '\0')) {
-            if (posix_memalign((void**)&(results[var]), 64, sz)) {
+            if (posix_memalign((void**)&(results[var]), ALIGNMENT, sz) != 0) {
 	        perror("posix_memalign()");
 	        exit(EXIT_FAILURE);
             }
@@ -357,11 +355,7 @@ int main(int argc, const char* argv[])
     }
 #else
     memset(results, 0, sizeof(results));
-    if (posix_memalign((void**)&(results[MEAN_SQUARED_ERROR]), 64, sz)) {
-      perror("posix_memalign()");
-      exit(EXIT_FAILURE);
-    }
-    if (posix_memalign((void**)&(results[ROOT_MEAN_SQUARED_ERROR]), 64, sz)) {
+    if (posix_memalign((void**)&(results[ROOT_MEAN_SQUARED_ERROR]), ALIGNMENT, sz) != 0) {
       perror("posix_memalign()");
       exit(EXIT_FAILURE);
     }

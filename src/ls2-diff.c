@@ -46,19 +46,23 @@
 
 static char *file[2];
 static char *compare[NUM_VARIANTS];
+static double similarity = 3.0;
+static double dynamic = 200.0;
 
 static struct poptOption cli_options[] = {
+     { "similarity", 'S', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+       &similarity, 0, "similarity threshold", NULL },
+     { "dynamic", 'D', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+       &dynamic, 0, "dynamic range", NULL },
      { "average", 'o', POPT_ARG_STRING, &(compare[AVERAGE_ERROR]), 0,
        "compare average values.", NULL },
      { "maximum", 'M', POPT_ARG_STRING, &(compare[MAXIMUM_ERROR]), 0,
        "compare maximum values.", NULL },
      { "minimum", 'm', POPT_ARG_STRING, &(compare[MINIMUM_ERROR]), 0,
        "compare minimum values.", NULL },
-     { "variance", 's', POPT_ARG_STRING, &(compare[VARIANCE]), 0,
+     { "standard-deviation", 's', POPT_ARG_STRING, &(compare[STANDARD_DEVIATION]), 0,
        "compare variances.", NULL },
-     { "mse", 'n', POPT_ARG_STRING, &(compare[MEAN_SQUARED_ERROR]), 0,
-       "compare mean squared errors.", NULL },
-     { "rmse", 'p', POPT_ARG_STRING, &(compare[ROOT_MEAN_SQUARED_ERROR]), 0,
+     { "rmse", 'r', POPT_ARG_STRING, &(compare[ROOT_MEAN_SQUARED_ERROR]), 0,
        "compare root mean squared errors.", NULL },
      POPT_AUTOHELP
      POPT_TABLEEND
@@ -167,7 +171,8 @@ main(int argc, const char **argv)
 		  "max = %f\n", mu, sigma, min, max);
 	  
 	  ls2_cairo_write_png_diff(compare[var], a_anchors, a_no_anchors,
-				   results, a_width, a_height);
+				   results, a_width, a_height,
+                                   similarity, dynamic);
      }
      exit(EXIT_SUCCESS);
 }
