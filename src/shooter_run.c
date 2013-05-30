@@ -489,7 +489,7 @@ typedef struct inverted_runparams_t {
     size_t no_anchors;
     int_fast64_t runs;
     uint_fast64_t *result;
-    float cx, cy, cn;
+    float cx, sx, cy, sy, cn;
     float *results;
     int width, height;
     algorithm_t algorithm;
@@ -528,6 +528,9 @@ static void* ls2_inverse_run(void *rr)
         distances[i] = distance(vx[i], vy[i], tagx, tagy);
     }
 
+    float M_X = 0.0F, M_X_old, S_X = 0.0F, N = 0.0F,
+          M_Y = 0.0F, M_Y_old, S_Y = 0.0F;
+
     // Calculation for every pixel
     for (int_fast64_t j = 0; j < runs; j++) {
         VECTOR resx, resy;
@@ -552,11 +555,21 @@ static void* ls2_inverse_run(void *rr)
 		if (0 <= x && x < params->width && 0 <= y && y < params->height) {
 		    params->result[x + params->width * y] += 1;
 		}
-                params->cx += resx[k];
-                params->cy += resy[k];
-                params->cn += 1.0F;
+                N   += 1.0F;
+                M_X_old = M_X;
+                M_X += (resx[k] - M_X_old) / N;
+                S_X += (resx[k] - M_X) * (resx[k] - M_X_old);
+                M_Y_old = M_Y;
+                M_Y += (resy[k] - M_Y_old) / N;
+                S_Y += (resy[k] - M_Y) * (resy[k] - M_Y_old);
             }
         }
+
+        params->cn = N;
+        params->cx = M_X;
+        params->sx = S_X / N;
+        params->cy = M_Y;
+        params->sy = S_Y / N;
     }
     running--;
 
