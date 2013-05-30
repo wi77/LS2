@@ -53,6 +53,8 @@ PKG_CHECK_MODULES([OPENEXR], [OpenEXR >= 1.6])
 
 AC_CHECK_LIB([hdf5], [H5Fcreate], [], [AC_MSG_FAILURE([You need to install libhdf5.so and hdf5.h])])
 
+AX_OPENCL(C)
+
 # Checks for header files.
 AC_CHECK_HEADERS([float.h popt.h stdlib.h string.h unistd.h hdf5.h])
 AC_HEADER_ASSERT
@@ -200,7 +202,9 @@ AC_SUBST(RDRND_TESTS)
 # Checks for library functions.
 AC_CHECK_FUNCS([memset sqrt strtoul])
 
-AC_CONFIG_FILES([Makefile
+AC_CONFIG_FILES([ls2be.pc
+                 ls2.pc
+                 Makefile
                  src/Makefile
                  tests/Makefile
                  Doxyfile])
