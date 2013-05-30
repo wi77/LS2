@@ -28,6 +28,8 @@
 #  define _GNU_SOURCE
 #endif
 
+#include <stdint.h>
+
 #include <immintrin.h>
 #include <stdio.h>
 #include <string.h>
