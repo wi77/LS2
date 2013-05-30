@@ -624,9 +624,10 @@ ls2_distribute_work_inverted(const int alg, const int em,
 			     const int num_threads, const int64_t runs,
                              const long seed,
                              const float tag_x, const float tag_y,
-			     const vector2* anchors, const size_t no_anchors,
-			     float *results, const int width, const int height,
-			     float *center_x, float *center_y)
+			     const vector2 *restrict anchors, const size_t no_anchors,
+			     float *restrict results, const int width, const int height,
+			     float *restrict center_x, float *restrict sdev_x,
+                             float *center_y, float *restrict sdev_y)
 {
     running = 0;
 
@@ -696,17 +697,24 @@ ls2_distribute_work_inverted(const int alg, const int em,
      * Evaluate the results.
      */
 
+   *center_x = *sdev_x = *center_y = *sdev_y = 0.0F;
+
     /* Accumulate all results and store them in the first thread's image. */
     uint_fast64_t max_val = 0;
     for (int t = 1; t < num_threads; t++) {
-	params[0].cx += params[t].cx;
-	params[0].cy += params[t].cy;
-	params[0].cn += params[t].cn;
+	*center_x += params[t].cx;
+        *sdev_x += params[t].sx;
+	*center_y += params[t].cy;
+        *sdev_y += params[t].sy;
         for (int i = 0; i < width * height; i++) {
             params[0].result[i] += params[t].result[i];
             if (params[0].result[i] > max_val) max_val = params[0].result[i];
         }
     }
+    *center_x /= ((float) num_threads);
+    *sdev_x = sqrtf(*sdev_x / (float) num_threads);
+    *center_y /= ((float) num_threads);
+    *sdev_y = sqrtf(*sdev_y / (float) num_threads);
 
     fprintf(stderr, "Maximum value: %" PRIuFAST64 "\n", max_val);
 
@@ -726,9 +734,6 @@ ls2_distribute_work_inverted(const int alg, const int em,
 	    }
 	}
     }
-    *center_x = params[0].cx / params[0].cn;
-    *center_y = params[0].cy / params[0].cn;
-
     for (int t = 0; t < num_threads; t++) {
 	free(params[t].result);
     }
@@ -740,12 +745,13 @@ ls2_distribute_work_inverted(const int alg, const int em,
 
 
 extern int
-compute_inverse(const int alg, const int em,
-		const int num_threads, const int64_t runs,
-		const float *anchor_x, const float *anchor_y,
-		const int no_anchors, const float tag_x, const float tag_y,
-		float* results, const int width, const int height,
-		float *center_x, float *center_y)
+compute_inverse(const int alg, const int em, const int num_threads,
+                const int64_t runs, const float *restrict anchor_x,
+                const float *restrict anchor_y, const int no_anchors,
+                const float tag_x, const float tag_y,
+		float *restrict results, const int width, const int height,
+		float *restrict center_x, float *restrict sdev_x,
+                float *restrict center_y, float *restrict sdev_y)
 {
     vector2 *anchors;
 
@@ -764,9 +770,9 @@ compute_inverse(const int alg, const int em,
     }
 
     ls2_distribute_work_inverted(alg, em, num_threads, runs, time(NULL),
-				 tag_x, tag_y,
-				 anchors, (size_t) no_anchors, results,
-                                 width, height, center_x, center_y);
+				 tag_x, tag_y, anchors, (size_t) no_anchors,
+                                 results, width, height,
+                                 center_x, sdev_x, center_y, sdev_y);
 
     free(anchors);
 

@@ -112,7 +112,8 @@ int main(int argc, const char* argv[])
     float *results[NUM_VARIANTS]; /* Array holding the results. */
     uint16_t no_anchor_args = 0; /* number of anchor parameters seen.       */
 #if !defined(ESTIMATOR)
-    float center_x, center_y;    /* Center of mass of estimations (inverted only) */
+    /* Center of mass of estimations (inverted only) */
+    float center_x, sdev_x, center_y, sdev_y;
 #endif
     vector2 *anchors;
     int rc;
@@ -380,7 +381,8 @@ int main(int argc, const char* argv[])
 	ls2_distribute_work_inverted(alg, em, num_threads, runs, seed,
                                      tag_x, tag_y,
 				     anchors, no_anchors, results[0], width,
-				     height, &center_x, &center_y);
+				     height, &center_x, &sdev_x,
+                                     &center_y, &sdev_y);
     }
 #else
     ls2_distribute_work_estimator(est, num_threads, anchors, no_anchors,
@@ -398,8 +400,11 @@ int main(int argc, const char* argv[])
 	fprintf(stdout, "MAE = %f, sdev = %f, min = %f, max = %f\n",
 		mu, sigma, min, max);
     } else {
-	fprintf(stdout, "Centroid of location estimations: (%f, %f) error = %f\n",
-		center_x, center_y, distance_s(tag_x, tag_y, center_x, center_y));
+	fprintf(stdout, "Centroid of location estimations: (%f, %f)"
+                        "\n    standard deviations: (%f, %f)\n"
+                        "    mean average error: %f\n",
+		center_x, center_y, sdev_x, sdev_y,
+                distance_s(tag_x, tag_y, center_x, center_y));
     }
 #endif
 
