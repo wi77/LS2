@@ -68,10 +68,10 @@ static
 DECLARE_DRAW_RECTANGLE(ls2_draw_rectangle_to_openexr, ImfRgba *, float r, float g, float b)
 
 
-static void
-ls2_draw_result_to_openexr(ImfRgba *image,
+static void __attribute__((__nonnull__))
+ls2_draw_result_to_openexr(ImfRgba *restrict image,
                            const uint16_t width, const uint16_t height,
-                           const float* result)
+                           const float *restrict result)
 {
     for (uint16_t y = 0; y < height; y++) {
         for (uint16_t x = 0; x < width; x++) {
@@ -95,12 +95,12 @@ ls2_draw_result_to_openexr(ImfRgba *image,
 static void
 ls2_draw_inverted_to_openexr(ImfRgba *image,
 			     const uint16_t width, const uint16_t height,
-			     const float* result)
+			     const double* result)
 {
     for (uint16_t y = 0; y < height; y++) {
         for (uint16_t x = 0; x < width; x++) {
             const int pos = x + width * y;
-	    const float sample = result[pos];
+	    const float sample = (float) result[pos];
 	    float r, g, b;
 	    hsl_to_rgbf(360.0f * sample, sample, 1.0f - sample, &r, &g, &b);
 	    paint_dot_to_openexr(image, width, height, x, y, r, g, b);
@@ -127,7 +127,7 @@ ls2_draw_anchors_to_openexr(ImfRgba *image,
 extern void
 ls2_openexr_write_locbased(const char* filename,
 			   const vector2 *anchors, const size_t no_anchors, 
-			   const float* result, const uint16_t width,
+			   const float* restrict result, const uint16_t width,
 			   const uint16_t height)
 {
     ImfRgba *image = (ImfRgba *) malloc((size_t) width * height * sizeof(ImfRgba));
@@ -150,11 +150,11 @@ ls2_openexr_write_locbased(const char* filename,
 }
 
 
-extern void
+extern void __attribute__((nonnull))
 ls2_openexr_write_inverted(const char* filename,
                            const float tag_x, const float tag_y,
 			   const vector2 *anchors, const size_t no_anchors,
-			   const float* result,
+			   const double *restrict result,
 			   const uint16_t width, const uint16_t height,
     			   const double center_x, const double center_y)
 {

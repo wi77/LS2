@@ -76,7 +76,7 @@ extern void
 ls2_cairo_write_pdf_inverted(const char* filename,
                              const float tag_x, const float tag_y,
 			     const vector2 *anchors, const size_t no_anchors, 
-			     const float* result,
+			     const double *restrict result,
 			     const uint16_t width, const uint16_t height,
 			     const double center_x, const double center_y);
 
@@ -84,7 +84,7 @@ extern void
 ls2_cairo_write_png_inverted(const char* filename,
                              const float tag_x, const float tag_y,
 			     const vector2 *anchors, const size_t no_anchors, 
-			     const float* result,
+			     const double *restrict result,
 			     const uint16_t width, const uint16_t height,
 			     const double center_x, const double center_y);
 
@@ -119,14 +119,14 @@ ls2_cairo_write_png_diff(const char* filename, const vector2 *anchors,
 extern void
 ls2_openexr_write_locbased(const char* filename,
                            const vector2 *anchors, const size_t no_anchors,
-                           const float* result, const uint16_t width,
+                           const float* restrict result, const uint16_t width,
 			   const uint16_t height);
 
 extern void 
 ls2_openexr_write_inverted(const char* filename,
                            const float tag_x, const float tag_y,
 			   const vector2 *anchors, const size_t no_anchors,
-                           const float* result,
+                           const double *restrict result,
                            const uint16_t dim_x, const uint16_t dim_y,
     			   const double center_x, const double center_y);
 

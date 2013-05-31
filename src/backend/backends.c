@@ -94,20 +94,20 @@ ls2_write_inverted(ls2_output_format_t format, const char *filename,
 		   const uint16_t height,
     		   const float center_x, float center_y)
 {
-    uint64_t maxval = 0.0;
+    uint64_t maxval = 0;
     for (size_t i = 0; i < (size_t)(width * height); i++) {
         maxval = (result[i] > maxval) ? result[i] : maxval;
     }
 
-    float *converted;
-    converted = malloc((size_t)(width * height) * sizeof(float));
+    double *converted;
+    converted = malloc((size_t)(width * height) * sizeof(*converted));
     if (converted == NULL) {
         perror(__FUNCTION__);
         exit(EXIT_FAILURE);
     }
     for (size_t i = 0; i < (size_t)width * height; i++) {
         if (maxval > 0) {
-            converted[i] = ((float) result[i] / (float) maxval);
+            converted[i] = ((double) result[i] / (double) maxval);
         } else {
             converted[i] = 0.0;
         }

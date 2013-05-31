@@ -383,12 +383,30 @@ ls2_cairo_write_png_diff(const char* filename,
 
 
 /*!
+ *
+ */
+static inline void __attribute__((__always_inline__,__const__))
+ls2_cairo_pick_color_inverted(const double sample, double *restrict h,
+                              double *restrict s, double *restrict l)
+{
+    *l = 1.0 - cbrt(sample);
+    *h = 0.0;  /* Red. */
+    if (sample < 0.97) {
+        *s = 0.0;
+    } else {
+        *s = 0.8;
+    }
+}
+
+
+
+/*!
  * Draw a result image of an inverted computation to a surface.
  */
-static void
+static void __attribute__((__nonnull__,__flatten__))
 ls2_draw_inverted_result_to_cairo(cairo_surface_t *surface,
-				  const uint16_t width, const uint16_t height,
-				  const float *result)
+				  const double *restrict result,
+				  const uint16_t width, const uint16_t height)
 {
     cairo_t *cr;
 
@@ -403,14 +421,12 @@ ls2_draw_inverted_result_to_cairo(cairo_surface_t *surface,
     // Color each location by the average or maximum error
     for (uint16_t y = 0; y < height; y++) {
 	for (uint16_t x = 0; x < width; x++) {
+            double h, s, l, r, g, b;
 	    const double sample = result[y * width + x];
-	    const double color = 1.0 - cbrt(sample);
             if (sample > 0.0) {
-	        if (sample < 0.97) {
-		    cairo_set_source_rgb(cr, color, color, color);
-	        } else {
-		    cairo_set_source_rgb(cr, cbrt(sample), color, color);
-	        }
+                ls2_cairo_pick_color_inverted(sample, &h, &s, &l);
+                hsl_to_rgb(h, s, l, &r, &g, &b);
+		cairo_set_source_rgb(cr, r, g, b);
 	        cairo_rectangle(cr, (double) x, (double) y, 1.0, 1.0);
 	        cairo_fill(cr);
             }
@@ -423,15 +439,16 @@ ls2_draw_inverted_result_to_cairo(cairo_surface_t *surface,
 }
 
 
-static void
-ls2_inverted_to_cairo_surface(cairo_surface_t *surface,
+static void __attribute__((__nonnull__))
+ls2_inverted_to_cairo_surface(cairo_surface_t *restrict surface,
                               const float tag_x, const float tag_y,
-			      const vector2 *anchors, const size_t no_anchors, 
-			      const float* result,
+			      const vector2 *restrict anchors,
+                              const size_t no_anchors, 
+			      const double *restrict result,
 			      const uint16_t width, const uint16_t height,
 			      const double center_x, const double center_y)
 {
-    ls2_draw_inverted_result_to_cairo(surface, width, height, result);
+    ls2_draw_inverted_result_to_cairo(surface, result, width, height);
     cairo_t *cr = cairo_create(surface);
 
     // Add a yellow circle into the center
@@ -468,7 +485,7 @@ extern void
 ls2_cairo_write_pdf_inverted(const char* filename,
                              const float tag_x, const float tag_y,
 			     const vector2 *anchors, const size_t no_anchors, 
-			     const float* result,
+			     const double *restrict result,
 			     const uint16_t width, const uint16_t height,
 			     const double center_x, const double center_y)
 {
@@ -480,11 +497,11 @@ ls2_cairo_write_pdf_inverted(const char* filename,
 }
 
 
-extern void
+extern void __attribute__((__nonnull__))
 ls2_cairo_write_png_inverted(const char* filename,
                              const float tag_x, const float tag_y,
 			     const vector2 *anchors, const size_t no_anchors, 
-			     const float* result,
+			     const double *restrict result,
 			     const uint16_t width, const uint16_t height,
 			     const double center_x, const double center_y)
 {
