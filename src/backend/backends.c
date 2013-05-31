@@ -88,15 +88,19 @@ ls2_write_locbased(ls2_output_format_t format, const char *filename,
 
 void
 ls2_write_inverted(ls2_output_format_t format, const char *filename,
-		   const float tag_x, float tag_y,
+		   const uint64_t runs, const float tag_x, float tag_y,
 		   const vector2 *restrict anchors, const size_t num_anchors,
 		   const uint64_t *restrict result, const uint16_t width,
 		   const uint16_t height,
     		   const float center_x, float center_y)
 {
     uint64_t maxval = 0;
-    for (size_t i = 0; i < (size_t)(width * height); i++) {
-        maxval = MAX(result[i], maxval);
+    if (runs <= 0) {
+        for (size_t i = 0; i < (size_t)(width * height); i++) {
+            maxval = MAX(result[i], maxval);
+        }
+    } else {
+        maxval = runs;
     }
 
     double *converted;

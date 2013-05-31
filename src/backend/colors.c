@@ -101,8 +101,15 @@ __attribute__((__nonnull__,__gnu_inline__,__always_inline__,__const__))
 ls2_pick_color_inverted(const double sample, double *restrict h,
 			double *restrict s, double *restrict l)
 {
-    *l = 1.0 - cbrt(sample);
     *h = 0.0;  /* Red. */
+    if (sample > 0.0) {
+        static const double alpha = 0.002;  // constant used for compression
+        double t = sample;
+        t = (1.0 - alpha) * t + alpha;
+        *l = 1.0 - cbrt(t);
+    } else {
+        *l = 1.0;
+    }
     if (sample < 0.97) {
         *s = 0.0;
     } else {

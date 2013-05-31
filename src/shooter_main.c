@@ -90,6 +90,7 @@ static char const *estimator;
 static char const *algorithm;
 static char const *error_model;
 static int inverted;
+static int relative;
 static float tag_x;
 static float tag_y;
 static long seed;
@@ -147,6 +148,9 @@ int main(int argc, const char* argv[])
         { "inverted", 'i', POPT_ARG_NONE,
           &inverted, 0,
           "run the inverted version of the algorithm", NULL },
+        { "relative", 0, POPT_ARG_NONE,
+          &relative, 0,
+          "Use a relative density representation", NULL },
 #  else
         { "estimator", 'e', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &estimator, 0,
@@ -441,9 +445,15 @@ int main(int argc, const char* argv[])
         }
 #if !defined(ESTIMATOR)
     } else {
-	ls2_write_inverted(get_output_format(output_format), output[0],
-			   tag_x, tag_y, anchors, no_anchors,
-			   result, width, height, center_x, center_y);
+        if (relative) {
+	    ls2_write_inverted(get_output_format(output_format), output[0],
+			       0, tag_x, tag_y, anchors, no_anchors,
+			       result, width, height, center_x, center_y);
+        } else {
+	    ls2_write_inverted(get_output_format(output_format), output[0],
+			       (uint64_t) runs, tag_x, tag_y, anchors, no_anchors,
+			       result, width, height, center_x, center_y);
+        }
         if (output_hdf5 != NULL && *output_hdf5 != '\0') {
 	    ls2_hdf5_write_inverted(output_hdf5, tag_x, tag_y, anchors,
                                     no_anchors, result, width, height,

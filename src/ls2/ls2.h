@@ -42,6 +42,9 @@
 #  define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 
+#ifndef CLAMP
+#  define CLAMP(l,x,u) (((l) < (x)) ? (((x) < (u)) ? (x) : (u)) : (l))
+#endif
 
 /*! Enumerates the different variants of information gathered by
  * shooter_run().
