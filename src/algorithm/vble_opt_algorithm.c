@@ -34,9 +34,6 @@
 
  /* @algorithm_name: Optimized Voting Based Location Estimation */
 
-#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
-#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
-
 /*
  * ivector_u is currently only available to SSE4.1 builds.
  */

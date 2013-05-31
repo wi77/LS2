@@ -40,40 +40,9 @@
 #include "vector_shooter.h"
 #include "ls2/backend.h"
 
-#ifndef MIN
-#  define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef MAX
-#  define MAX(a,b) ((a) > (b) ? (a) : (b))
-#endif
-
+#include "backend/colors.c"
 #include "util/util_colors.c"
 
-
-
-static inline void __attribute__((__always_inline__,__const__))
-ls2_cairo_pick_color_locbased(const float sample, double *r, double *g,
-                              double *b, double __attribute__((__unused__)) *a)
-{
-    const float good_color = 50.0F;
-    const float bad_color = 250.0F;
-    if (isnan(sample)) {
-        // Mark not-a-number in magenta.
-        *r = 1.0; *g = 0.0; *b = 1.0;
-    } else if (sample < good_color) {
-        // Use a very good color.
-        const double t = sample / 50.0;
-        *r = t; *g = 1.0; *b = t;
-    } else if (sample < bad_color) {
-        // Use a good color.
-        const double t = 1.0 - (sample - good_color) / (bad_color - good_color);
-        *r = t; *g = t; *b = t;
-    } else {
-        // Error too large
-        *r = 0.0; *g = 0.0; *b = 1.0;
-    }
-}
 
 
 /*!
@@ -99,7 +68,7 @@ ls2_draw_result_to_cairo(cairo_surface_t *surface,
 	for (uint16_t x = 0; x < width; x++) {
 	    const float sample = result[y * width + x];
             double r, g, b, a;
-            ls2_cairo_pick_color_locbased(sample, &r, &g, &b, &a);
+            ls2_pick_color_locbased(sample, &r, &g, &b, &a);
 	    cairo_set_source_rgb(cr, r, g, b);
 	    cairo_rectangle(cr, x, y, 1.0, 1.0);
 	    cairo_fill(cr);
@@ -231,7 +200,7 @@ ls2_cairo_draw_phase_portrait(cairo_surface_t *surface,
 	    const double end_y = (double) y + dy[pos];
             double r, g, b, a;
 
-            ls2_cairo_pick_color_locbased(length, &r, &g, &b, &a);
+            ls2_pick_color_locbased(length, &r, &g, &b, &a);
 	    cairo_set_source_rgb(cr, r, g, b);
 	    cairo_arc(cr, x, y, 2.0, 0, 2.0 * M_PI);
             cairo_fill(cr);
@@ -292,41 +261,6 @@ ls2_cairo_write_pdf_phase_portrait(const char* filename,
 
 
 
-static inline void
-__attribute__((nonnull,gnu_inline,always_inline,artificial))
-ls2_cairo_pick_color_diff(const double sample,
-                          const double similar,
-                          const double dynamic,
-			  double *restrict hue,
-			  double *restrict saturation,
-			  double *restrict lightness)
-{
-    if (sample < -similar) {                     // First was better
-	/* The color is green and gets darker. */
-	assert(sample < 0);
-	*hue = 120.0;
-	*saturation = MAX(0.125, 0.5 + sample / dynamic);
-	assert(0.125 <= *saturation && *saturation <= 0.5);
-	*lightness = MAX(0.0, 0.5 + sample / dynamic);
-	assert(0 <= *lightness && *lightness <= 0.5);
-    } else if (-similar <= sample && sample <= similar) {    // Similar
-	*hue = 60.0;  // This is the color yellow
-	*lightness = 0.5;
-	*saturation = 0.5;
-    } else if (similar < sample) {              // Second was better
-	/* We start with red and get brighter. */
-	assert (0 < sample);
-	*hue = 0.0;
-	*saturation = MIN(0.5 + sample / dynamic, 0.875);
-	assert(0.5 <= *saturation && *saturation <= 0.875);
-	*lightness = MIN(0.5 + sample / dynamic, 0.875);
-	assert(0.5 <= *lightness && *lightness <= 0.875);
-    } else {
-	assert(false);
-    }
-}
-
-
 static void
 ls2_cairo_draw_diff(cairo_surface_t *surface,
 		    const vector2 *anchors, const size_t no_anchors,
@@ -348,8 +282,8 @@ ls2_cairo_draw_diff(cairo_surface_t *surface,
 	for (uint16_t x = 0; x < width; x++) {
             double r, g, b, lightness, saturation, hue;
 	    const float sample = result[y * width + x];
-	    ls2_cairo_pick_color_diff(sample, similar, dynamic,
-                                      &hue, &saturation, &lightness);
+	    ls2_pick_color_diff(sample, similar, dynamic,
+				&hue, &saturation, &lightness);
             hsl_to_rgb(hue, lightness, saturation, &r, &g, &b);
 	    cairo_set_source_rgb(cr, r, g, b);
 	    cairo_rectangle(cr, x, y, 1.0, 1.0);
@@ -383,24 +317,6 @@ ls2_cairo_write_png_diff(const char* filename,
 
 
 /*!
- *
- */
-static inline void __attribute__((__always_inline__,__const__))
-ls2_cairo_pick_color_inverted(const double sample, double *restrict h,
-                              double *restrict s, double *restrict l)
-{
-    *l = 1.0 - cbrt(sample);
-    *h = 0.0;  /* Red. */
-    if (sample < 0.97) {
-        *s = 0.0;
-    } else {
-        *s = 0.8;
-    }
-}
-
-
-
-/*!
  * Draw a result image of an inverted computation to a surface.
  */
 static void __attribute__((__nonnull__,__flatten__))
@@ -424,7 +340,7 @@ ls2_draw_inverted_result_to_cairo(cairo_surface_t *surface,
             double h, s, l, r, g, b;
 	    const double sample = result[y * width + x];
             if (sample > 0.0) {
-                ls2_cairo_pick_color_inverted(sample, &h, &s, &l);
+                ls2_pick_color_inverted(sample, &h, &s, &l);
                 hsl_to_rgb(h, s, l, &r, &g, &b);
 		cairo_set_source_rgb(cr, r, g, b);
 	        cairo_rectangle(cr, (double) x, (double) y, 1.0, 1.0);

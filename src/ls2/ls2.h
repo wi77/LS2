@@ -34,6 +34,15 @@
 #  define MAX_ANCHORS 16
 #endif
 
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
+
 /*! Enumerates the different variants of information gathered by
  * shooter_run().
  */
@@ -200,7 +209,6 @@ compute_estimates(const int est, const int num_threads,
 /*! Cancel a computation. */
 extern int
 cancel_running(void);
-
 
 
 #endif

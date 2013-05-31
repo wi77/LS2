@@ -34,9 +34,6 @@
  
  /* @algorithm_name: Voting Based Location Estimation */
 
-#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
-#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
-
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 vble_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
     int ii;

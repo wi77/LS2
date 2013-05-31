@@ -96,7 +96,7 @@ ls2_write_inverted(ls2_output_format_t format, const char *filename,
 {
     uint64_t maxval = 0;
     for (size_t i = 0; i < (size_t)(width * height); i++) {
-        maxval = (result[i] > maxval) ? result[i] : maxval;
+        maxval = MAX(result[i], maxval);
     }
 
     double *converted;

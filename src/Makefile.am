@@ -59,6 +59,7 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/res_bruteforce_algorithm.h \
 	backend/bits/circle.c \
 	backend/bits/rectangle.c \
+	backend/colors.c \
 	estimator/crlb_malaney_algorithm.c \
 	estimator/crlb_malaney_algorithm.h \
 	estimator/crlb_qi_algorithm.c \

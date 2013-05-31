@@ -26,7 +26,9 @@
 
 #define _XOPEN_SOURCE 600
 
-#include <stdint.h>
+#include <assert.h>
+#include <stdbool.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -37,6 +39,7 @@
 #include "vector_shooter.h"
 #include "ls2/backend.h"
 
+#include "backend/colors.c"
 #include "util/util_colors.c"
 
 static inline void
@@ -76,17 +79,11 @@ ls2_draw_result_to_openexr(ImfRgba *restrict image,
     for (uint16_t y = 0; y < height; y++) {
         for (uint16_t x = 0; x < width; x++) {
             const int pos = x + width * y;
+	    double r, g, b, a;
             const float sample = result[pos];
-            if (sample < 50.0F) {
-                const float i = sample / 50.0F;
-	        paint_dot_to_openexr(image, width, height, x, y, i, 1.0F, i);
-            } else if (sample < 250.0F) {
-                const float i = 1.0F - (sample - 50.0F) / 200.0F;
-	        paint_dot_to_openexr(image, width, height, x, y, i, i, i);
-            } else {
-                const float i = sample / 50.0F;
-	        paint_dot_to_openexr(image, width, height, x, y, 0.0F, 0.0F, i);
-            }
+	    ls2_pick_color_locbased(sample, &r, &g, &b, &a);
+	    paint_dot_to_openexr(image, width, height, x, y,
+                                 (float) r, (float) g, (float) b);
         }
     }
 }
@@ -100,9 +97,10 @@ ls2_draw_inverted_to_openexr(ImfRgba *image,
     for (uint16_t y = 0; y < height; y++) {
         for (uint16_t x = 0; x < width; x++) {
             const int pos = x + width * y;
-	    const float sample = (float) result[pos];
+	    double h, s, l;
 	    float r, g, b;
-	    hsl_to_rgbf(360.0f * sample, sample, 1.0f - sample, &r, &g, &b);
+	    ls2_pick_color_inverted((double) result[pos], &h, &s, &l);
+	    hsl_to_rgbf((float)h, (float)s, (float)l, &r, &g, &b);
 	    paint_dot_to_openexr(image, width, height, x, y, r, g, b);
         }
     }
