@@ -103,7 +103,9 @@ ls2_pick_color_inverted(const double sample, double *restrict h,
 {
     *h = 0.0;  /* Red. */
     if (sample > 0.0) {
-        static const double alpha = 0.002;  // constant used for compression
+        // constant used for compression
+        static const double ___a = 0.04;
+        static const double alpha = ___a * ___a * ___a; 
         double t = sample;
         t = (1.0 - alpha) * t + alpha;
         *l = 1.0 - cbrt(t);

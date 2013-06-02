@@ -44,21 +44,17 @@
 #include "ls2/backend.h"
 #include "ls2/util.h"
 
-static char const *output_format;             /* Format of the output files. */ 
-static char const *output[NUM_VARIANTS];       /* Names of output files.      */
-static char const *input_hdf5;                /* Names of raw input files.   */
+static char const *output_format;           /* Format of the output files. */ 
+static char const *output[NUM_VARIANTS];    /* Names of output files.      */
+static char const *input_hdf5;              /* Name of raw input files.    */
+static char const *inverted;      /* Name of inverted density output file. */
 
 static int stride = 10;
 
 int main(int argc, const char* argv[])
 {
-    poptContext opt_con;        /* context for parsing command-line options */
+    poptContext opt_con;       /* context for parsing command-line options */
     int rc;
-
-    vector2 *anchors;
-    size_t no_anchors;
-    float *results;
-    uint16_t height, width;
 
     /* Command line arguments. */
     static struct poptOption cli_options[] = {
@@ -89,6 +85,8 @@ int main(int argc, const char* argv[])
           POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
           &stride, 0,
           "stride of the phase portrait", "steps" },
+        { "inverted", 'i', POPT_ARG_STRING, &inverted, 0,
+          "name of the inverted density file", "file name" },
         POPT_AUTOHELP
         POPT_TABLEEND
     };
@@ -133,38 +131,59 @@ int main(int argc, const char* argv[])
 
     ls2_output_format_t format = get_output_format(output_format);
 
+    vector2 *anchors;
+    size_t no_anchors;
+    uint16_t height, width;
+
     // calculate average
-    for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
-        if (output[var] != NULL && *(output[var]) != '\0') {
-            if (var == AVERAGE_Y_ERROR)
-                continue;
-            if (var == AVERAGE_X_ERROR) {
-                float *dx, *dy;
-                ls2_hdf5_read_locbased(input_hdf5, AVERAGE_X_ERROR,
-                                       &anchors, &no_anchors, &dx,
-                                       &width, &height);
-                ls2_hdf5_read_locbased(input_hdf5, AVERAGE_Y_ERROR,
-                                       &anchors, &no_anchors, &dy,
-                                       &width, &height);
-                ls2_cairo_write_pdf_phase_portrait(output[var], anchors,
-						   no_anchors, dx, dy, width,
-						   height, (uint16_t) stride);
-                continue;
-            }
-	    ls2_hdf5_read_locbased(input_hdf5, var, &anchors, &no_anchors,
-				   &results, &width, &height);
-	    float mu, sigma, min, max;
-	    ls2_statistics(results, (size_t) width * height,
-			   &mu, &sigma, &min, &max);
-	    fprintf(stdout, "MAE = %f, sdev = %f, min = %f, max = %f\n",
-		    mu, sigma, min, max);
+    if (inverted == NULL) {
+        for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
+            if (output[var] != NULL && *(output[var]) != '\0') {
+                if (var == AVERAGE_Y_ERROR)
+                    continue;
+                if (var == AVERAGE_X_ERROR) {
+                    float *dx, *dy;
+                    ls2_hdf5_read_locbased(input_hdf5, AVERAGE_X_ERROR,
+                                           &anchors, &no_anchors, &dx,
+                                           &width, &height);
+                    ls2_hdf5_read_locbased(input_hdf5, AVERAGE_Y_ERROR,
+                                           NULL, NULL, &dy,
+                                           &width, &height);
+                    ls2_cairo_write_pdf_phase_portrait(output[var], anchors,
+						       no_anchors, dx, dy, width,
+						       height, (uint16_t) stride);
+                    free(dx);
+                    free(dy);
+                } else {
+                    float *results;
+
+	            ls2_hdf5_read_locbased(input_hdf5, var, &anchors, &no_anchors,
+				           &results, &width, &height);
+	            float mu, sigma, min, max;
+	            ls2_statistics(results, (size_t) width * height,
+			           &mu, &sigma, &min, &max);
+	            fprintf(stdout, "MAE = %f, sdev = %f, min = %f, max = %f\n",
+		            mu, sigma, min, max);
 	  
-	    ls2_write_locbased(format, output[var], anchors, no_anchors,
-			       results, width, height);
-            // clean-ups.
-            free(anchors);
-            free(results);
+	            ls2_write_locbased(format, output[var], anchors, no_anchors,
+			               results, width, height);
+                    free(results);
+                }
+                // clean-ups.
+                free(anchors);
+            }
         }
+    } else if (*inverted != '\0') { //Reading an inverted image
+        float tag_x, tag_y;
+        double center_x, center_y;
+        uint64_t *result;
+        uint64_t runs = 0;
+        ls2_hdf5_read_inverted(input_hdf5, &tag_x, &tag_y, &anchors, &no_anchors,
+			       &result, &width, &height, &center_x, &center_y);
+	ls2_write_inverted(format, inverted, runs, tag_x, tag_y, anchors, no_anchors,
+			   result, width, height, (float) center_x, (float) center_y);
+        free(result);
+        free(anchors);
     }
     poptFreeContext(opt_con);
     exit(EXIT_SUCCESS);

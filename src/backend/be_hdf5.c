@@ -62,6 +62,25 @@ ls2_hdf5_variant_name(ls2_output_variant variant)
 }
 
 
+
+
+static void
+ls2_hdf_write_anchors(hid_t file_id, const vector2 *anchors, size_t no_anchors)
+{
+    hid_t dataset, dataspace;
+    hsize_t dims[2] = { no_anchors, 2 };
+    
+    dataspace = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate(file_id, "/Anchors", H5T_NATIVE_FLOAT,
+                        dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             anchors);
+    H5Sclose(dataspace);
+    H5Dclose(dataset);
+}
+
+
+
 void
 ls2_hdf5_write_locbased(const char *filename, const vector2 *anchors,
                         const size_t no_anchors, float **results,
@@ -73,15 +92,8 @@ ls2_hdf5_write_locbased(const char *filename, const vector2 *anchors,
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     grp = H5Gcreate(file_id, "/Result", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    dims[0] = no_anchors;
-    dims[1] = 2;
-    dataspace = H5Screate_simple(2, dims, NULL);
-    dataset = H5Dcreate(file_id, "/Anchors", H5T_NATIVE_FLOAT,
-                        dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             anchors);
-    H5Sclose(dataspace);
-    H5Dclose(dataset);
+
+    ls2_hdf_write_anchors(file_id, anchors, no_anchors);
 
     dims[0] = height;
     dims[1] = width;
@@ -109,18 +121,13 @@ ls2_hdf5_write_locbased(const char *filename, const vector2 *anchors,
 
 
 
-int
-ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
-                       vector2 **anchors, size_t *no_anchors,
-                       float **results, uint16_t *width, uint16_t *height)
+static int __attribute__((__nonnull__))
+ls2_hdf5_read_anchors(hid_t file, vector2** anchors, size_t *no_anchors)
 {
-    hid_t file, dataset, dataspace, memspace;
+    hid_t dataset, dataspace, memspace;
     hsize_t dims[2];
     int rank;
 
-    file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-
-    // Read the anchors.
     dataset = H5Dopen2(file, "/Anchors", H5P_DEFAULT);
     dataspace = H5Dget_space(dataset);
     rank = H5Sget_simple_extent_ndims(dataspace);
@@ -142,6 +149,30 @@ ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
     H5Dclose(dataset);
     H5Sclose(dataspace);
     H5Sclose(memspace);
+
+    return 0;
+}
+
+
+
+
+int __attribute__((__nonnull__(1,5,6,7)))
+ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
+                       vector2 **anchors, size_t *no_anchors,
+                       float **results, uint16_t *width, uint16_t *height)
+{
+    hid_t file, dataset, dataspace, memspace;
+    hsize_t dims[2];
+    int rank, ret;
+
+    file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+
+    // Read the anchors.
+    if (anchors != NULL && no_anchors != NULL) {
+        ret = ls2_hdf5_read_anchors(file, anchors, no_anchors);
+        if (ret < 0)
+            return ret;
+    }
 
     // Read the errors.
     char name[256];
@@ -185,15 +216,8 @@ ls2_hdf5_write_inverted(const char *filename,
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     grp = H5Gcreate(file_id, "/Result", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    dims[0] = no_anchors;
-    dims[1] = 2;
-    dataspace = H5Screate_simple(2, dims, NULL);
-    dataset = H5Dcreate(file_id, "/Anchors", H5T_NATIVE_FLOAT,
-                        dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             anchors);
-    H5Sclose(dataspace);
-    H5Dclose(dataset);
+
+    ls2_hdf_write_anchors(file_id, anchors, no_anchors);
 
     dims[0] = 2;
     dims[1] = 1;
@@ -208,16 +232,15 @@ ls2_hdf5_write_inverted(const char *filename,
     dims[0] = 2;
     dims[1] = 1;
     dataspace = H5Screate_simple(2, dims, NULL);
-    dataset = H5Dcreate(file_id, "/Result/Center", H5T_NATIVE_FLOAT,
+    dataset = H5Dcreate(file_id, "/Result/Center", H5T_NATIVE_DOUBLE,
                         dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    float center[2] = { (float) center_x, (float) center_y};
-    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, center);
+    double center[2] = { center_x, center_y};
+    H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, center);
     H5Sclose(dataspace);
     H5Dclose(dataset);
 
     dims[0] = height;
     dims[1] = width;
-
     dataspace = H5Screate_simple(2, dims, NULL);
     plist_id = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_chunk(plist_id, 2, chunk_dims);
@@ -231,4 +254,87 @@ ls2_hdf5_write_inverted(const char *filename,
     H5Dclose(dataset);
     H5Gclose(grp);
     H5Fclose(file_id);
+}
+
+
+
+
+
+int __attribute__((__nonnull__))
+ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
+                       vector2 **anchors, size_t *no_anchors,
+                       uint64_t **results, uint16_t *width, uint16_t *height,
+                       double *center_x, double *center_y)
+{
+    hid_t file, dataset, dataspace, memspace;
+    hsize_t dims[2];
+    int rank, ret;
+
+    file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+
+    // Read the anchors.
+    if ((ret = ls2_hdf5_read_anchors(file, anchors, no_anchors)) < 0)
+        return ret;
+
+    // Read the tag position
+    dataset = H5Dopen2(file, "/Tag", H5P_DEFAULT);
+    dataspace = H5Dget_space(dataset);
+    rank = H5Sget_simple_extent_ndims(dataspace);
+    if (rank != 2) {
+        fprintf(stderr, "/Tag wrong rank %d\n", (int) rank);
+        return -1;
+    }
+    H5Sget_simple_extent_dims(dataspace, dims, NULL);
+    // TODO: Validate values.
+    float tag[2];
+    memspace = H5Screate_simple(2, dims, NULL);
+    H5Dread(dataset, H5T_NATIVE_FLOAT, memspace, dataspace, H5P_DEFAULT, tag);
+    H5Dclose(dataset);
+    H5Sclose(dataspace);
+    H5Sclose(memspace);
+    *tag_x = tag[0];
+    *tag_y = tag[1];
+
+    // Read the centroid of all estimates
+    dataset = H5Dopen2(file, "/Result/Center", H5P_DEFAULT);
+    dataspace = H5Dget_space(dataset);
+    rank = H5Sget_simple_extent_ndims(dataspace);
+    if (rank != 2) {
+        fprintf(stderr, "/Result/Center wrong rank %d\n", (int) rank);
+        return -1;
+    }
+    H5Sget_simple_extent_dims(dataspace, dims, NULL);
+    // TODO: Validate values.
+    double center[2];
+    memspace = H5Screate_simple(2, dims, NULL);
+    H5Dread(dataset, H5T_NATIVE_DOUBLE, memspace, dataspace, H5P_DEFAULT,
+            center);
+    H5Dclose(dataset);
+    H5Sclose(dataspace);
+    H5Sclose(memspace);
+    *center_x = center[0];
+    *center_y = center[1];
+
+    // Read the frequencies
+    dataset = H5Dopen2(file, "/Result/Frequencies", H5P_DEFAULT);
+    dataspace = H5Dget_space(dataset);
+    rank = H5Sget_simple_extent_ndims(dataspace);
+    if (rank != 2) {
+        fprintf(stderr, "/Result/Frequencies wrong rank %d\n", (int) rank);
+        return -1;
+    }
+    H5Sget_simple_extent_dims(dataspace, dims, NULL);
+    *width = (uint16_t) dims[1];
+    *height = (uint16_t) dims[0];
+    *results = (uint64_t*) calloc((size_t) (*height * *width),
+                                  sizeof(uint64_t));
+    memspace = H5Screate_simple(2, dims, NULL);
+    H5Dread(dataset, H5T_STD_U64LE, memspace, dataspace, H5P_DEFAULT,
+            *results);
+    H5Dclose(dataset);
+    H5Sclose(dataspace);
+    H5Sclose(memspace);
+
+    H5Fclose(file);
+    return 0;
 }

@@ -145,7 +145,7 @@ ls2_hdf5_write_inverted(const char* filename,
                         const float tag_x, const float tag_y,
 			const vector2 *restrict anchors, const size_t no_anchors,
                         const uint64_t *restrict result,
-                        const uint16_t dim_x, const uint16_t dim_y,
+                        const uint16_t width, const uint16_t height,
     			const double center_x, const double center_y);
 
 extern int
@@ -157,5 +157,11 @@ extern int
 ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
                        vector2 **anchors, size_t *no_anchors,
                        float **results, uint16_t *width, uint16_t *height);
+
+extern int __attribute__((__nonnull__))
+ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
+                       vector2 **anchors, size_t *no_anchors,
+                       uint64_t **results, uint16_t *width, uint16_t *height,
+                       double *center_x, double *center_y);
 
 #endif
