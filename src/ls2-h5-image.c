@@ -31,7 +31,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
+#include <inttypes.h>
 #include <string.h>
 #include <math.h>
 
@@ -184,6 +184,11 @@ int main(int argc, const char* argv[])
         uint64_t *result;
         ls2_hdf5_read_inverted(input_hdf5, &tag_x, &tag_y, &anchors, &no_anchors,
 			       &result, &width, &height, &center_x, &center_y);
+        uint64_t maximum = 0;
+        for (int i = 0; i < width * height; i++)
+            maximum = MAX(result[i], maximum);
+        fprintf(stdout, "Actual maximum: %" PRIu64 ", used maximum: %" PRIu64 "\n",
+                maximum, ((runs == 0) ? maximum : (uint64_t) runs));
 	ls2_write_inverted(format, inverted, (uint64_t) runs, tag_x, tag_y, anchors, no_anchors,
 			   result, width, height, (float) center_x, (float) center_y);
         free(result);

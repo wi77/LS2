@@ -111,7 +111,8 @@ ls2_write_inverted(ls2_output_format_t format, const char *filename,
     }
     for (size_t i = 0; i < (size_t)width * height; i++) {
         if (maxval > 0) {
-            converted[i] = ((double) result[i] / (double) maxval);
+            double v = ((double) result[i] / (double) maxval);
+            converted[i] = CLAMP(0.0, 1.0, v);
         } else {
             converted[i] = 0.0;
         }
