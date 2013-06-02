@@ -50,6 +50,7 @@ static char const *input_hdf5;              /* Name of raw input files.    */
 static char const *inverted;      /* Name of inverted density output file. */
 
 static int stride = 10;
+static long runs;
 
 int main(int argc, const char* argv[])
 {
@@ -87,6 +88,10 @@ int main(int argc, const char* argv[])
           "stride of the phase portrait", "steps" },
         { "inverted", 'i', POPT_ARG_STRING, &inverted, 0,
           "name of the inverted density file", "file name" },
+        { "maximum", 0,
+          POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
+          &runs, 0,
+          "maximum frequency in inverted image", "runs" },
         POPT_AUTOHELP
         POPT_TABLEEND
     };
@@ -177,10 +182,9 @@ int main(int argc, const char* argv[])
         float tag_x, tag_y;
         double center_x, center_y;
         uint64_t *result;
-        uint64_t runs = 0;
         ls2_hdf5_read_inverted(input_hdf5, &tag_x, &tag_y, &anchors, &no_anchors,
 			       &result, &width, &height, &center_x, &center_y);
-	ls2_write_inverted(format, inverted, runs, tag_x, tag_y, anchors, no_anchors,
+	ls2_write_inverted(format, inverted, (uint64_t) runs, tag_x, tag_y, anchors, no_anchors,
 			   result, width, height, (float) center_x, (float) center_y);
         free(result);
         free(anchors);
