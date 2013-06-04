@@ -118,9 +118,11 @@ extern "C" {
 #  define VECTOR_CMPGT(x,y)       _mm256_cmp_ps(x,y,_CMP_NLE_US)
 #  define VECTOR_CMPEQ(x,y)       _mm256_cmp_ps(x,y,_CMP_EQ_US)
 #  define VECTOR_ZERO()           _mm256_setzero_ps()
+#  define VECTOR_EXP(x)            exp256_ps(x)
 #  define VECTOR_LOG(x)            log256_ps(x)
-#  define VECTOR_SIN(x)            sin256_ps(x)
+#  define VECTOR_POW(x,y)          exp256_ps((y) * log256_ps(x))
 #  define VECTOR_COS(x)            cos256_ps(x)
+#  define VECTOR_SIN(x)            sin256_ps(x)
 #  define VECTOR_SINCOS(x,y,z)     sincos256_ps(x,y,z)
 
 #else
@@ -157,7 +159,9 @@ extern "C" {
 #  define VECTOR_OR(x, y)         _mm_or_ps(x, y)
 #  define VECTOR_XOR(x, y)        _mm_xor_ps(x, y)
 #  define VECTOR_HADD(x, y)       _mm_hadd_ps(x, y)
+#  define VECTOR_EXP(x)           exp_ps(x)
 #  define VECTOR_LOG(x)           log_ps(x)
+#  define VECTOR_POW(x,y)         exp_ps((y)*log_ps(x))
 #  define VECTOR_SIN(x)           sin_ps(x)
 #  define VECTOR_COS(x)           cos_ps(x)
 #  define VECTOR_SINCOS(x,y,z)    sincos_ps(x,y,z)

@@ -80,7 +80,26 @@ gamma_noise_error(__m128i *restrict seed,
             x *= rnd(seed);
         }
         if (alpha > 0.0F) {
-            // TODO: Find a random number for shape 0 <= alpha < 1
+            assert(alpha < 1.0F);
+            // Ahrens-Dieter acceptance-rejection method
+            const VECTOR v0 =
+                VECTOR_BROADCASTF(((float) M_E) / ((float) M_E + alpha));
+            VECTOR xi, eta, mask;
+            do {
+                // TODO: implement a way to keep accepted random values.
+                // Here, we try until all numbers are accepted.
+                VECTOR xi0, xi1, eta0, eta1;
+                VECTOR V0 = rnd(seed), V1 = rnd(seed), V2 = rnd(seed);
+                VECTOR m = VECTOR_LE(V0, v0);
+                xi0 = VECTOR_POW(V1, one / alpha);
+                eta0 = V2 * VECTOR_POW(xi0, VECTOR_BROADCASTF(alpha - 1.0F));
+                xi1 = VECTOR_BROADCASTF(1.0F) - VECTOR_LOG(V1);
+                eta1 = V2 * VECTOR_EXP(-xi1);
+                xi = VECTOR_OR(VECTOR_AND(xi0, m), VECTOR_ANDNOT(xi1, m));
+                eta = VECTOR_OR(VECTOR_AND(eta0, m), VECTOR_ANDNOT(eta1, m)); 
+                mask = VECTOR_GT(eta, VECTOR_POW(xi, alpha - VECTOR_BROADCASTF(1.0F)) * VECTOR_EXP(-xi));
+            } while (VECTOR_TEST_ALL_ONES(VECTOR_NE(mask, VECTOR_ZERO())));
+            x *= xi;
         }
         x = (VECTOR_LOG(x) / VECTOR_BROADCASTF(-gamma_rate)) -
               VECTOR_BROADCASTF(gamma_offset);
