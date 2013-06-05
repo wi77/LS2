@@ -63,16 +63,15 @@
 #endif
 
 #ifndef MLE_GAUSS_DEFAULT_EPSILON
-#define MLE_GAUSS_DEFAULT_EPSILON 1e-2
+#define MLE_GAUSS_DEFAULT_EPSILON 1e-3
 #endif
 
 #ifndef MLE_GAUSS_DEFAULT_ITERATIONS
-#define MLE_GAUSS_DEFAULT_ITERATIONS 200
+#define MLE_GAUSS_DEFAULT_ITERATIONS 100
 #endif
 
 static double mle_gauss_mean       = MLE_GAUSS_DEFAULT_MEAN;
 static double mle_gauss_deviation  = MLE_GAUSS_DEFAULT_DEVIATION;
-static double mle_gauss_step       = MLE_GAUSS_DEFAULT_STEP;
 static double mle_gauss_epsilon    = MLE_GAUSS_DEFAULT_EPSILON;
 static    int mle_gauss_iterations = MLE_GAUSS_DEFAULT_ITERATIONS;
 
@@ -84,9 +83,6 @@ struct poptOption mle_gauss_arguments[] = {
         { "mle-gauss-mean", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
           &mle_gauss_mean, 0,
           "mean of the gauss distribution", NULL },
-        { "mle-gauss-step", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gauss_step, 0,
-          "size of the initial line search step vector", NULL },
         { "mle-gauss-epsilon", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
           &mle_gauss_epsilon, 0,
           "maximum size of the simplex for termination", NULL },
@@ -118,23 +114,75 @@ mle_gauss_likelihood_function(const gsl_vector *X, void *restrict params)
     const struct mle_gauss_params *const p = params;
     const double mean2 = mle_gauss_mean * mle_gauss_mean;
     const double variance = mle_gauss_deviation * mle_gauss_deviation;
+    const double thetaX = gsl_vector_get(X, 0);
+    const double thetaY = gsl_vector_get(X, 1);
+
     for (size_t j = 0; j < p->no_anchors; j++) {
-        const double d2 = (gsl_vector_get(X, 0) - p->anchors[j].x) *
-                          (gsl_vector_get(X, 0) - p->anchors[j].x) +
-                          (gsl_vector_get(X, 1) - p->anchors[j].y) *
-                          (gsl_vector_get(X, 1) - p->anchors[j].y);
+        const double d2 = (thetaX - p->anchors[j].x) * (thetaX - p->anchors[j].x) +
+                          (thetaY - p->anchors[j].y) * (thetaY - p->anchors[j].y);
         const double d = sqrt(d2);
         const double z = p->ranges[j];
-        double logProbability = z * z;
-        logProbability -= (2 * z - 2 * mle_gauss_mean) * d;
-        logProbability -= 2 * mle_gauss_mean * z;
-        logProbability += d2;
-        logProbability += variance * (mean2 * log(M_PI) + 2 * log(mle_gauss_deviation) + log(2));
+        double logProbability = z * z ;
+        logProbability += (-2 * mle_gauss_mean - 2 * d) * z;
+        logProbability += variance * log(M_PI);
+        logProbability += mean2;
+        logProbability += 2 * d * mle_gauss_mean;
+        logProbability += 2 * variance * log(mle_gauss_deviation); 
+        logProbability += log(2) * mle_gauss_deviation;
+        logProbability += d2; 
         logProbability /= 2 * variance;
         result += logProbability;
     }
     return result;
 }
+
+
+
+
+
+static void
+__attribute__((__nonnull__))
+mle_gauss_likelihood_gradient(const gsl_vector *X, void *restrict params,
+                              gsl_vector *restrict g)
+{
+    const struct mle_gauss_params *const p = params;
+    const double variance = mle_gauss_deviation * mle_gauss_deviation;
+    const double thetaX = gsl_vector_get(X, 0);
+    const double thetaY = gsl_vector_get(X, 1);
+    double gradX = 0.0, gradY = 0.0;
+
+    for (size_t j = 0; j < p->no_anchors; j++) {
+        const double d2 = (thetaX - p->anchors[j].x) * (thetaX - p->anchors[j].x) +
+                          (thetaY - p->anchors[j].y) * (thetaY - p->anchors[j].y);
+        const double d = sqrt(d2);
+        const double z = p->ranges[j];
+        double x = ((2 * mle_gauss_mean * (thetaX - p->anchors[j].x) -
+                     2 * z * (thetaX - p->anchors[j].x)) / d +
+                    2 * (thetaX - p->anchors[j].x)) / (2 * variance);
+        double y = ((2 * mle_gauss_mean * (thetaY - p->anchors[j].y) -
+                     2 * z * (thetaY - p->anchors[j].y)) / d +
+                    2 * (thetaY - p->anchors[j].y)) / (2 * variance);
+        gradX += x;
+        gradY += y;
+    }
+    gsl_vector_set(g, 0, gradX);
+    gsl_vector_set(g, 1, gradY);
+}
+
+
+
+
+static void
+__attribute__((__nonnull__,__flatten__,__hot__))
+mle_gauss_likelihood_fdf(const gsl_vector *X, void *restrict params,
+                         double *restrict y, gsl_vector *restrict g)
+{
+    *y = mle_gauss_likelihood_function(X, params);
+    mle_gauss_likelihood_gradient(X, params, g);
+}
+
+
+
 
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
@@ -154,45 +202,43 @@ mle_gauss_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     }
     p.ranges = ranges;
 
-    gsl_multimin_function f;
-    f.f = &mle_gauss_likelihood_function;
-    f.n = 2u;
-    f.params = &p;
+    gsl_multimin_function_fdf fdf;
+    fdf.n = 2u;
+    fdf.f = &mle_gauss_likelihood_function;
+    fdf.df = &mle_gauss_likelihood_gradient;
+    fdf.fdf = &mle_gauss_likelihood_fdf;
+    fdf.params = (void*) &p;
 
     /* Step 1: Calculate an initial estimate. */
     VECTOR sx, sy;
     llsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
 
     /* Step 2: Call the simplex optimiser. */
-    const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex2;
-    gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc(T, 2);
-    gsl_vector *ss, *x;
+    const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
+    gsl_multimin_fdfminimizer *s = gsl_multimin_fdfminimizer_alloc(T, 2);
+    gsl_vector *x;
     x = gsl_vector_alloc(2);
-    ss = gsl_vector_alloc(2);
     
     for (int i = 0; i < VECTOR_OPS; i++) {
         /* Step 2a: Initialize the parameters. */
         for (size_t j = 0; j < no_anchors; j++) {
             p.ranges[j] = r[j][i];
         }
-        gsl_vector_set_all(ss, 50.0);
         gsl_vector_set(x, 0, sx[i]);
         gsl_vector_set(x, 1, sy[i]);
 
         int iter = 0;
         int status;
-        double size;
 
-        gsl_multimin_fminimizer_set(s, &f, x, ss);
+        gsl_multimin_fdfminimizer_set(s, &fdf, x, 1e-3, 1e-4);
 
         /* Step 2b: Iterate the minimization algorithm. */
         do {
             iter++;
-            status = gsl_multimin_fminimizer_iterate(s);
+            status = gsl_multimin_fdfminimizer_iterate(s);
             if (status)
                 break;
-            size = gsl_multimin_fminimizer_size(s);
-            status = gsl_multimin_test_size(size, mle_gauss_epsilon);
+            status = gsl_multimin_test_gradient (s->gradient, mle_gauss_epsilon);
         } while (status == GSL_CONTINUE && iter < mle_gauss_iterations);
 
         /* Step 2c: Store the result. */
@@ -201,9 +247,8 @@ mle_gauss_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     }
 
     /* Step 3: Clean up. */
+    gsl_multimin_fdfminimizer_free(s);
     gsl_vector_free(x);
-    gsl_vector_free(ss);
-    gsl_multimin_fminimizer_free(s);
 }
 
 #endif
