@@ -128,12 +128,12 @@ mle_gamma_likelihood_function(const gsl_vector *restrict X, void *restrict param
         const double d = sqrt(d2);
         const double Z = p->ranges[j] + mle_gamma_offset - d;
         if (Z <= 0.0) {
-            result = -INFINITY; // If one measurement is too short, choose this value.
+            result = INFINITY; // If a measurement is too short, return this.
             break;
         }
         const double likelihood =
-            p->factor * pow(Z, mle_gamma_shape - 1.0) * exp(-mle_gamma_rate * Z);
-        result += log(likelihood);
+            log(p->factor * pow(Z, mle_gamma_shape - 1.0)) - mle_gamma_rate * Z;
+        result -= likelihood;
     }
     // fprintf(stderr, "f(%f, %f) = %f\n", thetaX, thetaY, result);
     return result;
@@ -157,24 +157,12 @@ mle_gamma_likelihood_gradient(const gsl_vector *restrict X, void *restrict param
                           (thetaY - p->anchors[j].y);
         const double d = sqrt(d2);
         const double Z = p->ranges[j] + mle_gamma_offset - d;
-        gradX += -(p->gammaval * pow(Z, 1.0 - mle_gamma_shape) *
-                   ((pow(mle_gamma_rate, mle_gamma_shape + 1.0) *
-                     (thetaX - p->anchors[j].x) * pow(Z, mle_gamma_shape - 1.0) *
-                     exp(-mle_gamma_rate * Z)) /
-                    (p->gammaval * d) - ((mle_gamma_shape - 1.0) *
-                     pow(mle_gamma_rate, mle_gamma_shape) *
-                     (thetaX - p->anchors[j].x) * pow(Z, mle_gamma_shape - 2.0) *
-                     exp(-mle_gamma_rate * Z))/ (p->gammaval * d)) *
-                    exp(mle_gamma_rate * d)) / pow(mle_gamma_rate, mle_gamma_shape);
-        gradY += -(p->gammaval * pow(Z, 1.0 - mle_gamma_shape) *
-                   ((pow(mle_gamma_rate, mle_gamma_shape + 1.0) *
-                     (thetaY - p->anchors[j].y) * pow(Z, mle_gamma_shape - 1.0) *
-                     exp(-mle_gamma_rate * Z)) /
-                    (p->gammaval * d) - ((mle_gamma_shape - 1.0) *
-                     pow(mle_gamma_rate, mle_gamma_shape) *
-                     (thetaY - p->anchors[j].y) * pow(Z, mle_gamma_shape - 2.0) *
-                     exp(-mle_gamma_rate * Z))/ (p->gammaval * d)) *
-                    exp(mle_gamma_rate * d)) / pow(mle_gamma_rate, mle_gamma_shape);
+        gradX -= ((thetaX -  p->anchors[j].x) *
+                  (mle_gamma_rate * (d - Z - mle_gamma_offset) + mle_gamma_shape - 1)) /
+                  (d * (d - Z - mle_gamma_offset));
+        gradY -= ((thetaY -  p->anchors[j].y) *
+                  (mle_gamma_rate * (d - Z - mle_gamma_offset) + mle_gamma_shape - 1)) /
+                  (d * (d - Z - mle_gamma_offset));
     }
     // fprintf(stderr, "df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
     gsl_vector_set(g, 0, gradX);
