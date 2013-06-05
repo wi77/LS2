@@ -58,10 +58,6 @@
 #define MLE_GAUSS_DEFAULT_DEVIATION 20.0
 #endif
 
-#ifndef MLE_GAUSS_DEFAULT_STEP
-#define MLE_GAUSS_DEFAULT_STEP 50.0
-#endif
-
 #ifndef MLE_GAUSS_DEFAULT_EPSILON
 #define MLE_GAUSS_DEFAULT_EPSILON 1e-3
 #endif
@@ -213,7 +209,7 @@ mle_gauss_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     VECTOR sx, sy;
     llsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
 
-    /* Step 2: Call the simplex optimiser. */
+    /* Step 2: Call the optimiser. */
     const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
     gsl_multimin_fdfminimizer *s = gsl_multimin_fdfminimizer_alloc(T, 2);
     gsl_vector *x;
