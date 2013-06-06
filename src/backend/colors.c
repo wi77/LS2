@@ -64,10 +64,15 @@ ls2_pick_color_diff(const double sample, const double similar,
 		    const double dynamic, double *restrict hue,
 		    double *restrict saturation, double *restrict lightness)
 {
-    if (sample < -similar) {                     // First was better
+    if (sample < -similar) {
+        /* First was better                    */
 	/* The color is green and gets darker. */
 	assert(sample < 0);
-	*hue = 120.0;
+        if (sample < -dynamic / 2.0) {
+	    *hue = 150.0;
+        } else {
+	    *hue = 120.0;
+        }
 	*saturation = MAX(0.125, 0.5 + sample / dynamic);
 	assert(0.125 <= *saturation && *saturation <= 0.5);
 	*lightness = MAX(0.0, 0.5 + sample / dynamic);
@@ -76,10 +81,15 @@ ls2_pick_color_diff(const double sample, const double similar,
 	*hue = 60.0;  // This is the color yellow
 	*lightness = 0.5;
 	*saturation = 0.5;
-    } else if (similar < sample) {              // Second was better
+    } else if (similar < sample) {
+        /* Second was better                   */
 	/* We start with red and get brighter. */
 	assert (0 < sample);
-	*hue = 0.0;
+	if (sample < dynamic / 2.0 ) {
+            *hue = 15.0;
+        } else {
+            *hue = 0.0;
+        }
 	*saturation = MIN(0.5 + sample / dynamic, 0.875);
 	assert(0.5 <= *saturation && *saturation <= 0.875);
 	*lightness = MIN(0.5 + sample / dynamic, 0.875);
