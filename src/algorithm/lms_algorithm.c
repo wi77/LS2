@@ -82,7 +82,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     int k = 4;
     int N = (int)no_anchors;
     int M = N > 6 ? 20 : binom(N, k);
-    float threshold = 2.5;
+    float threshold = 2.5f;
 
     if (N < k) {
         llsq_run(vx, vy, r, no_anchors, width, height, resx, resy);
@@ -108,7 +108,8 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                 ran[i] = -1;
                 do {
                     int j;
-                    int rn = (int) ( rand() * (bino - 1));
+		    double randZeroOne = ((double) rand() / (double)RAND_MAX);
+                    int rn = (int) (randZeroOne * (bino - 1));
                     for (j = 0; j < i; j++) {
                         if (ran[j] == rn) break;
                     }
@@ -117,7 +118,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                     }
                 } while (ran[i] == -1);
             }
-            qsort (ran, (size_t)M, sizeof (int), compare_ints);
+            qsort(ran, (size_t) M, sizeof(int), compare_ints);
         }
 
         // initialisation for calculating k-permutations
@@ -130,7 +131,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 
             // add current permutation if choosen
             if (i == ran[rpi]) {
-                memcpy(randPermutations[rpi],permutations, (size_t)k*sizeof(int));
+                memcpy(randPermutations[rpi], permutations, (size_t) k*sizeof(int));
                 rpi++;
                 if (rpi == M) break;
             }
@@ -148,8 +149,8 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
                
         // calculate intermediate position and median of residues
-        int iPos_x[M];
-        int iPos_y[M];
+        float iPos_x[M];
+        float iPos_y[M];
         float medians[M];
         VECTOR tmpAnchors_x[k];
         VECTOR tmpAnchors_y[k];
@@ -157,25 +158,25 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         float tmpMedian[N];
                                 
         for (int j = 0; j < M; j++) {
-            for (int i = 0; i < k; i++) {
-                tmpAnchors_x[i][ii] = vx[randPermutations[j][i]][ii];
+	    for (int i = 0; i < k; i++) {               
+		tmpAnchors_x[i][ii] = vx[randPermutations[j][i]][ii];
                 tmpAnchors_y[i][ii] = vy[randPermutations[j][i]][ii];
                 tmpRanges[i][ii] = r[randPermutations[j][i]][ii];
             }
             VECTOR pex, pey;
             llsq_run(tmpAnchors_x,tmpAnchors_y,tmpRanges,(size_t)k,width,height,&pex,&pey);
-             
-            iPos_x[j] = (int)pex[ii];
-            iPos_y[j] = (int)pey[ii];
+            
+            iPos_x[j] = pex[ii];
+            iPos_y[j] = pey[ii];
             // calculate residue for all points and find median
             for (int i = 0; i < N; i++) {
-                float residue = distance_s((float)iPos_x[j],(float)iPos_y[j],vx[i][ii],vy[i][ii]) - r[i][ii];
+                float residue = distance_s(iPos_x[j],iPos_y[j],vx[i][ii],vy[i][ii]) - r[i][ii];
                 tmpMedian[i] = residue * residue;
             }
-            qsort(tmpMedian,(size_t)N,sizeof(float),compare_floats);
+            qsort(tmpMedian, (size_t)N, sizeof(float), compare_floats);
             medians[j] = tmpMedian[N/2];
         }
-                
+
         // 3. Find index of least median
         int m = 0;
         for (int i = 1; i < M; i++) {
