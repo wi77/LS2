@@ -186,10 +186,10 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
         
         // 4. Calculate s0
-        double s0 = 1.4826 * ((1.0 + 5.0) / (N - 2.0)) * sqrt(medians[m]);
+        double s0 = 1.4826 * ((1 + 5) / (N - 2)) * sqrt(medians[m]);
 
         // 5. Assign weights to samples
-        float wei[N];
+        int wei[N];
         int count = 0;
         for (int i = 0; i < N; i++) {
             double ri = distance_sf(iPos_x[m],iPos_y[m],vx[i][ii],vy[i][ii]) - r[i][ii];
