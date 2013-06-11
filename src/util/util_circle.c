@@ -77,6 +77,47 @@ circle_get_intersection (const float  p1x, const float  p1y, const float  p2x,
     return count;
 }
 
+static inline size_t
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+circle_get_intersectionf (const float  p1x, const float  p1y, const float  p2x,
+                         const float  p2y, const float r1, const float r2,
+                         double *restrict retx, double *restrict rety)
+{
+    float d = distance_s(p1x,p1y,p2x,p2y);
+
+    // no solutions, the circles are separate || the circles are coincident || no solutions because one circle is contained within the other
+    // => infinite number of solutions possible
+    if (r1+r2 < d || fabs(r1-r2) > d || d == 0) {
+        return 0;
+    }
+
+    double a = (r1*r1 - r2*r2 + d*d) / (2.0f * d);
+    double v = r1*r1 - a*a;
+    double h = sqrt(v);
+
+    double dx = (p2x - p1x) / d;
+    double dy = (p2y - p1y) / d;
+    double p3x = p1x + a * dx;
+    double p3y = p1y + a * dy;
+
+    dx *= h;
+    dy *= h;
+    double p4x = p3x + dy;
+    double p4y = p3y - dx;
+
+    size_t count = (p4x == p3x && p4y == p3y) ? 1 : 2;
+
+    retx[0] = p4x;
+    rety[0] = p4y;
+    if (count == 2) {
+        p4x = p3x - dy;
+        p4y = p3y + dx;
+        retx[1] = p4x;
+        rety[1] = p4y;
+    }
+    return count;
+}
+
 #if (UNITTEST == 1)
 int test_circle_get_intersection(){
     int num;
@@ -205,31 +246,62 @@ circle_get_approx_intersection(const float  p1x, const float p1y,
     return 1;
 }
 
-#if (UNITTEST == 1)
-int test_circle_get_approx_intersection(){
-    int num;
-    float ix[2], iy[2];
-    printf("\nTesting circle_get_approx_intersection\n");
-    
-    num = circle_get_approx_intersection  (0, 0, 3, 0, 1, 1, ix, iy);
-    printf("Intersection of (0,0 r:1) (3,0 r:1) should be with %i intersections.",0);
-    if (num == 0) printf("found no intersections\n");
-    if (num > 0) printf(" - found (%.8f,%.8f)", ix[0], iy[0]);
-    if (num == 2) printf("and (%.8f,%.8f)" , ix[1], iy[1]);
-    if (num>0) printf(" with %i intersections\n",num);
-    if (num!=1) return 0;
+    /**
+     * Returns an approximated intersection of the two circles as found in
+     * paper "A Low-Complexity Geometric Bilateration Method for Localization
+     * in Wireless Sensor Networks and Its Comparison with Least-Squares
+     * Methods" (Figure 3).
+     *
+     * @param p1 The center of the first circle.
+     * @param r1 The radius of the first circle.
+     * @param p2 The center of the second circle.
+     * @param r2 The radius of the second circle.
+     *
+     * @return An approximated intersection of the two circles or
+     *         <code>null</code> if p1 equals p2.
+     */
+static inline size_t
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+circle_get_approx_intersection2(const float  p1x, const float p1y,
+                               const float  p2x, const float p2y,
+                               const float r1, const float r2,
+                               float *restrict retx, float *restrict rety)
+{
+    // calculate distance between center of circles
+    float dist = distance_s(p1x,p1y,p2x,p2y);
+    // if distance is zero => infinite number of solutions
+    if (dist == 0) return 0;
 
-    num = circle_get_approx_intersection  (0, 0, 2, 2, 20, 1, ix, iy);
-    printf("Intersection of (0,0 r:20) (2,2 r:1) should be with %i intersections.",1);
-    if (num == 0) printf(" - found no intersections\n");
-    if (num > 0) printf(" - found (%.8f,%.8f)", ix[0], iy[0]);
-    if (num == 2) printf("and (%.8f,%.8f)" , ix[1], iy[1]);
-    if (num>0) printf(" with %i intersections\n",num);
-    if (num!=1) return 0;
+    // take first circle and calculate new radius for this circle
+    // as follows, same for second circle but alleviate because of
+    // floating point calculations (use some small epsilon offset)
+    // and special case of zero distance:
+    double rr1 = r1;
+    double rr2 = r2;
+    if (rr1 == 0) {
+        rr1 = 0.001f;
+    }
+    if (rr2 == 0) {
+        rr2 = 0.001f;
+    }
+    double r1n = fabs(dist - r2) + 0.001001;
+    double r2n = fabs(dist - r1) + 0.001001;
     
+    // Use CCI procedure to calculate intersection points
+    float ret1x[2];
+    float ret1y[2];
+    float ret2x[2];
+    float ret2y[2];
+    memset (ret1x,0,sizeof(float)*2);
+    memset (ret1y,0,sizeof(float)*2);
+    memset (ret2x,0,sizeof(float)*2);
+    memset (ret2y,0,sizeof(float)*2);
+    circle_get_intersection (p1x, p1y, p2x, p2y, (float)r1n, (float)rr2, ret1x, ret1y);
+    circle_get_intersection (p1x, p1y, p2x, p2y, (float)rr1, (float)r2n, ret2x, ret2y);
+    *retx = (ret1x[0] + ret2x[0]) / 2.0f;
+    *rety = (ret1y[0] + ret2y[0]) / 2.0f;
     return 1;
-}       
-#endif
+}
 
 
 

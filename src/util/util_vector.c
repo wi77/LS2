@@ -79,6 +79,26 @@ distance_s(const float vx, const float vy, const float wx, const float wy)
 }
 
 // Calculates the distances of two (skalar) points
+static inline double
+__attribute__((__always_inline__,__gnu_inline__,__const__,__artificial__))
+distance_sf(const double vx, const double vy, const double wx, const double wy)
+{
+   const double a = vx - wx;
+   const double b = vy - wy;
+   return sqrt(a * a + b * b);
+}
+
+// Calculates the squared distances of two (skalar) points
+static inline float
+__attribute__((__always_inline__,__gnu_inline__,__const__,__artificial__))
+distance_squared_s(const float vx, const float vy, const float wx, const float wy)
+{
+   const float a = vx - wx;
+   const float b = vy - wy;
+   return (a * a + b * b);
+}
+
+// Calculates the distances of two (skalar) points
 static inline float
 __attribute__((__always_inline__,__const__,__nonnull__,__artificial__))
 distance_v(const vector2 *v, const vector2 *w)

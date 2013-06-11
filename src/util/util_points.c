@@ -32,6 +32,9 @@
  *** Operations on Points
  ***
  *******************************************************************/
+#ifndef UTIL_POINTS_C_INCLUDED
+#define UTIL_POINTS_C_INCLUDED 1
+
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 center_of_mass(const int count, const float *restrict ptsx,
@@ -47,6 +50,23 @@ center_of_mass(const int count, const float *restrict ptsx,
     *retx = x/m;
     *rety = y/m;
 }
+
+static inline void
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+center_of_mass_eqw(const int count, const float *restrict ptsx,
+              const float *restrict ptsy,
+              float *restrict retx, float *restrict rety)
+{
+    float m = 0, x = 0, y = 0;
+    for (int i = 0; i < count; i++) {
+        x += ptsx[i];
+        y += ptsy[i];
+        m += 1.0f;
+    }
+    *retx = x/m;
+    *rety = y/m;
+}
+
 
 #if (UNITTEST == 1)
     int test_center_of_mass() {
@@ -234,3 +254,18 @@ calculate_residual_error(size_t count, const VECTOR *restrict vx,
     }
     return error;
 }
+
+static inline float 
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+calculate_residual_error_s(size_t count, const float *restrict vx,
+                         const float *restrict vy, const float *restrict r,
+                         float ex, float ey)
+{
+    float error =  0.0f;
+    for (size_t i = 0; i < count; i++) {
+        float residual = distance_s(vx[i],vy[i],ex,ey) - r[i];
+        error += residual * residual;
+    }
+    return error;
+}
+#endif

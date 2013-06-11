@@ -34,6 +34,10 @@
  ***
  *******************************************************************/
 
+
+#ifndef NLLSQ_ALGORITHM_C_INCLUDED
+#define NLLSQ_ALGORITHM_C_INCLUDED 1
+
 #include "llsq_algorithm.c"
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
@@ -115,3 +119,5 @@ nllsq_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t n
             }           
         }
 }
+
+#endif

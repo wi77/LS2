@@ -19,8 +19,11 @@
 
 EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/aml_algorithm.h \
+	algorithm/bilateration_algorithm.c \
+	algorithm/bilateration_algorithm.h \
 	algorithm/centroid_algorithm.c \
 	algorithm/centroid_algorithm.h \
+	algorithm/clurol_algorithm.c \
 	algorithm/const_algorithm.c \
 	algorithm/const_algorithm.h \
 	algorithm/eminmax_w2_algorithm.c \
@@ -31,8 +34,11 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/geo3_algorithm.h \
 	algorithm/geon_algorithm.c \
 	algorithm/geon_algorithm.h \
+	algorithm/icla_algorithm.c \
 	algorithm/llsq_algorithm.c \
 	algorithm/llsq_algorithm.h \
+	algorithm/lms_algorithm.h \
+	algorithm/lms_algorithm.c \
 	algorithm/md_minmax_abs_algorithm.c \
 	algorithm/md_minmax_abs_algorithm.h \
 	algorithm/minmax_algorithm.c \
@@ -47,6 +53,7 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/mle_gauss_algorithm.h \
 	algorithm/nllsq_algorithm.c \
 	algorithm/nllsq_algorithm.h \
+	algorithm/rlsm.c \
 	algorithm/trilateration_algorithm.c \
 	algorithm/trilateration_algorithm.h \
 	algorithm/vble_algorithm.c \
@@ -57,6 +64,7 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/weighted_minmax_algorithm.h \
 	algorithm/res_bruteforce_algorithm.c \
 	algorithm/res_bruteforce_algorithm.h \
+	algorithm/rwgh.c \
 	backend/bits/circle.c \
 	backend/bits/rectangle.c \
 	backend/colors.c \

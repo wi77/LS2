@@ -26,6 +26,9 @@
  **
  ********************************************************************/
 
+#ifndef UTIL_MATH_C_INCLUDED
+#define UTIL_MATH_C_INCLUDED 1
+
 /** All long-representable factorials */
 static const long long factorials[] =  {
     1LL, 1LL, 2LL,
@@ -66,3 +69,11 @@ iceil(const long N, const long K)
     else
         return N;
 }
+
+/** Utility method for k-permutation building */
+static inline int incCounter(int v[], int i, int n, int k) {
+    v[i]++;
+    return (v[i] == n - ((k - 1) - i)); // return overflow information
+}
+
+#endif
