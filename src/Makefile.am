@@ -24,6 +24,7 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/centroid_algorithm.c \
 	algorithm/centroid_algorithm.h \
 	algorithm/clurol_algorithm.c \
+	algorithm/clurol_algorithm.h \
 	algorithm/const_algorithm.c \
 	algorithm/const_algorithm.h \
 	algorithm/eminmax_w2_algorithm.c \
@@ -35,6 +36,7 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/geon_algorithm.c \
 	algorithm/geon_algorithm.h \
 	algorithm/icla_algorithm.c \
+	algorithm/icla_algorithm.h \
 	algorithm/llsq_algorithm.c \
 	algorithm/llsq_algorithm.h \
 	algorithm/lms_algorithm.h \
