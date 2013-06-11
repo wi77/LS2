@@ -279,7 +279,7 @@ for (int ii = 0; ii < VECTOR_OPS; ii++) {
         int cMax = findMaxCluster(D, bino, dth , points, is);
 
         // step 8: determine anchors for Minimum Squared Error (MSE) method
-        double dMax = 0.05;
+        double dMax = 100;
         double boundConst = (1 + dMax) * (1 + dMax);
         for (int cm=0;cm<is;cm++) {
             if (points[cm].cluster==cMax){
