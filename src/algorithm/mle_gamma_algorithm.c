@@ -157,12 +157,14 @@ mle_gamma_likelihood_gradient(const gsl_vector *restrict X, void *restrict param
                           (thetaY - p->anchors[j].y);
         const double d = sqrt(d2);
         const double Z = p->ranges[j] + mle_gamma_offset - d;
-        gradX -= ((thetaX -  p->anchors[j].x) *
-                  (mle_gamma_rate * (d - Z - mle_gamma_offset) + mle_gamma_shape - 1)) /
-                  (d * (d - Z - mle_gamma_offset));
-        gradY -= ((thetaY -  p->anchors[j].y) *
-                  (mle_gamma_rate * (d - Z - mle_gamma_offset) + mle_gamma_shape - 1)) /
-                  (d * (d - Z - mle_gamma_offset));
+        if (thetaX != p->anchors[j].x && thetaY != p->anchors[j].x) {
+            gradX -= ((thetaX -  p->anchors[j].x) *
+                      (mle_gamma_rate * (d - Z - mle_gamma_offset) + mle_gamma_shape - 1)) /
+                      (d * (d - Z - mle_gamma_offset));
+            gradY -= ((thetaY -  p->anchors[j].y) *
+                      (mle_gamma_rate * (d - Z - mle_gamma_offset) + mle_gamma_shape - 1)) /
+                      (d * (d - Z - mle_gamma_offset));
+        } // Otherwise the value of the gradient component is 0.
     }
     // fprintf(stderr, "df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
     gsl_vector_set(g, 0, gradX);

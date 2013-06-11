@@ -53,7 +53,8 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/mle_gauss_algorithm.h \
 	algorithm/nllsq_algorithm.c \
 	algorithm/nllsq_algorithm.h \
-	algorithm/rlsm.c \
+	algorithm/rlsm_algorithm.c \
+	algorithm/rlsm_algorithm.h \
 	algorithm/trilateration_algorithm.c \
 	algorithm/trilateration_algorithm.h \
 	algorithm/vble_algorithm.c \
@@ -64,7 +65,8 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/weighted_minmax_algorithm.h \
 	algorithm/res_bruteforce_algorithm.c \
 	algorithm/res_bruteforce_algorithm.h \
-	algorithm/rwgh.c \
+	algorithm/rwgh_algorithm.c \
+	algorithm/rwgh_algorithm.h \
 	backend/bits/circle.c \
 	backend/bits/rectangle.c \
 	backend/colors.c \
@@ -153,7 +155,7 @@ libls2_la_LIBADD   = $(GSL_LIBS) $(LIBOBJS)
 
 test_em_SOURCES  = test-em.c vector_shooter.h ls2/ls2.h
 test_em_CPPFLAGS =
-test_em_LDADD    = $(LIBOBJS)
+test_em_LDADD    = $(GSL_LIBS) $(LIBOBJS)
 
 library.c: ${srcdir}/generate.py ${srcdir}/Makefile.am
 	test -d ls2 || mkdir ls2
