@@ -41,8 +41,33 @@ aml_run (const VECTOR* vx, const VECTOR* vy,
     VECTOR intersectionx[] = { zero, zero };
     VECTOR intersectiony[] = { zero, zero };
     VECTOR ci, cj;
-    VECTOR icount = zero;
+    VECTOR icount = two;
     
+    int is;
+    
+    for (int ii = 0; ii < VECTOR_OPS; ii++) {
+        int c = 0;
+        float ix[2], iy[2];
+        int i,j;
+        while (c < 100) {
+            i = rand()%(int)num_anchors;
+            j = rand()%(int)num_anchors;
+            if (j == i) continue;
+            is = (int)circle_get_intersection(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii], r[i][ii], r[j][ii],ix,iy);
+            if (is==2) {
+                intersectionx[0][ii] = ix[0];
+                intersectionx[1][ii] = ix[1];
+                intersectiony[0][ii] = iy[0];
+                intersectiony[1][ii] = iy[1];
+                ci[ii] = (float)i;
+                cj[ii] = (float)j;
+                break;
+            }
+            c++;
+        }
+    }
+     
+    /*
     // find two circles (random), which intersect in one or two points
     for (size_t i = 0; i < num_anchors-1; i++) {
         for (size_t j = i+1; j < num_anchors; j++) {
@@ -65,6 +90,8 @@ aml_run (const VECTOR* vx, const VECTOR* vy,
         }
     }
     endloop: ;
+    */
+    
     
     // Refinement anchors.
     size_t rcount = num_anchors - 2;
