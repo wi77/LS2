@@ -186,7 +186,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
         
         // 4. Calculate s0
-        double s0 = 1.4826 * ((float)(1 + 5) / (float)(N - 2)) * sqrt(medians[m]);
+        double s0 = 1.4826 * ((1.0 + 5.0) / (N - 2.0)) * sqrt(medians[m]);
 
         // 5. Assign weights to samples
         float wei[N];
