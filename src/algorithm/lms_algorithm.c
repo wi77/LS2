@@ -64,10 +64,10 @@ compare_ints (const void *a_, const void *b_)
 }
 
 static inline int
-compare_floats (const void *a_, const void *b_) 
+compare_dbl (const void *a_, const void *b_) 
 {
-  const float *a = a_;
-  const float *b = b_;
+  const double *a = a_;
+  const double *b = b_;
 
   return *a < *b ? -1 : *a > *b;
 }
@@ -82,7 +82,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     int k = 4;
     int N = (int)no_anchors;
     int M = N > 6 ? 20 : binom(N, k);
-    float threshold = 2.5f;
+    double threshold = 2.5;
 
     if (N < k) {
         llsq_run(vx, vy, r, no_anchors, width, height, resx, resy);
@@ -149,13 +149,13 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
                
         // calculate intermediate position and median of residues
-        float iPos_x[M];
-        float iPos_y[M];
-        float medians[M];
+        double iPos_x[M];
+        double iPos_y[M];
+        double medians[M];
         VECTOR tmpAnchors_x[k];
         VECTOR tmpAnchors_y[k];
         VECTOR tmpRanges[k];
-        float tmpMedian[N];
+        double tmpMedian[N];
                                 
         for (int j = 0; j < M; j++) {
 	    for (int i = 0; i < k; i++) {               
@@ -170,10 +170,10 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
             iPos_y[j] = pey[ii];
             // calculate residue for all points and find median
             for (int i = 0; i < N; i++) {
-                float residue = distance_s(iPos_x[j],iPos_y[j],vx[i][ii],vy[i][ii]) - r[i][ii];
+                double residue = distance_sf(iPos_x[j],iPos_y[j],vx[i][ii],vy[i][ii]) - r[i][ii];
                 tmpMedian[i] = residue * residue;
             }
-            qsort(tmpMedian, (size_t)N, sizeof(float), compare_floats);
+            qsort(tmpMedian, (size_t)N, sizeof(double), compare_dbl);
             medians[j] = tmpMedian[N/2];
         }
 
@@ -186,14 +186,14 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
         
         // 4. Calculate s0
-        float s0 = 1.4826f * ((float)(1 + 5) / (float)(N - 2)) * sqrtf(medians[m]);
+        double s0 = 1.4826 * ((float)(1 + 5) / (float)(N - 2)) * sqrt(medians[m]);
 
         // 5. Assign weights to samples
         float wei[N];
         int count = 0;
         for (int i = 0; i < N; i++) {
-            float ri = distance_s((float)iPos_x[m],(float)iPos_y[m],vx[i][ii],vy[i][ii]) - r[i][ii];
-            if (fabsf(ri/s0) <= threshold) {
+            double ri = distance_sf(iPos_x[m],iPos_y[m],vx[i][ii],vy[i][ii]) - r[i][ii];
+            if (fabs(ri/s0) <= threshold) {
                 wei[i] = 1;
                 count++;
             } else {

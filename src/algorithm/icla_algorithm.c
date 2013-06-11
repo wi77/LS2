@@ -59,10 +59,10 @@ typedef struct IcmPoint {
     int movingDirection;
     Point2d intersection;
     Point2d currentLocation;
-    struct IcmPoint *nodesInRange[30];
+    struct IcmPoint *nodesInRange[90];
     int nin_fill ;
     double attractingBoundary;
-    struct IcmPoint *mergeList[30];
+    struct IcmPoint *mergeList[90];
     int ml_fill;
 } IcmPoint;
 
