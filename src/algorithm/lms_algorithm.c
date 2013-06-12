@@ -47,8 +47,8 @@
 
 #include <assert.h>
 #include <gsl/gsl_multimin.h>
-#include "algorithm/llsq_algorithm.c"
-#include "util/util_math.c"
+//#include "algorithm/llsq_algorithm.c"
+//#include "util/util_math.c"
 #include <stdlib.h>
 
 /* Returns 1 if *A is greater than *B,
@@ -108,7 +108,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                 ran[i] = -1;
                 do {
                     int j;
-		    double randZeroOne = ((double) rand() / (double)RAND_MAX);
+		            double randZeroOne = ((double) rand() / (double)RAND_MAX);
                     int rn = (int) (randZeroOne * (bino - 1));
                     for (j = 0; j < i; j++) {
                         if (ran[j] == rn) break;
@@ -158,10 +158,10 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         double tmpMedian[N];
                                 
         for (int j = 0; j < M; j++) {
-	    for (int i = 0; i < k; i++) {               
-		tmpAnchors_x[i][ii] = vx[randPermutations[j][i]][ii];
-                tmpAnchors_y[i][ii] = vy[randPermutations[j][i]][ii];
-                tmpRanges[i][ii] = r[randPermutations[j][i]][ii];
+	        for (int i = 0; i < k; i++) {               
+		        tmpAnchors_x[i] = vx[randPermutations[j][i]];
+                tmpAnchors_y[i] = vy[randPermutations[j][i]];
+                tmpRanges[i] = r[randPermutations[j][i]];
             }
             VECTOR pex, pey;
             llsq_run(tmpAnchors_x,tmpAnchors_y,tmpRanges,(size_t)k,width,height,&pex,&pey);
@@ -186,8 +186,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
         
         // 4. Calculate s0
-        double s0 = 1.4826 * ((1 + 5) / (N - 2)) * sqrt(medians[m]);
-
+        double s0 = 1.4826 * (1.0 + 5.0 / ((double)N - 2.0)) * sqrt(medians[m]);
         // 5. Assign weights to samples
         int wei[N];
         int count = 0;
@@ -206,9 +205,9 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         int c=0;
         for (int i=0; i < N; i++) {
             if (wei[i]==1) {
-                anchors_x[c][ii] = vx[i][ii];
-                anchors_y[c][ii] = vy[i][ii];
-                ranges[c][ii] = r[i][ii];
+                anchors_x[c] = vx[i];
+                anchors_y[c] = vy[i];
+                ranges[c] = r[i];
                 c++;
             }
         }
