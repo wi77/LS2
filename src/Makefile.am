@@ -126,11 +126,11 @@ AM_CFLAGS = -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
 	@ARCH_CFLAGS@ @RDRND_FLAGS@ -pthread \
 	-ffast-math -fpredictive-commoning -ftree-vectorize
 
-ls2_run_SOURCES  = shooter_main.c
+ls2_run_SOURCES  = ls2-run.c
 ls2_run_CPPFLAGS =
 ls2_run_LDADD    = $(LIBOBJS) libls2.la libls2be.la
 
-ls2_bounds_SOURCES  = shooter_main.c
+ls2_bounds_SOURCES  = ls2-run.c
 ls2_bounds_CPPFLAGS = -DESTIMATOR
 ls2_bounds_LDADD    = $(LIBOBJS) libls2.la libls2be.la
 
