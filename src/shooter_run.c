@@ -161,6 +161,9 @@ ls2_get_view_by_name(const char *name)
 /*! Whether to collect statistics about this thread */
 int ls2_verbose = 0;
 
+/*! Whether to collect statistics about this thread */
+int ls2_progress = 0;
+
 
 /*! Parameters to the location-based simulator. */
 
@@ -174,7 +177,7 @@ typedef struct locbased_runparams_t {
     uint16_t height;
     size_t from;
     size_t count;
-    int_fast64_t runs;
+    uint_fast64_t runs;
     algorithm_t algorithm;
     error_model_t error_model;
 } locbased_runparams_t;
@@ -246,7 +249,7 @@ ls2_shooter_run(void *rr)
                max_error = VECTOR_BROADCASTF(0.0F);
 
     	// Calculate every pixel runs times 
-    	for (int_fast64_t i = 0; i < params->runs; i += VECTOR_OPS) {
+    	for (uint_fast64_t i = 0; i < params->runs; i += VECTOR_OPS) {
             // The results of the algorithm
             VECTOR resx, resy;
             
@@ -256,6 +259,15 @@ ls2_shooter_run(void *rr)
 	    ALGORITHM_RUN(params->no_anchors, vx, vy, r, &resx, &resy);
 #else
 	    pthread_testcancel();   // Check whether this thread is cancelled.
+
+            if (__builtin_expect(ls2_progress != 0, 0)) {
+                const unsigned long step =
+                    (j - params->from) * params->runs + i;
+                if (__builtin_expect((step & 0x7fffU) == 0, 0)) {
+                    fprintf(stderr, ".");
+                    fflush(stderr);
+                }
+            }
 
 	    error_model(params->error_model, &seed, distances, vx, vy,
                         params->no_anchors, tagx, tagy, r);
@@ -437,7 +449,7 @@ ls2_distribute_work_shooter(const int alg, const int em,
         params[t].results = results;
         params[t].from = (uint32_t) (t * slice);
         params[t].count = (uint32_t) slice;
-        params[t].runs = runs;
+        params[t].runs = (uint_fast64_t) runs;
         params[t].algorithm = alg;
         params[t].error_model = em;
 

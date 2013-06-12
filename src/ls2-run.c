@@ -151,6 +151,8 @@ int main(int argc, const char* argv[])
         { "relative", 0, POPT_ARG_NONE,
           &relative, 0,
           "Use a relative density representation", NULL },
+        { "progress", 'P', POPT_ARG_NONE, &ls2_progress, 0,
+          "Periodically report progress", NULL },
 #  else
         { "estimator", 'e', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &estimator, 0,
@@ -404,6 +406,11 @@ int main(int argc, const char* argv[])
     gettimeofday(&end_tv, NULL);
 
 #if !defined(ESTIMATOR)
+    if (ls2_progress != 0) {
+        fprintf(stderr, "\n");
+        fflush(stderr);
+    }
+
     // calculate average
     if (inverted == 0) {
 	float mu, sigma, min, max;
