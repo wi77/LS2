@@ -21,7 +21,7 @@
 
 #include "bahillo_em.h"
 
-/* @error_model_name: NLOS error (Normal + Exponential) */
+/* @error_model_name: NLOS (Bahillo) */
 
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
