@@ -54,8 +54,6 @@ rwgh_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
               size_t no_anchors, int width, int height,
               VECTOR *restrict resx, VECTOR *restrict resy)
 {
-    if (width==height){};
-
     int s = 3;
     int M = (int)no_anchors;
     
@@ -78,7 +76,9 @@ rwgh_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
             VECTOR tmpRanges[k];
             VECTOR tmpAnchors_x[k];
             VECTOR tmpAnchors_y[k];
-            VECTOR tresx, tresy;
+            VECTOR tresx, tresy, tresres;
+            float _vk = (float)k;
+            VECTOR vk = VECTOR_BROADCAST(&_vk);
             // initialisation for calculating k-permutations
             for (int i = 0; i < k; i++) {
                 permutations[i] = i;
@@ -90,16 +90,24 @@ rwgh_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                 // calculate intermediate position estimate using non-linear
                 // least squares multilateration
                 for (int h = 0; h < k; h++) {
-                    tmpAnchors_x[h][ii] = vx[permutations[h]][ii];
-                    tmpAnchors_y[h][ii] = vy[permutations[h]][ii];
-                    tmpRanges[h][ii] = r[permutations[h]][ii];
+                    tmpAnchors_x[h][i%VECTOR_OPS] = vx[permutations[h]][ii];
+                    tmpAnchors_y[h][i%VECTOR_OPS] = vy[permutations[h]][ii];
+                    tmpRanges[h][i%VECTOR_OPS] = r[permutations[h]][ii];
                 }
 
-                nllsq_run(tmpAnchors_x, tmpAnchors_y, tmpRanges, (size_t)k, width, height, &tresx, &tresy);
-                resError[int_count] = calculate_residual_error((size_t)k, tmpAnchors_x, tmpAnchors_y, tmpRanges, tresx,tresy)[ii] / (float)k;
-                intermediatePositions_x[int_count] = tresx[ii];
-                intermediatePositions_y[int_count] = tresy[ii];
-                int_count++;
+                    
+                if (((i+1)%VECTOR_OPS)==0 || i == bino - 1){
+                    nllsq_run(tmpAnchors_x, tmpAnchors_y, tmpRanges, (size_t)k, width, height, &tresx, &tresy);
+                    tresres = calculate_residual_error((size_t)k, tmpAnchors_x, tmpAnchors_y, tmpRanges, tresx, tresy) / vk;
+                    for (int jj=0; jj <= i%VECTOR_OPS; jj++){
+                        if (!isnan(tresy[jj])){
+                            resError[int_count] = tresres[jj];
+                            intermediatePositions_x[int_count] = tresx[jj];
+                            intermediatePositions_y[int_count] = tresy[jj];
+                            int_count++;
+                        }
+                    }
+                }                
                 // build next permutation
                 if (i == bino - 1) {
                     break;
