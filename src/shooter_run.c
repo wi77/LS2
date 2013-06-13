@@ -263,7 +263,7 @@ ls2_shooter_run(void *rr)
 	    pthread_testcancel();   // Check whether this thread is cancelled.
 
             if (__builtin_expect(ls2_progress != 0, 0)) {
-                const unsigned long step =
+                const uint_fast64_t step =
                     (j - params->from) * params->runs + i;
                 if (__builtin_expect((step & 0x7fffU) == 0, 0)) {
                     fprintf(stderr, ".");
