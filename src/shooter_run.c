@@ -244,7 +244,9 @@ ls2_shooter_run(void *rr)
 
         float M = 0.0F, M_old, S = 0.0F, cnt = 0.0F, mse = 0.0F;
         float M_X = 0.0F, M_X_old, S_X = 0.0F, C_X = 0.0F;
-        float M_Y = 0.0F, M_Y_old, S_Y = 0.0F, C_Y = 0.0F;
+        float M_Y = 1.0F, M_Y_old, S_Y = 0.0F, C_Y = 0.0F;
+        uint_fast64_t failures = 0U; // How often did it fail (nan)?
+
         VECTOR min_error = VECTOR_BROADCASTF(FLT_MAX),
                max_error = VECTOR_BROADCASTF(0.0F);
 
@@ -284,13 +286,15 @@ ls2_shooter_run(void *rr)
             if (params->results[AVERAGE_ERROR] != NULL ||
                 params->results[STANDARD_DEVIATION] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
-                    if (!isnan(errors[k])) {
+                    if (__builtin_expect(!isnan(errors[k]), 1)) {
                         cnt += 1.0F;
                         M_old = M;
                         M += (errors[k] - M) / cnt;
                         if (params->results[STANDARD_DEVIATION] != NULL)
                             S += (errors[k] - M) * (errors[k] - M_old);
-                     }
+                    } else {
+                        failures += 1;
+                    }
                 }
             }
 
@@ -353,6 +357,18 @@ ls2_shooter_run(void *rr)
         if (params->results[MINIMUM_ERROR] != NULL) {
 	    params->results[MINIMUM_ERROR][pos] =
                 vector_min_ps(min_error, FLT_MAX);
+        }
+        if (params->results[FAILURES] != NULL) {
+	    params->results[FAILURES][pos] =
+                ((float) failures) / ((float) params->runs);
+            if (__builtin_expect(ls2_verbose > 0, 0)) {
+                if (params->results[FAILURES][pos] > 0.0) {
+                    fprintf(stderr, "Warning: %" PRIuFAST64 " of %" PRIuFAST64
+                                    " runs failed at (%d, %d)\n",
+                            failures, params->runs, x, y);
+                    fflush(stderr);
+                }
+            }
         }
         if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
             const float __r = (float) params->runs;
