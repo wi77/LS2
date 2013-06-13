@@ -50,6 +50,7 @@
 #include "algorithm/nllsq_algorithm.c"
 
 static inline int
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 compare_floats2 (const void *a_, const void *b_) 
 {
   const float *a = a_;
@@ -58,7 +59,9 @@ compare_floats2 (const void *a_, const void *b_)
   return *a < *b ? -1 : *a > *b;
 }
 
-static inline int toIndex(int row, int col, int N) {
+static inline int 
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
+toIndex(int row, int col, int N) {
         int idx = -1;
         if (row < col) {
             idx = row * (N-1) - (row-1) * ((row-1) + 1)/2 + col - row - 1;
@@ -68,7 +71,9 @@ static inline int toIndex(int row, int col, int N) {
         return idx;
     }
     
-static inline int robust_filter(int const count ,float *restrict resx,float *restrict resy) {
+static inline int 
+__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
+robust_filter(int const count ,float *restrict resx,float *restrict resy) {
         int N = binom(count, 2);
         float v[N];
         float vC[N];
@@ -148,15 +153,23 @@ rlsm_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                 // calculate intermediate position estimate using non-linear
                 // least squares multilateration
                 for (int h = 0; h < k; h++) {
-                    tmpAnchors_x[h][ii] = vx[permutations[h]][ii];
-                    tmpAnchors_y[h][ii] = vy[permutations[h]][ii];
-                    tmpRanges[h][ii] = r[permutations[h]][ii];
+                    tmpAnchors_x[h][i%VECTOR_OPS] = vx[permutations[h]][ii];
+                    tmpAnchors_y[h][i%VECTOR_OPS] = vy[permutations[h]][ii];
+                    tmpRanges[h][i%VECTOR_OPS] = r[permutations[h]][ii];
                 }
 
-                llsq_run(tmpAnchors_x, tmpAnchors_y, tmpRanges, (size_t)k, width, height, &tresx, &tresy);
-                intermediatePositions_x[int_count] = tresx[ii];
-                intermediatePositions_y[int_count] = tresy[ii];
-                int_count++;
+                if (((i+1)%VECTOR_OPS)==0 || i == bino - 1){
+                    llsq_run(tmpAnchors_x, tmpAnchors_y, tmpRanges, (size_t)k, width, height, &tresx, &tresy);
+                    for (int jj=0; jj <= i%VECTOR_OPS; jj++){
+                        if (!isnan(tresy[jj])){
+                            intermediatePositions_x[int_count] = tresx[jj];
+                            intermediatePositions_y[int_count] = tresy[jj];
+                            int_count++;
+                        }
+                    }
+                }                
+
+                
                 // build next permutation
                 if (i == bino - 1) {
                     break;
