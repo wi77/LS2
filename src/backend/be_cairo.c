@@ -167,6 +167,34 @@ ls2_cairo_write_png_locbased(const char* filename,
 
 
 
+/*
+ * Draw an arrow.
+ */
+static void __attribute__((__nonnull__))
+ls2_cairo_draw_arrow(cairo_t *cr, double x, double y, double end_x, double end_y, double r, double g, double b)
+{
+	cairo_set_source_rgb(cr, r, g, b);
+	cairo_arc(cr, x, y, 1.5, 0, 2.0 * M_PI);
+        cairo_fill(cr);
+	cairo_stroke(cr);
+
+	const double angle = atan2(end_x - x, end_y - y) + M_PI;
+	const double head_length = 5.0;
+	const double head_angle = M_PI * 30.0 / 180.0;
+
+	cairo_move_to(cr, x, y);
+	cairo_line_to(cr, end_x, end_y);
+	cairo_stroke(cr);
+	cairo_move_to(cr, end_x, end_y);
+	cairo_rel_line_to(cr, head_length * cos(angle - head_angle),
+			  head_length * sin(angle - head_angle));
+	cairo_stroke(cr);
+	cairo_move_to(cr, end_x, end_y);
+	cairo_rel_line_to(cr, head_length * cos(angle + head_angle),
+			  head_length * sin(angle + head_angle));
+	cairo_stroke(cr);
+}
+
 /*!
  * Draw a result image to a surface.
  */
@@ -188,35 +216,26 @@ ls2_cairo_draw_phase_portrait(cairo_surface_t *surface,
     cairo_rectangle(cr, 0, 0, width, height);
     cairo_fill(cr);
 
-    // Color each location by the average or maximum error
-    for (int y = stride / 2; y < height; y += stride) {
-	for (int x = stride / 2; x < width; x += stride) {
-	    const int pos = x + y * width;
-	    const float  length = sqrtf(dx[pos] * dx[pos] + dy[pos] * dy[pos]);
-	    const double angle = atan2(dy[pos], dx[pos]) + M_PI;
-	    const double head_length = MIN((double) stride, 5.0);
-	    const double head_angle = M_PI * 30.0 / 180.0;
-	    const double end_x = (double) x + dx[pos];
-	    const double end_y = (double) y + dy[pos];
-            double r, g, b, a;
+    /* Color each location by the average or maximum error
+     *
+     * Draw the arrows outside in, assuming that the stride leads to
+     * a symmetric image. If not, the image may look funny in the middle.
+     */
+    for (int y = stride / 2; y < height / 2; y += stride) {
+	for (int x = stride / 2; x < width / 2; x += stride) {
+            int sx[] = { x, width - x, x, width - x };
+            int sy[] = { y, y, height - y, height - y };
+            for (int i = 0; i < 4; i++) {
+                int pos = sx[i] + sy[i] * width;
+	        float  length = sqrtf(dx[pos] * dx[pos] + dy[pos] * dy[pos]);
+	        double end_x = (double) sx[i] + dx[pos];
+	        double end_y = (double) sy[i] + dy[pos];
+                double r, g, b, a;
 
-            ls2_pick_color_locbased(length, &r, &g, &b, &a);
-	    cairo_set_source_rgb(cr, r, g, b);
-	    cairo_arc(cr, x, y, 2.0, 0, 2.0 * M_PI);
-            cairo_fill(cr);
-	    cairo_stroke(cr);
-	    cairo_move_to(cr, x, y);
-	    cairo_line_to(cr, end_x, end_y);
-	    cairo_stroke(cr);
-	    cairo_move_to(cr, end_x, end_y);
-	    cairo_rel_line_to(cr, head_length * cos(angle - head_angle),
-			      head_length * sin(angle - head_angle));
-	    cairo_stroke(cr);
-	    cairo_move_to(cr, end_x, end_y);
-	    cairo_rel_line_to(cr, head_length * cos(angle + head_angle),
-			      head_length * sin(angle + head_angle));
-	    cairo_stroke(cr);
-	}
+                ls2_pick_color_locbased(length, &r, &g, &b, &a);
+                ls2_cairo_draw_arrow(cr, sx[i], sy[i], end_x, end_y, r, g, b);
+            }
+        }
     }
     cairo_destroy(cr);
     cairo_surface_flush(surface);
