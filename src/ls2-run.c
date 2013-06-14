@@ -393,13 +393,14 @@ int main(int argc, const char* argv[])
 
     if (inverted == 0) {
 	if (ls2_progress != 0) {
-	    ls2_initialize_progress_bar((size_t) (runs * height * width));
+	    ls2_initialize_progress_bar((size_t) (runs * height * width),
+                                        algorithm);
 	}
 	ls2_distribute_work_shooter(alg, em, num_threads, runs, seed, anchors,
 				    no_anchors, results, width, height);
     } else {
 	if (ls2_progress != 0) {
-	    ls2_initialize_progress_bar((size_t) runs);
+	    ls2_initialize_progress_bar((size_t) runs, algorithm);
 	}
 	ls2_distribute_work_inverted(alg, em, num_threads, runs, seed,
                                      tag_x, tag_y,
