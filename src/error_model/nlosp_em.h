@@ -24,9 +24,13 @@
 
 extern void nlosp_setup(const vector2 *, size_t);
 
+#if HAVE_POPT_H
+extern struct poptOption nlosp_arguments[];
+#endif
+
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "NLOS p"
-#  undef ERROR_MODEL_ARGUMENTS
+#  define ERROR_MODEL_ARGUMENTS nlosp_arguments
 #endif
 
 #endif

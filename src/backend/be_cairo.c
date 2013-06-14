@@ -195,6 +195,35 @@ ls2_cairo_draw_arrow(cairo_t *cr, double x, double y, double end_x, double end_y
 	cairo_stroke(cr);
 }
 
+
+
+
+/*
+ *
+ */
+struct ls2_phase_portrait_item {
+    float length;
+    double sx, sy, ex, ey;
+};
+
+
+
+static int
+ls2_phase_portrait_item_cmp(const void *__x, const void *__y)
+{
+    const struct ls2_phase_portrait_item* x = __x;
+    const struct ls2_phase_portrait_item* y = __y;
+    if (x->length > y->length)
+        return -1;
+    else if (x->length < y->length)
+        return 1;
+    else
+        return 0;
+}
+
+
+
+
 /*!
  * Draw a result image to a surface.
  */
@@ -207,6 +236,10 @@ ls2_cairo_draw_phase_portrait(cairo_surface_t *surface,
 			      const uint16_t stride)
 {
     cairo_t *cr;
+    size_t p = 0;
+    const size_t no_items =
+        (size_t) (((width + 1U) / stride) * ((height + 1U) / stride));
+    struct ls2_phase_portrait_item items[no_items];
 
     // Create a drawing buffer.
     cr = cairo_create(surface);
@@ -218,24 +251,30 @@ ls2_cairo_draw_phase_portrait(cairo_surface_t *surface,
 
     /* Color each location by the average or maximum error
      *
-     * Draw the arrows outside in, assuming that the stride leads to
-     * a symmetric image. If not, the image may look funny in the middle.
+     * Draw largest arrows first, and finish with drawing the
+     * shortest last.
      */
-    for (int y = stride / 2; y < height / 2; y += stride) {
-	for (int x = stride / 2; x < width / 2; x += stride) {
-            int sx[] = { x, width - x, x, width - x };
-            int sy[] = { y, y, height - y, height - y };
-            for (int i = 0; i < 4; i++) {
-                int pos = sx[i] + sy[i] * width;
-	        float  length = sqrtf(dx[pos] * dx[pos] + dy[pos] * dy[pos]);
-	        double end_x = (double) sx[i] + dx[pos];
-	        double end_y = (double) sy[i] + dy[pos];
-                double r, g, b, a;
+    for (int y = stride / 2; y < height; y += stride) {
+	for (int x = stride / 2; x < width; x += stride) {
+            int pos = x + y * width;
 
-                ls2_pick_color_locbased(length, &r, &g, &b, &a);
-                ls2_cairo_draw_arrow(cr, sx[i], sy[i], end_x, end_y, r, g, b);
-            }
+            items[p].length = sqrtf(dx[pos] * dx[pos] + dy[pos] * dy[pos]);
+            items[p].sx     = (double) x;
+            items[p].sy     = (double) y;
+            items[p].ex     = (double) x + dx[pos];
+            items[p].ey     = (double) y + dy[pos];
+            p++;
         }
+    }
+    qsort(items, no_items, sizeof(struct ls2_phase_portrait_item),
+          ls2_phase_portrait_item_cmp);
+
+    for (size_t i = 0; i < no_items; i++) {
+        double r, g, b, a;
+
+        ls2_pick_color_locbased(items[i].length, &r, &g, &b, &a);
+        ls2_cairo_draw_arrow(cr, items[i].sx, items[i].sy,
+                             items[i].ex, items[i].ey, r, g, b);
     }
     cairo_destroy(cr);
     cairo_surface_flush(surface);

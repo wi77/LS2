@@ -16,13 +16,6 @@
 
   You should have received a copy of the GNU General Public License
   along with LS².  If not, see <http://www.gnu.org/licenses/>.
-
-
- * SVN revision information:
- * @version $Revision$:
- * @author  $Author$:
- * @date    $Date$:
- * @URL     $URL$:
  */
 
 #ifndef INCLUDED_LS2_H
@@ -96,6 +89,9 @@ extern ls2_output_variant
 ls2_get_view_by_name(const char *name);
 
 
+
+void ls2_initialize_progress_bar(size_t __total);
+void ls2_stop_progress_bar(void);
 
 
 /*!

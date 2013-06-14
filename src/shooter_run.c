@@ -38,8 +38,11 @@
 #include <inttypes.h>
 #include <float.h>
 #include <math.h>
+#include <signal.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <time.h>
+#include <unistd.h>
 
 #ifdef HAVE_POPT_H
 # include <popt.h>
@@ -89,7 +92,7 @@
 static volatile bool cancelled;
 
 /*! The number of still running threads. */
-static volatile int running;
+static volatile size_t running;
 
 /*! An array of thread identifiers. */
 static pthread_t *ls2_thread;
@@ -109,6 +112,143 @@ cancel_running(void)
     cancelled = true;
     return 1;
 }
+
+
+
+
+
+/*******************************************************************
+ *******************************************************************
+ ***
+ ***   Progress bar.
+ ***
+ *******************************************************************
+ *******************************************************************/
+
+static volatile size_t total;
+static volatile size_t progress_current;
+static volatile size_t progress_last;
+static volatile unsigned int spinner;
+
+static timer_t timer_id;
+
+#define DEFAULT_WIDTH 80
+
+static pthread_mutex_t progress_bar_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void
+ls2_update_progress_bar(size_t value)
+{
+    pthread_mutex_lock(&progress_bar_mutex);
+    progress_current = MIN(progress_current + value, total);
+    pthread_mutex_unlock(&progress_bar_mutex);
+}
+
+/*
+ * Set up the progress bar.
+ */
+static void
+ls2_handle_progress_bar(int signal __attribute__((__unused__)),
+                        siginfo_t *si __attribute__((__unused__)),
+                        void *uc __attribute__((__unused__)))
+{
+    static const char spinner_char[4] = { '|', '/', '-', '\\' };
+    const float ratio = ((float) progress_current) / ((float) total);
+    char buffer [DEFAULT_WIDTH];
+    int pos = 0;
+
+    buffer[pos++] = '[';
+    while (pos < 50 * ratio + 1) {
+        buffer[pos++] = '=';
+    }
+    buffer[pos++] = '>';
+    while (pos < 50 + 1) {
+        buffer[pos++] = '.';
+    }
+    buffer[pos++] = ']';
+
+    pos += snprintf(buffer + pos, (size_t) ((DEFAULT_WIDTH - 1) - pos),
+                    " %6.2f %2zu/%2zu %c\r", ratio * 100.0f,
+                    running, ls2_num_threads, spinner_char[spinner]);
+    if (progress_current != progress_last)
+        spinner = (spinner + 1U) & 0x3U;
+    progress_last = progress_current;
+    write(STDERR_FILENO, buffer, (size_t) pos);
+    fdatasync(STDERR_FILENO);
+}
+
+
+
+
+void
+ls2_initialize_progress_bar(size_t __total)
+{
+    struct sigevent sev;
+    struct itimerspec its;
+    sigset_t mask;
+    struct sigaction sa;
+
+
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = ls2_handle_progress_bar;
+    sigemptyset(&sa.sa_mask);
+    if (sigaction(SIGRTMIN, &sa, NULL) == -1) {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
+
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGRTMIN);
+    if (sigprocmask(SIG_SETMASK, &mask, NULL) == -1) {
+        perror("sigprocmask");
+        exit(EXIT_FAILURE);
+    }
+
+    sev.sigev_notify = SIGEV_SIGNAL;
+    sev.sigev_signo = SIGRTMIN;
+    sev.sigev_value.sival_ptr = &timer_id;
+    if (timer_create(CLOCK_REALTIME, &sev, &timer_id) == -1) {
+        perror("timer_create");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Start the timer */
+
+    its.it_value.tv_sec = 0;
+    its.it_value.tv_nsec = 250000000;
+    its.it_interval.tv_sec = its.it_value.tv_sec;
+    its.it_interval.tv_nsec = its.it_value.tv_nsec;
+
+    if (timer_settime(timer_id, 0, &its, NULL) == -1) {
+        perror("timer_settime");
+        exit(EXIT_FAILURE);
+    }
+
+    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == -1) {
+        perror("sigprocmask");
+        exit(EXIT_FAILURE);
+    }
+
+    spinner = 0U;
+    progress_current = 0U;
+    progress_last    = 0U;
+    total   = __total;
+
+    ls2_handle_progress_bar(SIGRTMIN, NULL, NULL);
+}
+
+
+void
+ls2_stop_progress_bar(void)
+{
+    timer_delete(timer_id);
+    signal(SIGRTMIN, SIG_IGN);
+    ls2_handle_progress_bar(SIGRTMIN, NULL, NULL);
+    write(STDERR_FILENO, "\n", 1u);
+    fdatasync(STDERR_FILENO);
+}
+
+
 
 
 /*******************************************************************
@@ -263,11 +403,10 @@ ls2_shooter_run(void *rr)
 	    pthread_testcancel();   // Check whether this thread is cancelled.
 
             if (__builtin_expect(ls2_progress != 0, 0)) {
-                const unsigned long step =
+                const uint_fast64_t step =
                     (j - params->from) * params->runs + i;
                 if (__builtin_expect((step & 0x7fffU) == 0, 0)) {
-                    fprintf(stderr, ".");
-                    fflush(stderr);
+                    ls2_update_progress_bar(0x7fffU);
                 }
             }
 
@@ -596,6 +735,12 @@ static void* ls2_inverse_run(void *rr)
 	ALGORITHM_RUN(params->no_anchors, vx, vy, r, &resx, &resy);
 #else
         pthread_testcancel();
+        if (__builtin_expect(ls2_progress != 0, 0)) {
+            if (__builtin_expect((j & 0x7fffU) == 0, 0)) {
+                ls2_update_progress_bar(0x7fffU);
+            }
+        }
+
 	error_model(params->error_model, &seed, distances, vx, vy,
                     params->no_anchors, tagx, tagy, r);
 	algorithm(params->algorithm, vx, vy, r, params->no_anchors,
