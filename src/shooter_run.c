@@ -173,7 +173,7 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
     if (progress_current != progress_last)
         spinner = (spinner + 1U) & 0x3U;
     progress_last = progress_current;
-    write(STDERR_FILENO, buffer, (size_t) pos);
+    if (write(STDERR_FILENO, buffer, (size_t) pos)) {}
     fdatasync(STDERR_FILENO);
 }
 
@@ -244,7 +244,7 @@ ls2_stop_progress_bar(void)
     timer_delete(timer_id);
     signal(SIGRTMIN, SIG_IGN);
     ls2_handle_progress_bar(SIGRTMIN, NULL, NULL);
-    write(STDERR_FILENO, "\n", 1u);
+    if (write(STDERR_FILENO, "\n", 1u)) {}
     fdatasync(STDERR_FILENO);
 }
 
