@@ -37,7 +37,7 @@
 /*
  * ivector_u is currently only available to SSE4.1 builds.
  */
-#if !__AVX__ && __SSE4_1__
+#if !__AVX__ && __SSE4_1__ && 0
 static inline int 
 ivector_hmax(ivector_u a) {
     int max = a.m[0];
