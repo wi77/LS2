@@ -153,7 +153,7 @@ libls2be_la_LIBADD   = $(CAIRO_LIBS) $(OPENEXR_LIBS) $(LIBOBJS)
 libls2_la_SOURCES  = shooter_run.c vector_shooter.h
 libls2_la_CPPFLAGS = $(GSL_CFLAGS)
 libls2_la_LDFLAGS  = -version $(LS2_LIBRARY_VERSION)
-libls2_la_LIBADD   = $(GSL_LIBS) $(LIBOBJS)
+libls2_la_LIBADD   = $(GSL_LIBS) $(LIBOBJS) -lrt
 
 test_em_SOURCES  = test-em.c vector_shooter.h ls2/ls2.h
 test_em_CPPFLAGS =

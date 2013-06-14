@@ -378,20 +378,29 @@ int main(int argc, const char* argv[])
     gettimeofday(&start_tv, NULL);
 
 #if !defined(ESTIMATOR)
+    /* Sanitize the number of runs. */
+    do {
+        long t;
+        if (inverted == 0)
+            t = iceil((long) runs, (long) VECTOR_OPS);
+        else
+            t = iceil((long) runs, (long) num_threads * VECTOR_OPS);
+        if (t != runs) {
+    	    runs = t;
+    	    fprintf(stderr, "warning: number of runs rounded to %ld\n", runs);
+        }
+    } while (0);
+
     if (inverted == 0) {
+	if (ls2_progress != 0) {
+	    ls2_initialize_progress_bar((size_t) (runs * height * width));
+	}
 	ls2_distribute_work_shooter(alg, em, num_threads, runs, seed, anchors,
 				    no_anchors, results, width, height);
     } else {
-	/* Sanitize the number of runs. */
-	do {
-	    long t = iceil((long) runs, (long) num_threads * VECTOR_OPS);
-	    if (t != runs) {
-		runs = t;
-		fprintf(stderr, "warning: number of runs rounded to %ld\n",
-			runs);
-	    }
-	} while (0);
-
+	if (ls2_progress != 0) {
+	    ls2_initialize_progress_bar((size_t) runs);
+	}
 	ls2_distribute_work_inverted(alg, em, num_threads, runs, seed,
                                      tag_x, tag_y,
 				     anchors, no_anchors, result, width,
@@ -407,17 +416,19 @@ int main(int argc, const char* argv[])
 
 #if !defined(ESTIMATOR)
     if (ls2_progress != 0) {
-        fprintf(stderr, "\n");
-        fflush(stderr);
+        ls2_stop_progress_bar();
     }
 
     // calculate average
     if (inverted == 0) {
 	float mu, sigma, min, max;
-	ls2_statistics(results[AVERAGE_ERROR], (size_t) width * height,
-		       &mu, &sigma, &min, &max);
-	fprintf(stdout, "MAE = %f, sdev = %f, min = %f, max = %f\n",
-		mu, sigma, min, max);
+        if (results[AVERAGE_ERROR] != NULL) {
+	    ls2_statistics(results[AVERAGE_ERROR], (size_t) width * height,
+		           &mu, &sigma, &min, &max);
+	    fprintf(stdout, "MAE = %f, sdev = %f, min = %f, max = %f\n",
+		    mu, sigma, min, max);
+            fflush(stderr);
+        }
     } else {
 	fprintf(stdout, "Centroid of location estimations: (%f, %f)"
                         "\n    standard deviations: (%f, %f)\n"
