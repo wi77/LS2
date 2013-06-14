@@ -219,26 +219,29 @@ clurol_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 {
 if (width==height){};
 
-for (int ii = 0; ii < VECTOR_OPS; ii++) {
-        // step 1: initialize variables
+    // step 1: initialize variables
 
-        int n = (int)no_anchors;
-        int ancStatusTaken = 0;
-        int ancStatus[n];
-        memset(ancStatus, 0 , no_anchors * sizeof(int));
-        
-        // step 2: calculate circle intersections
-        int bino = binom(n, 2);
-        double intersections_x[bino*2];
-        double intersections_y[bino*2];
+    const int n = (int)no_anchors;
+    int ancStatus[n];
+    // step 2: calculate circle intersections
+    int bino = binom(n, 2);
+    double intersections_x[bino*2];
+    double intersections_y[bino*2];
+    VECTOR rsx,rsy;
+
+    // Devectorized Part
+    for (int ii = 0; ii < VECTOR_OPS; ii++) {
         int num = 0;
         int is = 0;
+        int ancStatusTaken = 0;
         for (int i = 0; i < n-1; i++) {
             for (int j = i+1; j < n; j++) {
                 // Berechne Schnittpunkte mit aktueller Permutation
                 is += (int)circle_get_intersectionf(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii],r[i][ii],r[j][ii],&intersections_x[is],&intersections_y[is]);
             }
         }
+        
+        memset(ancStatus, 0 , no_anchors * sizeof(int));
 
         // step 3: copy intersections into one array
         Point2dC points[is];
@@ -248,14 +251,17 @@ for (int ii = 0; ii < VECTOR_OPS; ii++) {
 
         if (is < 2) {
             // no sense to do CluRoL, return NLLS here
-            nllsq_run(vx, vy, r, no_anchors, width, height, resx, resy);
+            nllsq_run(vx, vy, r, no_anchors, width, height, &rsx, &rsy);
+            (*resx)[ii]=rsx[ii];
+            (*resy)[ii]=rsy[ii];
             continue;
         }
 
         // step 4: build all pairwise distance tuples
         num = 0;
-        bino = binom(is, 2);
-        PairwiseDistanceTuple D[bino];
+        int bin;
+        bin = binom(is, 2);
+        PairwiseDistanceTuple D[bin];
         for (int i = 0; i < is-1; i++) {
             for (int j = i+1; j < is; j++) {
                 PairwiseDistanceTuple_new(&points[i], &points[j], &D[num]);
@@ -264,19 +270,19 @@ for (int ii = 0; ii < VECTOR_OPS; ii++) {
         }
 
         // step 5: sort D in ascending order of the pairwise distances
-        qsort(D,(size_t)bino,sizeof(PairwiseDistanceTuple),PairwiseDistanceTuple_compareTo);
+        qsort(D,(size_t)bin,sizeof(PairwiseDistanceTuple),PairwiseDistanceTuple_compareTo);
 
         // step 6: calculate distance threshold as n-th percentile tuple’s
         //         pairwise distance value
         int alpha = binom((int)(ceil((double)n/2.0) + 2), 2);
         int beta = 2 * binom(n, 2);
         double nth = (binom(alpha, 2)/(double)binom(beta, 2));
-        int nthPercentile = (int)lround((nth * (double)bino) + 0.5);
-        nthPercentile = min(nthPercentile, bino);
+        int nthPercentile = (int)lround((nth * (double)bin) + 0.5);
+        nthPercentile = min(nthPercentile, bin);
         double dth = D[nthPercentile-1].d;
 
         // step 7: call findMaxCluster subroutine
-        int cMax = findMaxCluster(D, bino, dth , points, is);
+        int cMax = findMaxCluster(D, bin, dth , points, is);
 
         // step 8: determine anchors for Minimum Squared Error (MSE) method
         double dMax = 100;
