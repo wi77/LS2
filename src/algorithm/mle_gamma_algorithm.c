@@ -46,6 +46,11 @@
 #endif
 
 #include <assert.h>
+
+#ifdef LS_WITH_QR
+#include <gsl/gsl_linalg.h>
+#endif
+
 #include <gsl/gsl_multimin.h>
 
 #include "algorithm/llsq_algorithm.c"
@@ -76,6 +81,7 @@ static double mle_gamma_offset     = MLE_GAMMA_DEFAULT_OFFSET;
 static double mle_gamma_epsilon    = MLE_GAMMA_DEFAULT_EPSILON;
 static    int mle_gamma_iterations = MLE_GAMMA_DEFAULT_ITERATIONS;
 
+//#define DEBUG
 
 struct poptOption mle_gamma_arguments[] = {
         { "mle-gamma-rate", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -197,7 +203,9 @@ mle_gamma_likelihood_fdf(const gsl_vector *X, void *restrict params,
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
-              size_t no_anchors, int width, int height,
+              size_t no_anchors,
+              int width __attribute__((__unused__)),
+              int height __attribute__((__unused__)),
               VECTOR *restrict resx, VECTOR *restrict resy)
 {
     /* Step 0: Set up the likelihood function. */
@@ -221,30 +229,79 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     fdf.fdf = &mle_gamma_likelihood_fdf;
     fdf.params = &p;
 
-    /* Step 1: Calculate an initial estimate. */
-    VECTOR sx, sy;
-    llsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
+    
 
-    /* Step 2: Call the optimiser. */
+    /* Step: Call the optimiser. */
     const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
     gsl_multimin_fdfminimizer *s = gsl_multimin_fdfminimizer_alloc(T, 2);
+
     gsl_vector *x;
     x = gsl_vector_alloc(2);
-    
+
+#if defined(LS2_WITH_QR)
+    gsl_vector *b, *tau, *residual;
+    b = gsl_vector_alloc(no_anchors - 1);
+    tau = gsl_vector_alloc(2);
+    residual = gsl_vector_alloc(no_anchors - 1);
+
+    gsl_matrix *A;
+    A = gsl_matrix_alloc(no_anchors - 1, 2);
+#endif
+
+#if !defined(LS2_WITH_QR)   
+    VECTOR sx, sy;
+    llsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
+#endif
+
     for (int i = 0; i < VECTOR_OPS; i++) {
         /* Step 2a: Initialize the parameters. */
         for (size_t j = 0; j < no_anchors; j++) {
             p.ranges[j] = r[j][i];
         }
+
+#if defined(LS2_WITH_QR)
+        /* Step 2b: Calculate an initial estimate.
+           We try the linear least squares solution to the inequality
+           system defining the domain. */
+
+        for (size_t j = 0; j < no_anchors - 1; j++) {
+            gsl_matrix_set(A, j, 0, 2 * (vx[no_anchors - 1][0] - vx[j][0]));
+            gsl_matrix_set(A, j, 1, 2 * (vy[no_anchors - 1][0] - vy[j][0]));
+            gsl_vector_set(b, j, (r[j][0] + mle_gamma_offset) * (r[j][0] + mle_gamma_offset) - 
+                           (r[no_anchors - 1][0] + mle_gamma_offset) * (r[no_anchors - 1][0] + mle_gamma_offset) +
+                           vx[no_anchors - 1][0] * vx[no_anchors - 1][0] -
+                           vx[j][0] - vx[j][0] +
+                           vy[no_anchors - 1][0] * vy[no_anchors - 1][0] -
+                           vy[j][0] - vy[j][0]);
+        }
+
+        gsl_linalg_QR_decomp(A, tau);
+        gsl_linalg_QR_lssolve(A, tau, b, x, residual);
+#ifdef DEBUG
+        do {
+            fprintf(stderr, "x = ");
+            gsl_vector_fprintf(stderr, x, "%g");
+            fprintf(stderr, "residual = ");
+            gsl_vector_fprintf(stderr, residual, "%g");
+        } while (0);
+#endif
+#else
         gsl_vector_set(x, 0, sx[i]);
         gsl_vector_set(x, 1, sy[i]);
+#endif
 
+        double likelihood = mle_gamma_likelihood_function(x, &p);
+#ifdef DEBUG
+        fprintf(stderr, "likelihood = %f\n", likelihood);
+#endif
+        if (isinf(likelihood))
+            goto store_result;
+
+        /* Step 2c: Iterate the minimization algorithm. */
         int iter = 0;
         int status;
-
         gsl_multimin_fdfminimizer_set(s, &fdf, x, 1e-3, 1e-4);
 
-        /* Step 2b: Iterate the minimization algorithm. */
         do {
             iter++;
             status = gsl_multimin_fdfminimizer_iterate(s);
@@ -254,6 +311,7 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         } while (status == GSL_CONTINUE && iter < mle_gamma_iterations);
 
         /* Step 2c: Store the result. */
+    store_result:
         (*resx)[i] = (float) gsl_vector_get(s->x, 0);
         (*resy)[i] = (float) gsl_vector_get(s->x, 1);
     }
@@ -261,6 +319,14 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     /* Step 3: Clean up. */
     gsl_multimin_fdfminimizer_free(s);
     gsl_vector_free(x);
+
+#if defined(LS2_WITH_QR)
+    gsl_matrix_free(A);
+    gsl_vector_free(b);
+    gsl_vector_free(tau);
+    gsl_vector_free(residual);
+#endif
+
 }
 
 #endif
