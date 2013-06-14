@@ -63,7 +63,7 @@
 #endif
 
 #ifndef MLE_GAMMA_DEFAULT_EPSILON
-#define MLE_GAMMA_DEFAULT_EPSILON 1e-3
+#define MLE_GAMMA_DEFAULT_EPSILON 1e-2
 #endif
 
 #ifndef MLE_GAMMA_DEFAULT_ITERATIONS
@@ -135,7 +135,9 @@ mle_gamma_likelihood_function(const gsl_vector *restrict X, void *restrict param
             log(p->factor * pow(Z, mle_gamma_shape - 1.0)) - mle_gamma_rate * Z;
         result -= likelihood;
     }
-    // fprintf(stderr, "f(%f, %f) = %f\n", thetaX, thetaY, result);
+#ifdef DEBUG
+    fprintf(stderr, "f(%f, %f) = %f\n", thetaX, thetaY, result);
+#endif
     return result;
 }
 
@@ -151,22 +153,29 @@ mle_gamma_likelihood_gradient(const gsl_vector *restrict X, void *restrict param
     const double thetaY = gsl_vector_get(X, 1);
     double gradX = 0.0, gradY = 0.0;
     for (size_t j = 0; j < p->no_anchors; j++) {
-        const double d2 = (thetaX - p->anchors[j].x) *
-                          (thetaX - p->anchors[j].x) +
-                          (thetaY - p->anchors[j].y) *
-                          (thetaY - p->anchors[j].y);
-        const double d = sqrt(d2);
-        const double Z = p->ranges[j] + mle_gamma_offset - d;
-        if (thetaX != p->anchors[j].x && thetaY != p->anchors[j].x) {
-            gradX -= ((thetaX -  p->anchors[j].x) *
-                      (mle_gamma_rate * (d - Z - mle_gamma_offset) + mle_gamma_shape - 1)) /
-                      (d * (d - Z - mle_gamma_offset));
-            gradY -= ((thetaY -  p->anchors[j].y) *
-                      (mle_gamma_rate * (d - Z - mle_gamma_offset) + mle_gamma_shape - 1)) /
-                      (d * (d - Z - mle_gamma_offset));
-        } // Otherwise the value of the gradient component is 0.
+        if (thetaX != p->anchors[j].x && thetaY != p->anchors[j].y) {
+            const double d2 = (thetaX - p->anchors[j].x) *
+                              (thetaX - p->anchors[j].x) +
+                              (thetaY - p->anchors[j].y) *
+                              (thetaY - p->anchors[j].y);
+            const double d = sqrt(d2);
+            const double Z = p->ranges[j] + mle_gamma_offset - d;
+
+            if (__builtin_expect(Z <= 0, 0)) {
+                gradX = NAN;
+                gradY = NAN;
+                break;
+            }
+            const double t =
+                (mle_gamma_rate * (d - Z - mle_gamma_offset) + mle_gamma_shape - 1.0) /
+                (d * (d - Z - mle_gamma_offset));
+            gradX -= (thetaX -  p->anchors[j].x) * t;
+            gradY -= (thetaY -  p->anchors[j].y) * t;
+        } // TODO: Otherwise the value of the gradient component is 0?
     }
-    // fprintf(stderr, "df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
+#ifdef DEBUG
+    fprintf(stderr, "df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
+#endif
     gsl_vector_set(g, 0, gradX);
     gsl_vector_set(g, 1, gradY);
 }
