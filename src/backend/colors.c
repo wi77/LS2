@@ -103,6 +103,9 @@ ls2_pick_color_diff(const double sample, const double similar,
 
 
 
+#define INVERTED_THRESHOLD 0.04
+#define INVERTED_CUBED_THRESHHOLD (INVERTED_THRESHOLD * INVERTED_THRESHOLD * INVERTED_THRESHOLD)
+
 /*!
  *
  */
@@ -114,8 +117,7 @@ ls2_pick_color_inverted(const double sample, double *restrict h,
     *h = 0.0;  /* Red. */
     if (sample > 0.0) {
         // constant used for compression
-        static const double ___a = 0.04;
-        static const double alpha = ___a * ___a * ___a; 
+        static const double alpha = INVERTED_CUBED_THRESHHOLD;
         double t = sample;
         t = (1.0 - alpha) * t + alpha;
         *l = 1.0 - cbrt(t);
