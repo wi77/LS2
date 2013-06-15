@@ -32,6 +32,7 @@
  *** Operations on Points
  ***
  *******************************************************************/
+
 #ifndef UTIL_POINTS_C_INCLUDED
 #define UTIL_POINTS_C_INCLUDED 1
 

@@ -26,7 +26,8 @@
  **
  ********************************************************************/
 
-
+#ifndef UTIL_MATRIX_C_INCLUDED
+#define UTIL_MATRIX_C_INCLUDED
 
 /*******************************************************************
  ***
@@ -81,3 +82,5 @@ times(const VECTOR * a, const size_t arows, const size_t acols,
         }
     }
 }
+
+#endif

@@ -19,6 +19,11 @@
 
  */
 
+#ifndef INCLUDED_UTIL_CIRCLE_C
+#define INCLUDED_UTIL_CIRCLE_C 1
+
+#include "util/util_vector.c"
+
 /********************************************************************
  **
  **  This file is made only for including in the lib_lat project
@@ -354,3 +359,4 @@ circle_point_in_circles_opt128 (__m128 mx, __m128 my, __m128 maxdists,
 #endif
 }
  
+#endif

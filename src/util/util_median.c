@@ -19,6 +19,9 @@
 
  */
 
+#ifndef UTIL_MEDIAN_C_INCLUDED
+#define UTIL_MEDIAN_C_INCLUDED 1
+
 /* Find the k-smallest element in an array.
  *
  * Adapted from Wirth, Niklaus.  * "Algorithms + data structures = programs",
@@ -64,3 +67,5 @@ median_s(const size_t length, float const * const values)
     const size_t k = length / 2 - ((length & 1) ? 0 : 1);
     return select_s(length, values, k);
 }
+
+#endif

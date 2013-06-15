@@ -27,6 +27,8 @@
  **
  ********************************************************************/
 
+#ifndef UTIL_POINTS_OPT_C_INCLUDED
+#define UTIL_POINTS_OPT_C_INCLUDED 1
 
 /*******************************************************************
  ***
@@ -189,3 +191,5 @@ point_geometric_median_opt(int count, const __m128 ptsx, const __m128 ptsy,
     *rety = xy;
     return;
 }
+
+#endif
