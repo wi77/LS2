@@ -161,7 +161,7 @@ test_em_SOURCES  = test-em.c vector_shooter.h ls2/ls2.h
 test_em_CPPFLAGS =
 test_em_LDADD    = $(GSL_LIBS) $(LIBOBJS)
 
-test_alg_SOURCES = debug.c vector_shooter.h ls2/ls2.h
+test_alg_SOURCES  = debug.c vector_shooter.h ls2/ls2.h
 test_alg_CPPFLAGS =
 test_alg_LDADD    = $(GSL_LIBS) $(LIBOBJS)
 
