@@ -174,7 +174,7 @@ icla_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 {
     static const double alpha = 1.5;
     static const double moveStep = 25;
-
+    int iterations=0;
     if (width==height){};
     for (int ii = 0; ii < VECTOR_OPS; ii++) {
         // step 1: calculate circle intersections
@@ -220,6 +220,7 @@ icla_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         // ICM step 1: define initiation range
         computeInitialAttractingBoundary(points,icount);
 
+        iterations = 1000;
         while (iterate) {
             // ICM step 2: determine moving direction
             computeMovingDirection(points,icount);
@@ -318,6 +319,7 @@ icla_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                     break;
                 }
             }
+            if (iterations--==0) break;
         }
 
         // step 3: return centroid of selected intersection points
