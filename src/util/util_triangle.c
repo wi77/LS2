@@ -26,6 +26,9 @@
  **
  ********************************************************************/
 
+#ifndef UTIL_TRIANGLE_C_INCLUDED
+#define UTIL_TRIANGLE_C_INCLUDED 1
+
 /*******************************************************************
  ***
  *** Triangle operations
@@ -143,3 +146,5 @@ triangle_icr(const VECTOR ax, const VECTOR ay, const VECTOR bx,
     
     return area / perimeter;
 }
+
+#endif

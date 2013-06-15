@@ -20,6 +20,9 @@
 
  */
 
+#ifndef UTIL_VCIRCLE_C_INCLUDED
+#define UTIL_VCIRCLE_C_INCLUDED 1
+
 /*
  * Compute the instersection of distances, vector version.
  *
@@ -133,4 +136,6 @@ int test_vcircle_intersections(){
 
     return 1;
 }       
+#endif
+
 #endif

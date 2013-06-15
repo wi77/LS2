@@ -125,14 +125,18 @@ cancel_running(void)
  *******************************************************************
  *******************************************************************/
 
-static volatile size_t total;
+static size_t total;
 static volatile size_t progress_current;
 static volatile size_t progress_last;
 static volatile unsigned int spinner;
+static char const* display_name;
+
 
 static timer_t timer_id;
 
 #define DEFAULT_WIDTH 80
+#define DEFAULT_NAME  24
+#define DEFAULT_STEPS 32U
 
 static pthread_mutex_t progress_bar_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -153,25 +157,37 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
                         void *uc __attribute__((__unused__)))
 {
     static const char spinner_char[4] = { '|', '/', '-', '\\' };
-    const float ratio = ((float) progress_current) / ((float) total);
-    char buffer [DEFAULT_WIDTH];
+    char buffer [DEFAULT_WIDTH + 1];
     int pos = 0;
 
+    strncpy(buffer, display_name, (size_t)(DEFAULT_NAME - 1));
+    pos = (int) strlen(buffer);
+    while (pos < DEFAULT_NAME + 2)
+        buffer[pos++] = ' ';
     buffer[pos++] = '[';
-    while (pos < 50 * ratio + 1) {
+
+    const int ratio = (int) ((DEFAULT_STEPS * progress_current) / total);
+    while (pos < ratio + DEFAULT_NAME + 2) {
         buffer[pos++] = '=';
     }
-    buffer[pos++] = '>';
-    while (pos < 50 + 1) {
+    if (ratio < (int) DEFAULT_STEPS)
+        buffer[pos++] = '>';
+    while (pos < DEFAULT_NAME + (int) DEFAULT_STEPS + 2) {
         buffer[pos++] = '.';
     }
     buffer[pos++] = ']';
 
-    pos += snprintf(buffer + pos, (size_t) ((DEFAULT_WIDTH - 1) - pos),
-                    " %6.2f %2zu/%2zu %c\r", ratio * 100.0f,
-                    running, ls2_num_threads, spinner_char[spinner]);
+    pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
+                    " %6.2f%% %2zu/%2zu thr.",
+                    ((float) progress_current) * 100.0f / ((float) total),
+                    running, ls2_num_threads);
+    pos = MIN(DEFAULT_WIDTH - 3, pos);
+    buffer[pos++] = ' ';
+    buffer[pos++] = spinner_char[spinner];
     if (progress_current != progress_last)
         spinner = (spinner + 1U) & 0x3U;
+    buffer[pos++] = '\r';
+    buffer[pos] = '\0';
     progress_last = progress_current;
     if (write(STDERR_FILENO, buffer, (size_t) pos)) {}
     fdatasync(STDERR_FILENO);
@@ -181,7 +197,7 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
 
 
 void
-ls2_initialize_progress_bar(size_t __total)
+ls2_initialize_progress_bar(size_t __total, const char *__algorithm)
 {
     struct sigevent sev;
     struct itimerspec its;
@@ -215,7 +231,7 @@ ls2_initialize_progress_bar(size_t __total)
     /* Start the timer */
 
     its.it_value.tv_sec = 0;
-    its.it_value.tv_nsec = 250000000;
+    its.it_value.tv_nsec = 500000000;
     its.it_interval.tv_sec = its.it_value.tv_sec;
     its.it_interval.tv_nsec = its.it_value.tv_nsec;
 
@@ -229,10 +245,11 @@ ls2_initialize_progress_bar(size_t __total)
         exit(EXIT_FAILURE);
     }
 
-    spinner = 0U;
+    spinner          = 0U;
     progress_current = 0U;
     progress_last    = 0U;
-    total   = __total;
+    total            = __total;
+    display_name     = __algorithm;
 
     ls2_handle_progress_bar(SIGRTMIN, NULL, NULL);
 }

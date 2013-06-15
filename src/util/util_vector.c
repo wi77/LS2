@@ -32,6 +32,9 @@
  ***
  *******************************************************************/
 
+#ifndef INCLUDED_UTIL_VECTOR_C
+#define INCLUDED_UTIL_VECTOR_C
+
 // Calculates the pair distances of all the points in the 4/8 vectors
 static inline VECTOR
 __attribute__((__always_inline__,__gnu_inline__,__const__,__artificial__))
@@ -107,3 +110,5 @@ distance_v(const vector2 *v, const vector2 *w)
    const float b = v->y - w->y;
    return sqrtf(a * a + b * b);
 }
+
+#endif
