@@ -14,13 +14,15 @@
 #include "algorithm/lms_algorithm.c"
 #include <time.h>     
 
-int main() {
+int main(int argc __attribute__((__unused__)),
+         char **argv __attribute__((__unused__)))
+{
     VECTOR vx[8];
     VECTOR vy[8];
     VECTOR r[8];
     VECTOR resx, resy;
     float f;
-     srand (time(NULL));
+    srand((unsigned int)time(NULL));
     // Anchors
     f = 100;
     vx[0] = VECTOR_BROADCAST(&f);
