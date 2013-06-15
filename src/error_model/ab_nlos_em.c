@@ -30,6 +30,7 @@ static int ab_nlos_count    = 3;
 static float ab_nlos_rate   = 2.0F;
 static float ab_nlos_scale  = 100.0F;
 static VECTOR ab_nlos_oscale;
+static int ab_nlos_norm = 1;
 
 #if defined(HAVE_POPT_H)
 struct poptOption ab_nlos_arguments[] = {
@@ -42,6 +43,9 @@ struct poptOption ab_nlos_arguments[] = {
   { "ab_nlos-count", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
     &ab_nlos_count, 0,
     "First n anchors with NLOS ERROR", NULL },
+  { "ab_nlos-norm", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
+    &ab_nlos_norm, 0,
+    "Normalize error?", NULL },
   { "ab_nlos-rate", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
     &ab_nlos_rate, 0,
     "Rate of exponential NLOS error", NULL },
@@ -83,6 +87,8 @@ ab_nlos_setup(const vector2 *anchors __attribute__((__unused__)), size_t nanchor
     const VECTOR d;
     VECTOR test[nanchors];
     ab_nlos_oscale = one;
+    if (!ab_nlos_norm) return;
+    
     for (int i = 0; i < (int)nanchors; i++)
         test[i]=zero;
     unsigned int _seed = (unsigned int)time(NULL);
