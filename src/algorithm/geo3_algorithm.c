@@ -26,6 +26,12 @@
  **
  ********************************************************************/
 
+#ifndef GEO3_ALGORITHM_C_INCLUDED
+#define GEO3_ALGORITHM_C_INCLUDED 1
+
+#include "util/util_median.c"
+#include "util/util_points_opt.c"
+
 /*******************************************************************
  ***
  ***   Geolateration
@@ -280,3 +286,5 @@ geo3_run(const const VECTOR* vx, const VECTOR* vy,
         point_geometric_median_opt(3, ccmx, ccmy, mass, &((*resx)[ii]), &((*resy)[ii]) );
     }
 }
+
+#endif

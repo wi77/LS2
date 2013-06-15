@@ -34,8 +34,11 @@
  
  /* @algorithm_name: Linear Least Squares */
 
-#ifndef ALGORITHM_LLSQ_C
-#define ALGORITHM_LLSQ_C
+#ifndef ALGORITHM_LLSQ_C_INCLUDED
+#define ALGORITHM_LLSQ_C_INCLUDED 1
+
+#include "util/util_matrix.c"
+#include "util/util_triangle.c"
  
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 llsq_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors,

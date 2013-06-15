@@ -34,6 +34,11 @@
 
 /* @algorithm_name: Centroid */
 
+#ifndef CENTROID_ALGORITHM_INCLUDED
+#define CENTROID_ALGORITHM_INCLUDED 1
+
+#include "util/util_vcircle.c"
+
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 centroid_run (const VECTOR* vx, const VECTOR* vy,
               const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy)
@@ -57,3 +62,5 @@ centroid_run (const VECTOR* vx, const VECTOR* vy,
     *resx = sx / VECTOR_MAX(n, one);
     *resy = sy / VECTOR_MAX(n, one);
 }
+
+#endif

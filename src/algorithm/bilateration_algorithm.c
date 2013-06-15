@@ -37,15 +37,8 @@
 #ifndef BILATERATION_ALGORITHM_C_INCLUDED
 #define BILATERATION_ALGORITHM_C_INCLUDED 1
 
-#if HAVE_CONFIG_H
-#  include "ls2/ls2-config.h"
-#endif
-
-#if HAVE_POPT_H
-#  include <popt.h>
-#endif
-
 #include "util/util_math.c"
+#include "util/util_points.c"
 
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
