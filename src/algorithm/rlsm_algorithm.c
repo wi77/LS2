@@ -75,8 +75,8 @@ static inline int
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 robust_filter(int const count ,float *restrict resx,float *restrict resy) {
         int N = binom(count, 2);
-        float v[N];
-        float vC[N];
+        double v[N];
+        double vC[N];
         for (int i = 0; i < count-1; i++) {
             for (int j = i+1; j < count; j++) {
                 int idx = toIndex(i, j, count);
@@ -86,9 +86,9 @@ robust_filter(int const count ,float *restrict resx,float *restrict resy) {
         }
 
         qsort(vC,(size_t)N,sizeof(float),compare_floats2);
-        float MEDV = 2 * vC[count/2+1];
-        float filtered_x[count];
-        float filtered_y[count];
+        double MEDV = 2 * vC[count/2+1];
+        double filtered_x[count];
+        double filtered_y[count];
         int filtered_count = 0;
         for (int i = 0; i < count; i++) {
             int dropCounter = 0;
@@ -107,9 +107,13 @@ robust_filter(int const count ,float *restrict resx,float *restrict resy) {
                 filtered_count++;
             }
         }
-        memcpy(resx,filtered_x,sizeof(float)*(unsigned int)filtered_count);
-        memcpy(resy,filtered_y,sizeof(float)*(unsigned int)filtered_count);
-        return filtered_count;
+	if (filtered_count){
+	        memcpy(resx,filtered_x,sizeof(float)*(unsigned int)filtered_count);
+        	memcpy(resy,filtered_y,sizeof(float)*(unsigned int)filtered_count);
+	        return filtered_count;
+	}
+	else 
+		return count;
     }    
 
 
@@ -158,10 +162,10 @@ rlsm_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                     tmpRanges[h][i%VECTOR_OPS] = r[permutations[h]][ii];
                 }
 
-                if (((i+1)%VECTOR_OPS)==0 || i == bino - 1){
+                if (((i+1)%VECTOR_OPS)==VECTOR_OPS-1 || i == bino - 1){
                     llsq_run(tmpAnchors_x, tmpAnchors_y, tmpRanges, (size_t)k, width, height, &tresx, &tresy);
                     for (int jj=0; jj <= i%VECTOR_OPS; jj++){
-                        if (!isnan(tresy[jj])){
+                        if (!isnan(tresy[jj]) && !isnan(tresx[jj])){
                             intermediatePositions_x[int_count] = tresx[jj];
                             intermediatePositions_y[int_count] = tresy[jj];
                             int_count++;
@@ -197,15 +201,15 @@ rlsm_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
         
         float weights[int_count];
-        for (int jj=0;jj<int_count;jj++)
-            weights[jj]=1.0f;
-
+        for (int jj=0;jj<int_count;jj++) {
+	   weights[jj]=1.0f;
+	}
         // return geometric median as result
         point_geometric_median(int_count, intermediatePositions_x,
                        intermediatePositions_y,
                        weights,
                        &x_x, &x_y);
-      
+     
         (*resx)[ii] = x_x;
         (*resy)[ii] = x_y;
     }
