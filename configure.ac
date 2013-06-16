@@ -47,18 +47,21 @@ AC_CHECK_LIB([popt], [poptGetContext], [],
 [AC_MSG_FAILURE([You need to install libpopt and popt.h])])
 AC_CHECK_HEADERS([popt.h], [], [AC_MSG_FAILURE([You need to install popt.h])])
 
+AX_OPENCL(C)
 PKG_CHECK_MODULES([GSL], [gsl >= 1.13])
 PKG_CHECK_MODULES([CAIRO], [cairo >= 1.8])
 PKG_CHECK_MODULES([OPENEXR], [OpenEXR >= 1.6])
 
 AC_CHECK_LIB([hdf5], [H5Fcreate], [], [AC_MSG_FAILURE([You need to install libhdf5.so and hdf5.h])])
+AC_CHECK_HEADERS([hdf5.h])
 
 AX_OPENCL(C)
 
 # Checks for header files.
-AC_CHECK_HEADERS([float.h popt.h stdlib.h string.h unistd.h hdf5.h])
 AC_HEADER_ASSERT
 AC_HEADER_STDBOOL
+AC_HEADER_TIME
+AC_CHECK_HEADERS([float.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
