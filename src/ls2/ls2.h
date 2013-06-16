@@ -92,6 +92,7 @@ ls2_get_view_by_name(const char *name);
 
 void ls2_initialize_progress_bar(size_t __total, const char *__algorithm);
 void ls2_stop_progress_bar(void);
+void progress(int *, int *);
 
 
 /*!

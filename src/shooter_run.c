@@ -125,7 +125,7 @@ cancel_running(void)
  *******************************************************************
  *******************************************************************/
 
-static size_t total;
+static volatile size_t progress_total;
 static volatile size_t progress_current;
 static volatile size_t progress_last;
 static volatile unsigned int spinner;
@@ -140,16 +140,34 @@ static timer_t timer_id;
 
 static pthread_mutex_t progress_bar_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void
+static inline void
+__attribute__((__always_inline__,__gnu_inline__))
 ls2_update_progress_bar(size_t value)
 {
     pthread_mutex_lock(&progress_bar_mutex);
-    progress_current = MIN(progress_current + value, total);
+    progress_current = MIN(progress_current + value, progress_total);
     pthread_mutex_unlock(&progress_bar_mutex);
 }
 
+
 /*
- * Set up the progress bar.
+ *
+ */
+void
+progress(int *current, int *total)
+{
+    if (progress_total < INT_MAX) {
+        *current = (int) progress_current;
+        *total   = (int) progress_total;
+    } else {
+        *current = (int) (progress_current / 0x8000U);
+        *total   = (int) (progress_total / 0x8000U);
+    }
+}
+
+
+/*
+ * Handle a progress event and draw the bar to the console.
  */
 static void
 ls2_handle_progress_bar(int signal __attribute__((__unused__)),
@@ -160,13 +178,17 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
     char buffer [DEFAULT_WIDTH + 1];
     int pos = 0;
 
-    strncpy(buffer, display_name, (size_t)(DEFAULT_NAME - 1));
-    pos = (int) strlen(buffer);
+    if (display_name != NULL) {
+        strncpy(buffer, display_name, (size_t)(DEFAULT_NAME - 1));
+        pos = (int) strlen(buffer);
+    } else {
+        pos = 0;
+    }
     while (pos < DEFAULT_NAME + 2)
         buffer[pos++] = ' ';
     buffer[pos++] = '[';
 
-    const int ratio = (int) ((DEFAULT_STEPS * progress_current) / total);
+    const int ratio = (int) ((DEFAULT_STEPS * progress_current) / progress_total);
     while (pos < ratio + DEFAULT_NAME + 2) {
         buffer[pos++] = '=';
     }
@@ -179,7 +201,7 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
 
     pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
                     " %6.2f%% %2zu/%2zu thr.",
-                    ((float) progress_current) * 100.0f / ((float) total),
+                    ((float) progress_current) * 100.0f / ((float) progress_total),
                     running, ls2_num_threads);
     pos = MIN(DEFAULT_WIDTH - 3, pos);
     buffer[pos++] = ' ';
@@ -196,17 +218,19 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
 
 
 
-void
-ls2_initialize_progress_bar(size_t __total, const char *__algorithm)
+/*
+ * Register a handler for updating progress.
+ */
+static void
+ls2_setup_progress_handler(void (*handler)(int, siginfo_t *, void*))
 {
     struct sigevent sev;
     struct itimerspec its;
     sigset_t mask;
     struct sigaction sa;
 
-
     sa.sa_flags = SA_SIGINFO;
-    sa.sa_sigaction = ls2_handle_progress_bar;
+    sa.sa_sigaction = handler;
     sigemptyset(&sa.sa_mask);
     if (sigaction(SIGRTMIN, &sa, NULL) == -1) {
         perror("sigaction");
@@ -244,22 +268,36 @@ ls2_initialize_progress_bar(size_t __total, const char *__algorithm)
         perror("sigprocmask");
         exit(EXIT_FAILURE);
     }
+}
 
+
+
+
+void
+ls2_initialize_progress_bar(size_t total, const char *name)
+{
     spinner          = 0U;
     progress_current = 0U;
     progress_last    = 0U;
-    total            = __total;
-    display_name     = __algorithm;
+    progress_total   = total;
+    display_name     = name;
 
+    ls2_setup_progress_handler(ls2_handle_progress_bar);
     ls2_handle_progress_bar(SIGRTMIN, NULL, NULL);
 }
 
 
-void
-ls2_stop_progress_bar(void)
+static void
+ls2_teardown_progress_handler(void)
 {
     timer_delete(timer_id);
     signal(SIGRTMIN, SIG_IGN);
+}
+
+void
+ls2_stop_progress_bar(void)
+{
+    ls2_teardown_progress_handler();
     ls2_handle_progress_bar(SIGRTMIN, NULL, NULL);
     if (write(STDERR_FILENO, "\n", 1u)) {}
     fdatasync(STDERR_FILENO);
@@ -423,7 +461,7 @@ ls2_shooter_run(void *rr)
                 const uint_fast64_t step =
                     (j - params->from) * params->runs + i;
                 if (__builtin_expect((step & 0x7fffU) == 0, 0)) {
-                    ls2_update_progress_bar(0x7fffU);
+                    ls2_update_progress_bar(0x8000U);
                 }
             }
 
@@ -646,6 +684,9 @@ ls2_distribute_work_shooter(const int alg, const int em,
 
 
 
+/*
+ * This function should only be called by tha Java api.
+ */
 extern int
 compute_locbased(const int alg, const int em,
                  const int num_threads, const int64_t runs,
@@ -656,6 +697,13 @@ compute_locbased(const int alg, const int em,
     vector2 *anchors;
 
     cancelled = false;
+
+    ls2_progress     = 1;
+    spinner          = 0U;
+    progress_current = 0U;
+    progress_last    = 0U;
+    progress_total   = (size_t)(runs * width * height);
+    display_name     = NULL;
 
     // parse and normalize arguments
     anchors = calloc((size_t) no_anchors, sizeof(vector2));
@@ -754,7 +802,7 @@ static void* ls2_inverse_run(void *rr)
         pthread_testcancel();
         if (__builtin_expect(ls2_progress != 0, 0)) {
             if (__builtin_expect((j & 0x7fffU) == 0, 0)) {
-                ls2_update_progress_bar(0x7fffU);
+                ls2_update_progress_bar(0x8000U);
             }
         }
 
