@@ -184,14 +184,18 @@ point_geometric_median(int count, const float *restrict ptsx,
         float xt = 0;
         float yt = 0;
         float id = 0;
+	float dist = 0;
         for (int i = 0; i < count; i++) {
-            float dist = distance_s(xx,xy,ptsx[i],ptsy[i]);
+            dist = distance_s(xx,xy,ptsx[i],ptsy[i]);
             xt += weights[i] * (ptsx[i] / dist);
             yt += weights[i] * (ptsy[i] / dist);
             id += weights[i] * (1.0f / dist);
         }
+
         xnewx = xt / id;
         xnewy = yt / id;
+
+//	if (isnan(xnewx)) printf("Fuck\n %f %f %i\n",id,dist,count);
 
         e0 = weiszfeld_distance_sum(count, ptsx,ptsy, xx, xy, hyperbolaE);
         e1 = weiszfeld_distance_sum(count, ptsx,ptsy, xnewx, xnewy, hyperbolaE);
