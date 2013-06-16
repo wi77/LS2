@@ -153,16 +153,13 @@ ls2_update_progress_bar(size_t value)
 /*
  *
  */
-void
-progress(int *current, int *total)
+double
+get_progress(int *threads)
 {
-    if (progress_total < INT_MAX) {
-        *current = (int) progress_current;
-        *total   = (int) progress_total;
-    } else {
-        *current = (int) (progress_current / 0x8000U);
-        *total   = (int) (progress_total / 0x8000U);
-    }
+    double result = (double) progress_current / (double) progress_total;
+    if (threads != NULL)
+        *threads = (int) running;
+    return result;
 }
 
 

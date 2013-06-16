@@ -92,7 +92,14 @@ ls2_get_view_by_name(const char *name);
 
 void ls2_initialize_progress_bar(size_t __total, const char *__algorithm);
 void ls2_stop_progress_bar(void);
-void progress(int *, int *);
+
+/*!
+ * Returns the progress information.
+ *
+ * \param[out] threads  The number of currently active threads.
+ * \return     Fraction of progress between 0 and 1.
+ */
+double get_progress(int *threads);
 
 
 /*!
