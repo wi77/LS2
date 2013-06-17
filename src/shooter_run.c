@@ -135,8 +135,12 @@ static char const* display_name;
 static timer_t timer_id;
 
 #define DEFAULT_WIDTH 80
+
 #define DEFAULT_NAME  24
+
 #define DEFAULT_STEPS 32U
+
+#define DEFAULT_RUNS  0x8000U
 
 static pthread_mutex_t progress_bar_mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -185,7 +189,8 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
         buffer[pos++] = ' ';
     buffer[pos++] = '[';
 
-    const int ratio = (int) ((DEFAULT_STEPS * progress_current) / progress_total);
+    const int ratio =
+      (int) ((DEFAULT_STEPS * progress_current) / progress_total);
     while (pos < ratio + DEFAULT_NAME + 2) {
         buffer[pos++] = '=';
     }
@@ -353,8 +358,6 @@ ls2_get_view_by_name(const char *name)
 /*! Whether to collect statistics about this thread */
 int ls2_verbose = 0;
 
-/*! Whether to collect statistics about this thread */
-int ls2_progress = 0;
 
 
 /*! Parameters to the location-based simulator. */
@@ -454,11 +457,11 @@ ls2_shooter_run(void *rr)
 #else
 	    pthread_testcancel();   // Check whether this thread is cancelled.
 
-            if (__builtin_expect(ls2_progress != 0, 0)) {
+            if (__builtin_expect(progress_total > 0, 0)) {
                 const uint_fast64_t step =
                     (j - params->from) * params->runs + i;
-                if (__builtin_expect((step & 0x7fffU) == 0, 0)) {
-                    ls2_update_progress_bar(0x8000U);
+                if (__builtin_expect((step & (DEFAULT_RUNS - 1U)) == 0, 0)) {
+                    ls2_update_progress_bar(DEFAULT_RUNS);
                 }
             }
 
@@ -695,7 +698,6 @@ compute_locbased(const int alg, const int em,
 
     cancelled = false;
 
-    ls2_progress     = 1;
     spinner          = 0U;
     progress_current = 0U;
     progress_last    = 0U;
@@ -797,9 +799,9 @@ static void* ls2_inverse_run(void *rr)
 	ALGORITHM_RUN(params->no_anchors, vx, vy, r, &resx, &resy);
 #else
         pthread_testcancel();
-        if (__builtin_expect(ls2_progress != 0, 0)) {
-            if (__builtin_expect((j & 0x7fffU) == 0, 0)) {
-                ls2_update_progress_bar(0x8000U);
+        if (__builtin_expect(progress_total > 0, 0)) {
+	    if (__builtin_expect((j & (DEFAULT_RUNS/VECTOR_OPS-1U)) == 0, 0)) {
+                ls2_update_progress_bar(DEFAULT_RUNS);
             }
         }
 

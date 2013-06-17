@@ -57,9 +57,6 @@ typedef struct vector2 {
 /*! Whether to collect statistics about this thread */
 extern int ls2_verbose;
 
-/*! Whether to report progress. */
-extern int ls2_progress;
-
 
 extern int
 get_algorithm_by_name(const char *)  __attribute__((__const__));

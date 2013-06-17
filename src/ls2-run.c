@@ -99,6 +99,9 @@ static long runs;
 static int arg_width;
 static int arg_height;
 static int num_threads;
+#if !defined(ESTIMATOR)
+static int ls2_progress;
+#endif
 
 static char const *output_format;             /* Format of the output files. */ 
 static char const *output[NUM_VARIANTS];      /* Names of output files.      */
@@ -400,7 +403,9 @@ int main(int argc, const char* argv[])
 				    no_anchors, results, width, height);
     } else {
 	if (ls2_progress != 0) {
-	    ls2_initialize_progress_bar((size_t) runs, algorithm);
+	    char buffer[32];
+	    snprintf(buffer, 31, "inverted %s", algorithm);
+	    ls2_initialize_progress_bar((size_t) runs, buffer);
 	}
 	ls2_distribute_work_inverted(alg, em, num_threads, runs, seed,
                                      tag_x, tag_y,
