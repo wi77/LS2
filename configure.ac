@@ -151,17 +151,20 @@ then
     unset my_save_cflags
 fi
 
-AC_ARG_WITH(arch,
-            [AS_HELP_STRING([--with-arch],
-                            [Build for architecture. @<:@default=native@:>@])],
-            [],
-            [with_arch=native])
-
-if test -z "$ARCH_CFLAGS"
-then
-    ARCH_CFLAGS="-march=$with_arch"
-fi
-AC_SUBST(ARCH_CFLAGS)
+my_save_cflags="$CFLAGS"
+CFLAGS="-mavx -mvzeroupper"
+AC_MSG_CHECKING([whether CC supports -mvzeroupper])
+AC_COMPILE_IFELSE([
+     AC_LANG_PROGRAM([[#include <immintrin.h>]],
+                     [[__m256 v = { 0, 0, 0, 0, 0, 0, 0, 0, };
+                      _mm256_zeroupper();
+                     ]])],
+    [AC_MSG_RESULT([yes])]
+    [cc_supports_vzeroupper=yes],
+    [AC_MSG_RESULT([no])]
+    [cc_supports_vzeroupper=no])
+CFLAGS="$my_save_cflags"
+unset my_save_cflags
 
 my_save_cflags="$CFLAGS"
 CFLAGS="-mrdrnd"
@@ -201,6 +204,18 @@ else
 fi
 AC_SUBST(RDRND_FLAGS)
 AC_SUBST(RDRND_TESTS)
+
+AC_ARG_WITH(arch,
+            [AS_HELP_STRING([--with-arch],
+                            [Build for architecture. @<:@default=native@:>@])],
+            [],
+            [with_arch=native])
+
+if test -z "$ARCH_CFLAGS"
+then
+    ARCH_CFLAGS="-march=$with_arch"
+fi
+AC_SUBST(ARCH_CFLAGS)
 
 # Checks for library functions.
 AC_CHECK_FUNCS([memset sqrt strtoul])
