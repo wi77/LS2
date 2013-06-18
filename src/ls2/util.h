@@ -26,4 +26,7 @@ extern void __attribute__((__nonnull__))
 ls2_statistics(const float *values, const size_t size,
 	       float *mu, float *sigma, float *min, float *max);
 
+extern void
+register_sigsegv_handler(void);
+
 #endif

@@ -108,7 +108,11 @@ static char const *output[NUM_VARIANTS];      /* Names of output files.      */
 static char const *output_hdf5;               /* Names of raw output files.  */
 
 
-int main(int argc, const char* argv[])
+
+
+
+int
+main(int argc, const char* argv[])
 {
     struct timeval start_tv, end_tv; /* For measuring the wall-clock time   */
     poptContext opt_con;        /* context for parsing command-line options */
@@ -230,6 +234,8 @@ int main(int argc, const char* argv[])
         POPT_AUTOHELP
         POPT_TABLEEND
     };
+
+    register_sigsegv_handler();
 
     ls2_verbose = 0;
     arg_width = SIZE;
