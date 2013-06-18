@@ -160,11 +160,16 @@ ls2_update_progress_bar(size_t value)
 double
 get_progress(int *threads)
 {
-    double result = (double) progress_current / (double) progress_total;
+    double result;
     if (threads != NULL)
         *threads = (int) running;
+    if (progress_total > 0)
+        result = (double) progress_current / (double) progress_total;
+    else
+        result = 0.0;
     return result;
 }
+
 
 
 /*
