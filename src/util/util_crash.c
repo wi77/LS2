@@ -58,7 +58,7 @@ sigsegv_handler(int signal __attribute__((__unused__)),
     static const char message2[] =
         "\n=============================== Backtrace End. ===============================\n\n";
 
-    write(STDERR_FILENO, message1, sizeof(message1));
+    if (write(STDERR_FILENO, message1, sizeof(message1))) {}
     fdatasync(STDERR_FILENO);
 
     /* Get the backtrace. */
@@ -72,7 +72,7 @@ sigsegv_handler(int signal __attribute__((__unused__)),
     backtrace_symbols_fd(array, ret, STDERR_FILENO);
     fdatasync(STDERR_FILENO);
 
-    write(STDERR_FILENO, message2, sizeof(message2));
+    if (write(STDERR_FILENO, message2, sizeof(message2)) {}
     fdatasync(STDERR_FILENO);
 
     abort();
