@@ -72,7 +72,7 @@ sigsegv_handler(int signal __attribute__((__unused__)),
     backtrace_symbols_fd(array, ret, STDERR_FILENO);
     fdatasync(STDERR_FILENO);
 
-    if (write(STDERR_FILENO, message2, sizeof(message2)) {}
+    if (write(STDERR_FILENO, message2, sizeof(message2))) {}
     fdatasync(STDERR_FILENO);
 
     abort();
