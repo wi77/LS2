@@ -62,8 +62,11 @@ main(int argc, const char* argv[])
     srand((unsigned int) time(NULL));
     __m128i seed = _mm_set_epi32(rand(), rand(), rand(), rand());
     VECTOR tagx = VECTOR_BROADCASTF(500.0F), tagy = VECTOR_BROADCASTF(500.0F);
-    VECTOR distances[1];
-    VECTOR result[1];
+    vector2 anchors[4] = { { 300.0, 300.0 }, { 300, 700 }, { 700, 300 }, { 700, 700 } };
+    VECTOR vx[4] = { VECTOR_BROADCASTF(300), VECTOR_BROADCASTF(300), VECTOR_BROADCASTF(700), VECTOR_BROADCASTF(700) };
+    VECTOR vy[4] = { VECTOR_BROADCASTF(300), VECTOR_BROADCASTF(700), VECTOR_BROADCASTF(300), VECTOR_BROADCASTF(700) };
+    VECTOR distances[4];
+    VECTOR result[4];
     memset(distances, 0, sizeof(distances));
 
     if (argc != 3) {
@@ -83,12 +86,13 @@ main(int argc, const char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    error_model_setup(em, NULL, 0);
+    error_model_setup(em, anchors, 4);
     for (int i = 0; i < samples; i += VECTOR_OPS) {
-	error_model(em, &seed, distances, NULL, NULL, 1, tagx, tagy, result);
+	error_model(em, &seed, distances, vx, vy, 4, tagx, tagy, result);
 	for (int ii = 0; ii < VECTOR_OPS; ii++) {
 	    printf("%f\n", result[0][ii]);
 	}
     }
     exit(EXIT_SUCCESS);
 }
+
