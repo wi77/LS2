@@ -46,18 +46,10 @@
 #endif
 
 #include "util/util_math.c"
+#include "util/util_median.c"
 #include "util/util_points.c"
 #include "algorithm/nllsq_algorithm.c"
 
-static inline int
-__attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
-compare_double2 (const void *a_, const void *b_) 
-{
-  const double *a = a_;
-  const double *b = b_;
-
-  return *a < *b ? -1 : *a > *b;
-}
 
 static inline int 
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
@@ -75,18 +67,15 @@ static inline int
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 robust_filter(int const count ,float *restrict resx,float *restrict resy) {
         int N = binom(count, 2);
-        double v[N];
-        double vC[N];
+        float v[N];
         for (int i = 0; i < count-1; i++) {
             for (int j = i+1; j < count; j++) {
                 int idx = toIndex(i, j, count);
                 v[idx] = distance_s(resx[i],resy[i],resx[j],resy[j]);
-                vC[idx] = v[idx];
             }
         }
 
-        qsort(vC,(size_t)N,sizeof(double),compare_double2);
-        double MEDV = 2.0 * vC[count/2+1];
+        float MEDV = 2.0f * select_s((size_t) N, v, (size_t) count / 2u + 1u);
         float filtered_x[count];
         float filtered_y[count];
         int filtered_count = 0;
@@ -96,7 +85,7 @@ robust_filter(int const count ,float *restrict resx,float *restrict resy) {
                 if (i == j) {
                     continue;
                 }
-                double dist = v[toIndex(i, j, count)];
+                float dist = v[toIndex(i, j, count)];
                 if (dist >= MEDV) {
                     dropCounter++;
                 }
