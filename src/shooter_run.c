@@ -653,7 +653,7 @@ ls2_distribute_work_shooter(const int alg, const int em,
 
     srand((unsigned int) seed);
 
-    // distribute work to threads
+    // Set up the parameters.
     for (size_t t = 0; t < ls2_num_threads; t++) {
         params[t].id = t;
         params[t].seed = (unsigned int) rand() + (unsigned int) t;
@@ -667,20 +667,31 @@ ls2_distribute_work_shooter(const int alg, const int em,
         params[t].runs = (uint_fast64_t) runs;
         params[t].algorithm = alg;
         params[t].error_model = em;
-
-        if (pthread_create(&ls2_thread[t], NULL, ls2_shooter_run, &params[t])) {
-            perror("pthread_create()");
-            free(ls2_thread);
-            exit(EXIT_FAILURE);
-        }
-        running++;
     }
 
+    /* Create the threads. */
+    if (ls2_num_threads > 2) {
+        for (size_t t = 0; t < ls2_num_threads; t++) {
+            if (pthread_create(&ls2_thread[t], NULL, ls2_shooter_run,
+                               &params[t])) {
+                perror("pthread_create()");
+                exit(EXIT_FAILURE);
+            }
+            running++;
+        }
 
-    // Sync Threads if work has been done
-    for(size_t t = 0; t < ls2_num_threads; t++)
-        pthread_join(ls2_thread[t], NULL);
 
+        // Sync Threads if work has been done
+        for(size_t t = 0; t < ls2_num_threads; t++) {
+            pthread_join(ls2_thread[t], NULL);
+        }
+    } else {
+        /* Since there is only one thread, we call the run code directly.
+         * This should make debugging simpler.
+         */
+        running = 1;
+        ls2_shooter_run(&(params[0]));
+    }
     free(ls2_thread);
     free(params);
 }
