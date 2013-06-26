@@ -66,7 +66,7 @@ toIndex(int row, int col, int N) {
 static inline int 
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 robust_filter(int const count ,float *restrict resx,float *restrict resy) {
-        int N = binom(count, 2);
+        int N = count * (count - 1) / 2;
         float v[N];
         for (int i = 0; i < count-1; i++) {
             for (int j = i+1; j < count; j++) {
@@ -75,7 +75,7 @@ robust_filter(int const count ,float *restrict resx,float *restrict resy) {
             }
         }
 
-        float MEDV = 2.0f * select_s((size_t) N, v, (size_t) count / 2u + 1u);
+        float MEDV = 2.0f * select_s((size_t) N, v, (size_t) N / 2u + 1u);
         float filtered_x[count];
         float filtered_y[count];
         int filtered_count = 0;
