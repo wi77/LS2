@@ -51,10 +51,10 @@
 
 static inline int
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
-compare_floats2 (const void *a_, const void *b_) 
+compare_double2 (const void *a_, const void *b_) 
 {
-  const float *a = a_;
-  const float *b = b_;
+  const double *a = a_;
+  const double *b = b_;
 
   return *a < *b ? -1 : *a > *b;
 }
@@ -85,10 +85,10 @@ robust_filter(int const count ,float *restrict resx,float *restrict resy) {
             }
         }
 
-        qsort(vC,(size_t)N,sizeof(float),compare_floats2);
-        double MEDV = 2 * vC[count/2+1];
-        double filtered_x[count];
-        double filtered_y[count];
+        qsort(vC,(size_t)N,sizeof(double),compare_double2);
+        double MEDV = 2.0 * vC[count/2+1];
+        float filtered_x[count];
+        float filtered_y[count];
         int filtered_count = 0;
         for (int i = 0; i < count; i++) {
             int dropCounter = 0;
@@ -107,14 +107,10 @@ robust_filter(int const count ,float *restrict resx,float *restrict resy) {
                 filtered_count++;
             }
         }
-	if (filtered_count){
-	        memcpy(resx,filtered_x,sizeof(float)*(unsigned int)filtered_count);
-        	memcpy(resy,filtered_y,sizeof(float)*(unsigned int)filtered_count);
-	        return filtered_count;
-	}
-	else 
-		return count;
-    }    
+        memcpy(resx,filtered_x,sizeof(float)*(unsigned int)filtered_count);
+      	memcpy(resy,filtered_y,sizeof(float)*(unsigned int)filtered_count);
+        return filtered_count;
+   }    
 
 
 static inline void
@@ -202,8 +198,8 @@ rlsm_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         
         float weights[int_count];
         for (int jj=0;jj<int_count;jj++) {
-	   weights[jj]=1.0f;
-	}
+	         weights[jj]=1.0f;
+	    }
         // return geometric median as result
         point_geometric_median(int_count, intermediatePositions_x,
                        intermediatePositions_y,
