@@ -58,7 +58,22 @@ AC_CHECK_HEADERS([hdf5.h])
 AX_OPENCL(C)
 
 # Checks for header files.
-AC_HEADER_ASSERT
+# from AC_HEADER_ASSERT, changed for default no
+AC_MSG_CHECKING([whether to enable assertions])
+AC_ARG_ENABLE([assert],
+  [AS_HELP_STRING([--enable-assert], [turn on assertions])],
+  [ac_enable_assert=$enableval
+   AS_IF(dnl
+    [test "x$enableval" = xno],
+      [AC_DEFINE([NDEBUG], [1],
+        [Define to 1 if assertions should be disabled.])],
+    [test "x$enableval" != xyes],
+      [AC_MSG_WARN([invalid argument supplied to --enable-assert])
+      ac_enable_assert=yes])],
+  [ac_enable_assert=no
+   AC_DEFINE([NDEBUG], [1])])
+AC_MSG_RESULT([$ac_enable_assert])
+
 AC_HEADER_STDBOOL
 AC_HEADER_TIME
 AC_CHECK_HEADERS([float.h])
