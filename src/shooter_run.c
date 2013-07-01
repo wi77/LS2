@@ -670,7 +670,7 @@ ls2_distribute_work_shooter(const int alg, const int em,
     }
 
     /* Create the threads. */
-    if (ls2_num_threads > 2) {
+    if (ls2_num_threads > 1) {
         for (size_t t = 0; t < ls2_num_threads; t++) {
             if (pthread_create(&ls2_thread[t], NULL, ls2_shooter_run,
                                &params[t])) {
@@ -816,7 +816,7 @@ static void* ls2_inverse_run(void *rr)
 #else
         pthread_testcancel();
         if (__builtin_expect(progress_total > 0, 0)) {
-	    if (__builtin_expect((j & (DEFAULT_RUNS/VECTOR_OPS-1U)) == 0, 0)) {
+	    if (__builtin_expect(((j + 1u) & (DEFAULT_RUNS/VECTOR_OPS-1U)) == 0, 0)) {
                 ls2_update_progress_bar(DEFAULT_RUNS);
             }
         }
