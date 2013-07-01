@@ -249,8 +249,11 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 #ifdef DEBUG
         fprintf(stderr, "likelihood = %f\n", likelihood);
 #endif
-        if (isinf(likelihood))
-            goto store_result;
+        if (isinf(likelihood)) {
+            (*resx)[i] = NAN;
+            (*resy)[i] = NAN;
+            continue;
+        }
 
         /* Step 2c: Iterate the minimization algorithm. */
         int iter = 0;
@@ -266,7 +269,6 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         } while (status == GSL_CONTINUE && iter < mle_gamma_iterations);
 
         /* Step 2c: Store the result. */
-    store_result:
         (*resx)[i] = (float) gsl_vector_get(s->x, 0);
         (*resy)[i] = (float) gsl_vector_get(s->x, 1);
     }
