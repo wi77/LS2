@@ -36,9 +36,9 @@ NAME(T *values, const size_t length) \
     \
     while ((gap > 1) || swapped) { \
         if (gap > 1) \
-            gap = (gap * 13u) / 10u; \
+            gap = (gap * 10u) / 13u; \
         swapped = false; \
-        for (size_t i = 0; i + gap < length; i += gap) { \
+        for (size_t i = 0; i + gap < length; i++) { \
             if (values[i] > values[i + gap]) { \
                 T t = values[i]; \
                 values[i] = values[i + gap]; \
