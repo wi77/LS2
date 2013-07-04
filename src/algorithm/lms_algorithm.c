@@ -64,7 +64,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     int k = 4;
     int N = (int)no_anchors;
     int M = N > 6 ? 20 : binom(N, k);
-    double threshold = 2.5;
+    float threshold = 2.5f;
 
     if (N < k) {
         llsq_run(vx, vy, r, no_anchors, width, height, resx, resy);
@@ -90,8 +90,8 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                 ran[i] = -1;
                 do {
                     int j;
-		            double randZeroOne = ((double) rand() / (double)RAND_MAX);
-                    int rn = (int) (randZeroOne * (bino - 1));
+		    float randZeroOne = ((float) rand() / (float)RAND_MAX);
+                    int rn = (int) (randZeroOne * ((float) bino - 1));
                     for (j = 0; j < i; j++) {
                         if (ran[j] == rn) break;
                     }
@@ -131,13 +131,13 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
                
         // calculate intermediate position and median of residues
-        double iPos_x[M];
-        double iPos_y[M];
-        double medians[M];
+        float iPos_x[M];
+        float iPos_y[M];
+        float medians[M];
         VECTOR tmpAnchors_x[k];
         VECTOR tmpAnchors_y[k];
         VECTOR tmpRanges[k];
-        double tmpMedian[N];
+        float tmpMedian[N];
                                 
         for (int j = 0; j < M; j++) {
 	        for (int i = 0; i < k; i++) {               
@@ -152,10 +152,10 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
             iPos_y[j] = pey[ii];
             // calculate residue for all points and find median
             for (int i = 0; i < N; i++) {
-                double residue = distance_sf(iPos_x[j],iPos_y[j],vx[i][ii],vy[i][ii]) - r[i][ii];
+                float residue = distance_s(iPos_x[j],iPos_y[j],vx[i][ii],vy[i][ii]) - r[i][ii];
                 tmpMedian[i] = residue * residue;
             }
-            dsort(tmpMedian, (size_t)N);
+            fsort(tmpMedian, (size_t)N);
             medians[j] = tmpMedian[N/2];
         }
 
@@ -168,12 +168,12 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
         
         // 4. Calculate s0
-        double s0 = 1.4826 * (1.0 + 5.0 / ((double)N - 2.0)) * sqrt(medians[m]);
+        float s0 = 1.4826f * (1.0f + 5.0f / (float)(N - 2)) * sqrtf(medians[m]);
         // 5. Assign weights to samples
         int wei[N];
         int count = 0;
         for (int i = 0; i < N; i++) {
-            double ri = distance_sf(iPos_x[m],iPos_y[m],vx[i][ii],vy[i][ii]) - r[i][ii];
+            float ri = distance_s(iPos_x[m], iPos_y[m], vx[i][ii], vy[i][ii]) - r[i][ii];
             if (fabs(ri/s0) <= threshold) {
                 wei[i] = 1;
                 count++;
@@ -181,9 +181,8 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                 wei[i] = 0;
             }
         }
-        
-        
-        VECTOR anchors_x[count],anchors_y[count],ranges[count];
+
+        VECTOR anchors_x[count], anchors_y[count], ranges[count];
         int c=0;
         for (int i=0; i < N; i++) {
             if (wei[i]==1) {
@@ -196,7 +195,8 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         
         // 6. Calculate weighted LS and return result as final position
         VECTOR pex, pey;
-        llsq_run(anchors_x,anchors_y,ranges,(size_t)count,width,height,&pex,&pey);
+        llsq_run(anchors_x, anchors_y, ranges, (size_t)count,
+                 width, height, &pex, &pey);
         
         (*resx)[ii] = pex[ii];
         (*resy)[ii] = pey[ii];
