@@ -46,31 +46,13 @@
 #endif
 
 #include <assert.h>
-#include <gsl/gsl_multimin.h>
 //#include "algorithm/llsq_algorithm.c"
-//#include "util/util_math.c"
+#include "util/util_sort.c"
 #include <stdlib.h>
 
-/* Returns 1 if *A is greater than *B,
-   0 if *A equals *B,
-   -1 if *A is less than *B. */
-static inline int
-compare_ints (const void *a_, const void *b_) 
-{
-  const int *a = a_;
-  const int *b = b_;
 
-  return *a < *b ? -1 : *a > *b;
-}
 
-static inline int
-compare_dbl (const void *a_, const void *b_) 
-{
-  const double *a = a_;
-  const double *b = b_;
 
-  return *a < *b ? -1 : *a > *b;
-}
 
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
@@ -118,7 +100,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                     }
                 } while (ran[i] == -1);
             }
-            qsort(ran, (size_t) M, sizeof(int), compare_ints);
+            isort(ran, (size_t) M);
         }
 
         // initialisation for calculating k-permutations
@@ -173,7 +155,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                 double residue = distance_sf(iPos_x[j],iPos_y[j],vx[i][ii],vy[i][ii]) - r[i][ii];
                 tmpMedian[i] = residue * residue;
             }
-            qsort(tmpMedian, (size_t)N, sizeof(double), compare_dbl);
+            dsort(tmpMedian, (size_t)N);
             medians[j] = tmpMedian[N/2];
         }
 
