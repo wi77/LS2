@@ -140,23 +140,24 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         float tmpMedian[N];
                                 
         for (int j = 0; j < M; j++) {
-	        for (int i = 0; i < k; i++) {               
-		        tmpAnchors_x[i] = vx[randPermutations[j][i]];
+	    for (int i = 0; i < k; i++) {               
+		tmpAnchors_x[i] = vx[randPermutations[j][i]];
                 tmpAnchors_y[i] = vy[randPermutations[j][i]];
                 tmpRanges[i] = r[randPermutations[j][i]];
             }
             VECTOR pex, pey;
-            llsq_run(tmpAnchors_x,tmpAnchors_y,tmpRanges,(size_t)k,width,height,&pex,&pey);
+            llsq_run(tmpAnchors_x, tmpAnchors_y, tmpRanges, (size_t) k,
+                     width, height, &pex, &pey);
             
-            iPos_x[j] = pex[ii];
-            iPos_y[j] = pey[ii];
+            iPos_x[j] = (!isnan(pex[ii])) ? pex[ii] : FLT_MAX;
+            iPos_y[j] = (!isnan(pey[ii])) ? pey[ii] : FLT_MAX;
+
             // calculate residue for all points and find median
             for (int i = 0; i < N; i++) {
-                float residue = distance_s(iPos_x[j],iPos_y[j],vx[i][ii],vy[i][ii]) - r[i][ii];
+                float residue = distance_s(iPos_x[j], iPos_y[j], vx[i][ii], vy[i][ii]) - r[i][ii];
                 tmpMedian[i] = residue * residue;
             }
-            fsort(tmpMedian, (size_t)N);
-            medians[j] = tmpMedian[N/2];
+            medians[j] = fselect_s(tmpMedian, (size_t) N, (size_t) N / 2);
         }
 
         // 3. Find index of least median
@@ -168,7 +169,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         }
         
         // 4. Calculate s0
-        float s0 = 1.4826f * (1.0f + 5.0f / (float)(N - 2)) * sqrtf(medians[m]);
+        float s0 = 1.4826f * (1.0f + 5.0f / ((float)N - 2.0f)) * sqrtf(medians[m]);
         // 5. Assign weights to samples
         int wei[N];
         int count = 0;
@@ -182,6 +183,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
             }
         }
 
+        assert(count > 0);
         VECTOR anchors_x[count], anchors_y[count], ranges[count];
         int c=0;
         for (int i=0; i < N; i++) {
