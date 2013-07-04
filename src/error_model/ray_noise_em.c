@@ -415,12 +415,12 @@ ray(VECTOR coord[],
 {
     //kill Ray if not Strong enough
     if((coord[depth+5][0])<THRESHOLD) return 0;
-    VECTOR cx;
-    VECTOR cy;
-    VECTOR dcx;
-    VECTOR dcy;
+    VECTOR cx = VECTOR_ZERO();
+    VECTOR cy = VECTOR_ZERO();
+    VECTOR dcx = VECTOR_ZERO();
+    VECTOR dcy = VECTOR_ZERO();
     VECTOR dist = fzero;
-    VECTOR angle;
+    VECTOR angle = VECTOR_ZERO();
     //get ray from array
     VECTOR ax = coord[depth];
     VECTOR ay = coord[depth+1];
@@ -431,7 +431,7 @@ ray(VECTOR coord[],
     VECTOR a = coord[depth+6];
     int status = 0;
     int space = (*space2);
-    int wnum;
+    int wnum = 0;
     //For debugging
     if(dx[0]==0&&dy[0]==0) {
         printf("dx = 0 und dy = 0 Bug, error beim durchaufen con coord \n");

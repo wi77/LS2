@@ -41,11 +41,16 @@
 #include "util/util_triangle.c"
  
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-llsq_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors,
-         int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy)
+llsq_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
+         size_t num_anchors,
+         int width __attribute__((__unused__)),
+         int height __attribute__((__unused__)),
+         VECTOR *restrict resx,
+         VECTOR *restrict resy)
 {
     // Solve equation of form W*A*x = W*b
-    size_t m = num_anchors-1U;
+    assert(num_anchors > 0);
+    const size_t m = num_anchors-1U;
     VECTOR b[m*1];
     VECTOR a[m*2];
     VECTOR mAT[2*m];
