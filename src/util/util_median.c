@@ -27,45 +27,62 @@
  * Adapted from Wirth, Niklaus.  * "Algorithms + data structures = programs",
  * Englewood Cliffs: Prentice-Hall, 1976.
  */
-static inline float
-__attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__))
-select_s(const size_t length, float const * const values, const size_t k)
-{
-    if (length <= 0) return 0.0F;
-    float a[length];
-    memcpy(a, values, length * sizeof(float));
-
-    size_t i, j, l = 0, m = length - 1;
-    float x;
-
-    while (l < m) {
-        x = a[k];
-        i = l;
-        j = m;
-        do {
-            while(a[i] < x) i++;
-            while(x < a[j]) j--;
-            if (i <= j) {
-                float t = a[i];
-                a[i] = a[j];
-                a[j] = t;
-                i++;
-                j--;
-            }
-        } while (i <= j);
-        if (j < k) l = i;
-        if (k < i) m = j;
-    }
-    return a[k];
+#define SELECT_TEMPLATE(T, NAME) \
+static inline T \
+__attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__)) \
+NAME(T const * const values, const size_t length, const size_t k) \
+{ \
+    if (length <= 0) return 0.0; \
+    T a[length]; \
+    memcpy(a, values, length * sizeof(T)); \
+    \
+    size_t i, j, l = 0, m = length - 1; \
+    T x; \
+    \
+    while (l < m) { \
+        x = a[k]; \
+        i = l; \
+        j = m; \
+        do { \
+            while(a[i] < x) i++; \
+            while(x < a[j]) j--; \
+            if (i <= j) { \
+                T t = a[i]; \
+                a[i] = a[j]; \
+                a[j] = t; \
+                i++; \
+                j--; \
+            } \
+        } while (i <= j); \
+        if (j < k) l = i; \
+        if (k < i) m = j; \
+    } \
+    return a[k]; \
 }
+
+SELECT_TEMPLATE(float, fselect_s)
 
 /* Compute the media. */
 static inline float
 __attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__))
-median_s(const size_t length, float const * const values)
+fmedian_s(const size_t length, float const * const values)
 {
     const size_t k = length / 2 - ((length & 1) ? 0 : 1);
-    return select_s(length, values, k);
+    return fselect_s(values, length, k);
 }
 
+
+
+
+
+SELECT_TEMPLATE(double, select_s)
+
+/* Compute the media. */
+static inline double
+__attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__))
+median_s(const size_t length, double const * const values)
+{
+    const size_t k = length / 2 - ((length & 1) ? 0 : 1);
+    return select_s(values, length, k);
+}
 #endif

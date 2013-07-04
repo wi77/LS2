@@ -80,7 +80,7 @@ robust_filter(size_t const count ,float *restrict resx,float *restrict resy)
         }
     }
 
-    const float MEDV = 2.0f * select_s(N, v, N / 2u + 1u);
+    const float MEDV = 2.0f * fselect_s(v, N, N / 2u + 1u);
     float filtered_x[count];
     float filtered_y[count];
     size_t filtered_count = 0;

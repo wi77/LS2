@@ -163,7 +163,7 @@ geon_run (const VECTOR* vx, const VECTOR* vy,
             }
         }
 
-        const float median = select_s(icount, distances, icount / 2);
+        const float median = fselect_s(distances, icount, icount / 2);
         
         float vvx[icount];
         float vvy[icount];
