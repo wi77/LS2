@@ -192,7 +192,7 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
     }
     while (pos < DEFAULT_NAME + 2)
         buffer[pos++] = ' ';
-    buffer[pos++] = '[';
+    buffer[pos++] = '|';
 
     const int ratio =
       (int) ((DEFAULT_STEPS * progress_current) / progress_total);
@@ -202,19 +202,28 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
     if (ratio < (int) DEFAULT_STEPS)
         buffer[pos++] = '>';
     while (pos < DEFAULT_NAME + (int) DEFAULT_STEPS + 2) {
-        buffer[pos++] = '.';
+        buffer[pos++] = ' ';
     }
-    buffer[pos++] = ']';
 
-    pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
-                    " %6.2f%% %2zu/%2zu thr.",
-                    ((float) progress_current) * 100.0f / ((float) progress_total),
-                    running, ls2_num_threads);
+    // Turn the spinner if not finished
+    if (progress_current < progress_total) {
+        buffer[pos++] = spinner_char[spinner];
+        if (progress_current != progress_last)
+            spinner = (spinner + 1U) & 0x3U;
+    } else {
+        buffer[pos++] = '|';
+    }
+
+    float progress = ((float) progress_current) * 100.0f / ((float) progress_total);
+    if (ls2_num_threads < 100) {
+        pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
+                        " %5.1f%% %2zu/%2zu thr.", progress,
+                        running, ls2_num_threads);
+    } else {
+        pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
+                        " %5.1f%% %4zu thr.", progress, running);
+    }
     pos = MIN(DEFAULT_WIDTH - 3, pos);
-    buffer[pos++] = ' ';
-    buffer[pos++] = spinner_char[spinner];
-    if (progress_current != progress_last)
-        spinner = (spinner + 1U) & 0x3U;
     buffer[pos++] = '\r';
     buffer[pos] = '\0';
     progress_last = progress_current;
