@@ -108,7 +108,8 @@ typedef union imm_xmm_union {
 
 
 #define AVX2_BITOP_USING_SSE2(fn) \
-static inline v8si _mm256_##fn(v8si x, int a) \
+static inline __attribute__((__always_inline__,__gnu_inline__,__flatten__,__const__)) \
+v8si _mm256_##fn(v8si x, int a) \
 { \
   /* use SSE2 instruction to perform the bitop AVX2 */ \
   v4si x1, x2; \
@@ -126,7 +127,8 @@ AVX2_BITOP_USING_SSE2(slli_epi32)
 AVX2_BITOP_USING_SSE2(srli_epi32)
 
 #define AVX2_INTOP_USING_SSE2(fn) \
-static inline v8si _mm256_##fn(v8si x, v8si y) \
+static inline __attribute__((__always_inline__,__gnu_inline__)) \
+v8si _mm256_##fn(v8si x, v8si y) \
 { \
   /* use SSE2 instructions to perform the AVX2 integer operation */ \
   v4si x1, x2; \
@@ -154,7 +156,7 @@ AVX2_INTOP_USING_SSE2(add_epi32)
 /* natural logarithm computed for 8 simultaneous float 
    return NaN for x <= 0
 */
-static inline __attribute__((always_inline,const,artificial))
+static inline __attribute__((always_inline,const,artificial,flatten))
 v8sf log256_ps(v8sf x) {
   v8si imm0;
   v8sf one = *(v8sf*)_ps256_1;

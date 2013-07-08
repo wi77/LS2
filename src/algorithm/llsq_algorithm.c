@@ -37,6 +37,8 @@
 #ifndef ALGORITHM_LLSQ_C_INCLUDED
 #define ALGORITHM_LLSQ_C_INCLUDED 1
 
+#include <assert.h>
+
 #include "util/util_matrix.c"
 #include "util/util_triangle.c"
  
