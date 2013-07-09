@@ -94,6 +94,11 @@ ls2_pick_color_diff(const double sample, const double similar,
 	assert(0.5 <= *saturation && *saturation <= 0.875);
 	*lightness = MIN(0.5 + sample / dynamic, 0.875);
 	assert(0.5 <= *lightness && *lightness <= 0.875);
+    } else if (isnan(sample)) {
+        // Mark not-a-number in magenta.
+        *hue = 300.0;
+        *saturation = 1.0;
+        *lightness = 0.5;
     } else {
 	assert(false);
     }
