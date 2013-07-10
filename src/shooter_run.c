@@ -214,7 +214,8 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
         buffer[pos++] = '|';
     }
 
-    float progress = ((float) progress_current) * 100.0f / ((float) progress_total);
+    float progress =
+        ((float) progress_current) * 100.0f / ((float) progress_total);
     if (ls2_num_threads < 100) {
         pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
                         " %5.1f%% %2zu/%2zu thr.", progress,
