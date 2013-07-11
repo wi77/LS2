@@ -77,7 +77,7 @@ rand_sse(__m128i* cur_seed)
 
 
 // Returns a vector of random numbers between 0..1
-#if !defined(__RDRND__)
+#if !defined(__RDRND__) || !defined(WITH_RDRND)
 #  if defined(__AVX__)
 static inline VECTOR
 __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__,__hot__,__flatten__))
@@ -91,7 +91,9 @@ rnd(__m128i *seed)
     ret += half;
     return ret;
 }
+
 #  else
+
 static inline VECTOR
 __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__,__hot__,__flatten__))
 rnd(__m128i *seed)

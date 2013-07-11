@@ -205,7 +205,7 @@ then
     then
         RDRND_FLAGS="-mrdrnd"
     else
-        AC_MSG_WARN([Use of rdrnd was requested but CC does not support it])
+        AC_MSG_WARN([Use of rdrnd was requested but CC does not support -mrdrnd])
         RDRND_FLAGS=""
     fi
 else
@@ -219,6 +219,9 @@ else
 fi
 AC_SUBST(RDRND_FLAGS)
 AC_SUBST(RDRND_TESTS)
+AC_MSG_NOTICE([Building the library with rdrnd support?])
+AC_MSG_NOTICE(AS_HELP_STRING([with rdrnd], [$with_rdrnd]))
+AC_MSG_NOTICE(AS_HELP_STRING([rdrnd flag], [$RDRND_FLAGS]))
 
 AC_ARG_WITH(arch,
             [AS_HELP_STRING([--with-arch],
