@@ -64,7 +64,10 @@ ls2_pick_color_diff(const double sample, const double similar,
 		    const double dynamic, double *restrict hue,
 		    double *restrict saturation, double *restrict lightness)
 {
-    if (sample < -similar) {
+    static const double min_saturation = 0.125;
+    static const double max_saturation = 0.875;
+
+    if (sample < -similar && isinf(sample) == 0) {
         /* First was better                    */
 	/* The color is green and gets darker. */
 	assert(sample < 0);
@@ -73,15 +76,15 @@ ls2_pick_color_diff(const double sample, const double similar,
         } else {
 	    *hue = 120.0;
         }
-	*saturation = MAX(0.125, 0.5 + sample / dynamic);
-	assert(0.125 <= *saturation && *saturation <= 0.5);
+	*saturation = MAX(min_saturation, 0.5 + sample / dynamic);
+	assert(min_saturation <= *saturation && *saturation <= 0.5);
 	*lightness = MAX(0.0, 0.5 + sample / dynamic);
 	assert(0 <= *lightness && *lightness <= 0.5);
     } else if (-similar <= sample && sample <= similar) {    // Similar
 	*hue = 60.0;  // This is the color yellow
 	*lightness = 0.5;
 	*saturation = 0.5;
-    } else if (similar < sample) {
+    } else if (similar < sample && isinf(sample) == 0) {
         /* Second was better                   */
 	/* We start with red and get brighter. */
 	assert (0 < sample);
@@ -90,11 +93,11 @@ ls2_pick_color_diff(const double sample, const double similar,
         } else {
             *hue = 0.0;
         }
-	*saturation = MIN(0.5 + sample / dynamic, 0.875);
-	assert(0.5 <= *saturation && *saturation <= 0.875);
-	*lightness = MIN(0.5 + sample / dynamic, 0.875);
-	assert(0.5 <= *lightness && *lightness <= 0.875);
-    } else if (isnan(sample)) {
+	*saturation = MIN(0.5 + sample / dynamic, max_saturation);
+	assert(0.5 <= *saturation && *saturation <= max_saturation);
+	*lightness = MIN(0.5 + sample / dynamic, 1.0);
+	assert(0.5 <= *lightness && *lightness <= 1.0);
+    } else if (isnan(sample) != 0) {
         // Mark not-a-number in magenta.
         *hue = 300.0;
         *saturation = 1.0;
