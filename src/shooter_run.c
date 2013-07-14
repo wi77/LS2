@@ -452,7 +452,8 @@ ls2_shooter_run(void *rr)
             distances[k] = distance(vx[k], vy[k], tagx, tagy);
         }
 
-        float M = 0.0F, M_old, S = 0.0F, cnt = 0.0F, mse = 0.0F;
+        float M = 0.0F, M_old, S = 0.0F, cnt = 0.0F;
+        float MSE = 0.0F, MSE_old, C_MSE = 0.0F;
         float M_X = 0.0F, M_X_old, S_X = 0.0F, C_X = 0.0F;
         float M_Y = 1.0F, M_Y_old, S_Y = 0.0F, C_Y = 0.0F;
         uint_fast64_t failures = 0U; // How often did it fail (nan)?
@@ -495,7 +496,7 @@ ls2_shooter_run(void *rr)
             if (params->results[AVERAGE_ERROR] != NULL ||
                 params->results[STANDARD_DEVIATION] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
-                    if (__builtin_expect(!isnan(errors[k]), 1)) {
+                    if (__builtin_expect(isnan(errors[k]) == 0, 1)) {
                         cnt += 1.0F;
                         M_old = M;
                         M += (errors[k] - M) / cnt;
@@ -513,21 +514,20 @@ ls2_shooter_run(void *rr)
                 continue;
 
             if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
-                VECTOR tmp = errors * errors;
-
-	        tmp = VECTOR_HADD(tmp, tmp);
-	        tmp = VECTOR_HADD(tmp, tmp);
-#  ifdef __AVX__
-	        tmp = VECTOR_HADD(tmp, tmp);
-#  endif
-
-	        mse += tmp[0];
+                VECTOR sqerror = errors * errors;
+                for (int k = 0; k < VECTOR_OPS; k++) {
+                    if (__builtin_expect(isnan(sqerror[k]) == 0, 1)) {
+                        C_MSE += 1.0F;
+                        MSE_old = MSE;
+                        MSE += (sqerror[k] - MSE_old) / C_MSE;
+                    }
+                }
             }
 
             if (params->results[AVERAGE_X_ERROR] != NULL ||
                 params->results[STANDARD_DEVIATION_X_ERROR] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
-                    if (!isnan(resx[k])) {
+                    if (__builtin_expect(isnan(resx[k]) == 0, 1)) {
                         C_X += 1.0F;
                         M_X_old = M_X;
 			const float dx = resx[k] - x;
@@ -540,7 +540,7 @@ ls2_shooter_run(void *rr)
             if (params->results[AVERAGE_Y_ERROR] != NULL ||
                 params->results[STANDARD_DEVIATION_Y_ERROR] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
-                    if (!isnan(resy[k])) {
+                    if (__builtin_expect(isnan(resy[k]) == 0, 1)) {
                         C_Y += 1.0F;
                         M_Y_old = M_Y;
 			const float dy = resy[k] - y;
@@ -580,8 +580,7 @@ ls2_shooter_run(void *rr)
             }
         }
         if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
-            const float __r = (float) params->runs;
-	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(mse / __r);
+	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(MSE);
         }
         if (params->results[AVERAGE_X_ERROR] != NULL) {
 	    params->results[AVERAGE_X_ERROR][pos] = M_X;
