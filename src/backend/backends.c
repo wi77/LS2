@@ -87,6 +87,34 @@ ls2_write_locbased(ls2_output_format_t format, const char *filename,
 
 
 void
+ls2_write_density(ls2_output_format_t format, const char *filename,
+		  const vector2 *anchors, const size_t num_anchors,
+		  const float *results, const uint16_t width,
+		  const uint16_t height)
+{
+    switch (format) {
+    case OUTPUT_PNG:
+	ls2_cairo_write_png_density(filename, anchors, num_anchors,
+				    results, width, height);
+	break;
+    case OUTPUT_PDF:
+	ls2_cairo_write_pdf_density(filename, anchors, num_anchors,
+				    results, width, height);
+	break;
+    case OUTPUT_OPENEXR:
+	// ls2_openexr_write_density(filename, anchors, num_anchors,
+	//			  results, width, height);
+        abort();
+	break;
+    case NUM_OUTPUT_FORMATS:
+	break;
+    }
+}
+
+
+
+
+void
 ls2_write_inverted(ls2_output_format_t format, const char *filename,
 		   const uint64_t runs, const float tag_x, float tag_y,
 		   const vector2 *restrict anchors, const size_t num_anchors,

@@ -240,7 +240,11 @@ main(int argc, const char* argv[])
     ls2_verbose = 0;
     arg_width = SIZE;
     arg_height = SIZE;
+#ifdef _SC_NPROCESSORS_ONLN
+    num_threads = (int) MIN(1024L, 4 * sysconf(_SC_NPROCESSORS_ONLN));
+#else
     num_threads = NUM_THREADS;
+#endif
     output_format = "png";
 #if !defined(ESTIMATOR)
     algorithm = ALGORITHM_DEFAULT;

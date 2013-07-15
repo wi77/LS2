@@ -125,10 +125,10 @@ ls2_draw_anchors_to_cairo(cairo_surface_t *surface,
 
 
 static void
-ls2_draw_to_cairo_surface(cairo_surface_t *surface,
-			  const vector2 *anchors, const size_t no_anchors,
-                          const float* result, const uint16_t width,
-			  const uint16_t height)
+ls2_draw_to_cairo_surface_locbased(cairo_surface_t *surface,
+				   const vector2 *anchors, const size_t no_anchors,
+				   const float* result, const uint16_t width,
+				   const uint16_t height)
 {
     const double fn_size = (double) ((width < height) ? width : height) / 50.0;
     ls2_draw_result_to_cairo(surface, result, width, height);
@@ -145,8 +145,8 @@ ls2_cairo_write_pdf_locbased(const char* filename,
 {
     cairo_surface_t *surface =
         cairo_pdf_surface_create(filename, width, height);
-    ls2_draw_to_cairo_surface(surface, anchors, no_anchors, result, width,
-			      height);
+    ls2_draw_to_cairo_surface_locbased(surface, anchors, no_anchors, result,
+				       width, height);
     cairo_surface_destroy(surface);
 }
 
@@ -159,11 +159,97 @@ ls2_cairo_write_png_locbased(const char* filename,
 {
     cairo_surface_t *surface =
         cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-    ls2_draw_to_cairo_surface(surface, anchors, no_anchors, result, width,
-			      height);
+    ls2_draw_to_cairo_surface_locbased(surface, anchors, no_anchors, result,
+				       width, height);
     cairo_surface_write_to_png(surface, filename);
     cairo_surface_destroy(surface);
 }
+
+
+
+/*!
+ * Draw a result image to a surface.
+ */
+static cairo_surface_t *
+ls2_draw_density_to_cairo(cairo_surface_t *surface,
+		         const float *result, const uint16_t width,
+			 const uint16_t height)
+{
+    cairo_t *cr;
+
+    // Create a drawing buffer.
+    cr = cairo_create(surface);
+    
+    // Fill the background
+    cairo_set_source_rgb(cr, 0.0, 0.0, 1.0);
+    cairo_rectangle(cr, 0, 0, width, height);
+    cairo_fill(cr);
+
+    // Color each location
+    for (uint16_t y = 0; y < height; y++) {
+	for (uint16_t x = 0; x < width; x++) {
+	    const float sample = result[y * width + x];
+            double hue, lightness, saturation, r, g, b;
+            ls2_pick_color_density(sample, &hue, &saturation, &lightness);
+            hsl_to_rgb(hue, saturation, lightness, &r, &g, &b);
+	    cairo_set_source_rgb(cr, r, g, b);
+	    cairo_rectangle(cr, x, y, 1.0, 1.0);
+	    cairo_fill(cr);
+	}
+    }
+
+    cairo_destroy(cr);
+    cairo_surface_flush(surface);
+
+    return surface;
+}
+
+
+static void
+ls2_draw_to_cairo_surface_density(cairo_surface_t *surface,
+				  const vector2 *anchors, const size_t no_anchors,
+				  const float* result, const uint16_t width,
+				  const uint16_t height)
+{
+    const double fn_size = (double) ((width < height) ? width : height) / 50.0;
+    ls2_draw_density_to_cairo(surface, result, width, height);
+    ls2_draw_anchors_to_cairo(surface, anchors, no_anchors, 0, fn_size);
+                              
+}
+
+
+extern void
+ls2_cairo_write_pdf_density(const char* filename,
+			    const vector2 *anchors, const size_t no_anchors, 
+			    const float* result, const uint16_t width,
+			    const uint16_t height)
+{
+    cairo_surface_t *surface =
+        cairo_pdf_surface_create(filename, width, height);
+    ls2_draw_to_cairo_surface_density(surface, anchors, no_anchors, result,
+				      width, height);
+    cairo_surface_destroy(surface);
+}
+
+
+
+
+
+extern void
+ls2_cairo_write_png_density(const char* filename,
+			    const vector2 *anchors, const size_t no_anchors, 
+			    const float* result, const uint16_t width,
+			    const uint16_t height)
+{
+    cairo_surface_t *surface =
+        cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+    ls2_draw_to_cairo_surface_density(surface, anchors, no_anchors, result,
+				      width, height);
+    cairo_surface_write_to_png(surface, filename);
+    cairo_surface_destroy(surface);
+}
+
+
 
 
 
@@ -342,7 +428,7 @@ ls2_cairo_draw_diff(cairo_surface_t *surface,
 	    const float sample = result[y * width + x];
 	    ls2_pick_color_diff(sample, similar, dynamic,
 				&hue, &saturation, &lightness);
-            hsl_to_rgb(hue, lightness, saturation, &r, &g, &b);
+            hsl_to_rgb(hue, saturation, lightness, &r, &g, &b);
 	    cairo_set_source_rgb(cr, r, g, b);
 	    cairo_rectangle(cr, x, y, 1.0, 1.0);
 	    cairo_fill(cr);

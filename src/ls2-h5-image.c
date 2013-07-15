@@ -78,6 +78,10 @@ int main(int argc, const char* argv[])
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[ROOT_MEAN_SQUARED_ERROR]), 0,
           "name of the root mean squared error output image", "file name" },
+        { "output-success", 'S',
+          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
+          &(output[FAILURES]), 0,
+          "name of the failure rate output image file", "file name" },
         { "output-phase", 'z',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[AVERAGE_X_ERROR]), 0,
@@ -169,9 +173,12 @@ int main(int argc, const char* argv[])
 			           &mu, &sigma, &min, &max);
 	            fprintf(stdout, "MAE = %f, sdev = %f, min = %f, max = %f\n",
 		            mu, sigma, min, max);
-	  
-	            ls2_write_locbased(format, output[var], anchors, no_anchors,
-			               results, width, height);
+		    if (var != FAILURES)
+			ls2_write_locbased(format, output[var], anchors, no_anchors,
+					   results, width, height);
+ 		    else
+			ls2_write_density(format, output[var], anchors, no_anchors,
+					  results, width, height);		      
                     free(results);
                 }
                 // clean-ups.

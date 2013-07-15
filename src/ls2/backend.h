@@ -46,6 +46,11 @@ ls2_write_locbased(ls2_output_format_t format, const char *filename,
 		   const float *results, const uint16_t width,
 		   const uint16_t height);
 
+extern void
+ls2_write_density(ls2_output_format_t format, const char *filename,
+		  const vector2 *anchors, const size_t num_anchors,
+		  const float *results, const uint16_t width,
+		  const uint16_t height);
 
 extern void
 ls2_write_inverted(ls2_output_format_t format, const char *filename,
@@ -71,6 +76,18 @@ ls2_cairo_write_png_locbased(const char* filename,
                              const vector2 *anchors, const size_t no_anchors,
                              const float* result, const uint16_t width,
 		             const uint16_t height);
+
+extern void
+ls2_cairo_write_pdf_density(const char* filename,
+                            const vector2 *anchors, const size_t no_anchors,
+                            const float* result, const uint16_t width,
+		            const uint16_t height);
+
+extern void
+ls2_cairo_write_png_density(const char* filename,
+                            const vector2 *anchors, const size_t no_anchors,
+                            const float* result, const uint16_t width,
+		            const uint16_t height);
 
 extern void
 ls2_cairo_write_pdf_inverted(const char* filename,

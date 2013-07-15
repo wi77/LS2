@@ -54,6 +54,45 @@ ls2_pick_color_locbased(const float sample, double *r, double *g,
 
 
 
+/*!
+ *
+ */
+static inline void
+__attribute__((__nonnull__,__gnu_inline__,__always_inline__,__const__))
+ls2_pick_color_density(const float sample, double *restrict hue,
+                       double *restrict saturation, double *restrict lightness)
+{
+    if (isnan(sample)) {
+        // Mark not-a-number in magenta.
+        *hue = 300.0;
+        *saturation = 1.0;
+        *lightness = 0.5;
+    } else {
+	assert(0.0 <= sample && sample <= 1.0);
+        const double t = cbrt(1.0 - sample);
+        if (sample <= 0.25) {
+            *hue = 150.0;
+        } else if (0.25 < sample && sample <= 0.5) {
+            *hue = 120.0;
+        } else if (0.5 < sample && sample <= 0.75) {
+            *hue = 90.0;
+        } else if (0.75 < sample && sample <= 0.95) {
+            *hue = 60.0;
+        } else if (0.95 < sample && sample <= 0.98) {
+            *hue = 30.0;
+        } else if (0.98 < sample && sample <= 0.99) {
+            *hue = 0.0;
+        } else {
+            *hue = 300.0;
+        }
+        *saturation = 1.0;
+        *lightness = t;
+    }
+}
+
+
+
+
 
 /*!
  *
