@@ -129,7 +129,7 @@ mle_gamma_likelihood_function(const gsl_vector *restrict X, void *restrict param
                           (thetaY - p->anchors[j].y);
         const double d = sqrt(d2);
         const double Z = p->ranges[j] + mle_gamma_offset - d;
-        if (Z <= 0.0) {
+        if (__builtin_expect(Z <= 0.0, 0)) {
             result = INFINITY; // If a measurement is too short, return this.
             break;
         }
@@ -137,7 +137,7 @@ mle_gamma_likelihood_function(const gsl_vector *restrict X, void *restrict param
             log(p->factor * pow(Z, mle_gamma_shape - 1.0)) - mle_gamma_rate * Z;
         result -= likelihood;
     }
-#ifdef DEBUG
+#if !defined(NDEBUG)
     fprintf(stderr, "f(%f, %f) = %f\n", thetaX, thetaY, result);
 #endif
     return result;
@@ -164,6 +164,8 @@ mle_gamma_likelihood_gradient(const gsl_vector *restrict X, void *restrict param
             const double Z = p->ranges[j] + mle_gamma_offset - d;
 
             if (__builtin_expect(Z <= 0, 0)) {
+                /* If this is the case, the initial guess does not have
+                   a likelihood associated to it. */
                 gradX = NAN;
                 gradY = NAN;
                 break;
@@ -175,7 +177,7 @@ mle_gamma_likelihood_gradient(const gsl_vector *restrict X, void *restrict param
             gradY -= (thetaY -  p->anchors[j].y) * t;
         } // TODO: Otherwise the value of the gradient component is 0?
     }
-#ifdef DEBUG
+#if !defined(NDEBUG)
     fprintf(stderr, "df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
 #endif
     gsl_vector_set(g, 0, gradX);
@@ -228,11 +230,11 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     
 
     /* Step: Call the optimiser. */
-    const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
+    const gsl_multimin_fdfminimizer_type *T =
+        gsl_multimin_fdfminimizer_vector_bfgs2;
     gsl_multimin_fdfminimizer *s = gsl_multimin_fdfminimizer_alloc(T, 2);
 
-    gsl_vector *x;
-    x = gsl_vector_alloc(2);
+    gsl_vector *x = gsl_vector_alloc(2);
 
     VECTOR sx, sy;
     llsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
@@ -246,10 +248,13 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         gsl_vector_set(x, 1, sy[i]);
 
         double likelihood = mle_gamma_likelihood_function(x, &p);
-#ifdef DEBUG
+#if !defined(NDEBUG)
         fprintf(stderr, "likelihood = %f\n", likelihood);
 #endif
-        if (isinf(likelihood)) {
+        if (__builtin_expect(isinf(likelihood), 0)) {
+            /* If this is the case, the initial guess does not have
+               a likelihood associated to it. We set the estimated coordinate
+               to an undefined value and continue. */
             (*resx)[i] = NAN;
             (*resy)[i] = NAN;
             continue;
@@ -258,14 +263,15 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         /* Step 2c: Iterate the minimization algorithm. */
         int iter = 0;
         int status;
-        gsl_multimin_fdfminimizer_set(s, &fdf, x, 1e-3, 1e-4);
+        gsl_multimin_fdfminimizer_set(s, &fdf, x, 1e-2, 1e-4);
 
         do {
             iter++;
             status = gsl_multimin_fdfminimizer_iterate(s);
-            if (status)
+            if (__builtin_expect(status, 0)) // Not zero if there was an error.
                 break;
-            status = gsl_multimin_test_gradient (s->gradient, mle_gamma_epsilon);
+            status =
+                gsl_multimin_test_gradient (s->gradient, mle_gamma_epsilon);
         } while (status == GSL_CONTINUE && iter < mle_gamma_iterations);
 
         /* Step 2c: Store the result. */
