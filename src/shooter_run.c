@@ -496,21 +496,21 @@ ls2_shooter_run(void *rr)
             if (params->results[AVERAGE_ERROR] != NULL ||
                 params->results[STANDARD_DEVIATION] != NULL) {
                 for (int k = 0; k < VECTOR_OPS; k++) {
-                    if (__builtin_expect(isnan(errors[k]) == 0, 1)) {
+                    if (__builtin_expect(isnan(errors[k]), 0)) {
+                        failures += 1;
+                    } else {
                         cnt += 1.0F;
                         M_old = M;
                         M += (errors[k] - M) / cnt;
                         if (params->results[STANDARD_DEVIATION] != NULL)
                             S += (errors[k] - M) * (errors[k] - M_old);
-                    } else {
-                        failures += 1;
                     }
                 }
             }
 
             // The common case is to compute the average error, so we
             // optimise for this case by not testing all cases below.
-            if (shortcut)
+            if (__builtin_expect(shortcut, 1))
                 continue;
 
             if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
@@ -571,7 +571,7 @@ ls2_shooter_run(void *rr)
 	    params->results[FAILURES][pos] =
                 ((float) failures) / ((float) params->runs);
             if (__builtin_expect(ls2_verbose > 0, 0)) {
-                if (params->results[FAILURES][pos] > 0.0) {
+                if (__builtin_expect(params->results[FAILURES][pos] > 0.0, 0)) {
                     fprintf(stderr, "Warning: %" PRIuFAST64 " of %" PRIuFAST64
                                     " runs failed at (%d, %d)\n",
                             failures, params->runs, x, y);
@@ -599,7 +599,7 @@ ls2_shooter_run(void *rr)
     }
     running--;
 
-    if (ls2_verbose >= 2) {
+    if (__builtin_expect(ls2_verbose >= 2, 0)) {
         struct rusage resources;
         getrusage(RUSAGE_THREAD, &resources);
         fprintf(stderr, "Thread %zu: %d.%06d sec.\n", params->id,
