@@ -226,15 +226,16 @@ mle_gauss_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         int iter = 0;
         int status;
 
-        gsl_multimin_fdfminimizer_set(s, &fdf, x, 1e-3, 1e-4);
+        gsl_multimin_fdfminimizer_set(s, &fdf, x, 1e-2, 1e-4);
 
         /* Step 2b: Iterate the minimization algorithm. */
         do {
             iter++;
             status = gsl_multimin_fdfminimizer_iterate(s);
-            if (status)
+            if (__builtin_expect(status, 0))
                 break;
-            status = gsl_multimin_test_gradient (s->gradient, mle_gauss_epsilon);
+            status =
+                gsl_multimin_test_gradient (s->gradient, mle_gauss_epsilon);
         } while (status == GSL_CONTINUE && iter < mle_gauss_iterations);
 
         /* Step 2c: Store the result. */
