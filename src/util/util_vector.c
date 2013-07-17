@@ -76,7 +76,7 @@ distance128(const __m128 vx, const __m128 vy, const __m128 wx, const __m128 wy)
 /*! Calculates the squared distances of two (skalar) points
  */
 static inline float
-__attribute__((__always_inline__,__gnu_inline__,__const__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__const__,__artificial__,__nonnull__))
 distance_squared_v(const vector2 *v, const vector2 *w)
 {
    const float a = v->x - w->x;
@@ -90,7 +90,7 @@ distance_squared_v(const vector2 *v, const vector2 *w)
 /*! Calculates the distances of two (skalar) points
  */
 static inline float
-__attribute__((__always_inline__,__const__,__flatten__,__nonnull__,__artificial__))
+__attribute__((__always_inline__,__gnu_inline__,__const__,__flatten__,__nonnull__,__artificial__))
 distance_v(const vector2 *v, const vector2 *w)
 {
    return sqrtf(distance_squared_v(v, w));
