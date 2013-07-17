@@ -103,7 +103,7 @@ struct mle_gauss_params {
 
 
 static double
-__attribute__((__nonnull__))
+__attribute__((__nonnull__,__flatten__))
 mle_gauss_likelihood_function(const gsl_vector *X, void *restrict params)
 {
     double result = 0.0;
@@ -114,8 +114,8 @@ mle_gauss_likelihood_function(const gsl_vector *X, void *restrict params)
     const double thetaY = gsl_vector_get(X, 1);
 
     for (size_t j = 0; j < p->no_anchors; j++) {
-        const double d2 = (thetaX - p->anchors[j].x) * (thetaX - p->anchors[j].x) +
-                          (thetaY - p->anchors[j].y) * (thetaY - p->anchors[j].y);
+        const double d2 =
+            distance_squared_sf(thetaX, thetaY, p->anchors[j].x, p->anchors[j].y);
         const double d = sqrt(d2);
         const double z = p->ranges[j];
         double logProbability = z * z ;
@@ -137,7 +137,7 @@ mle_gauss_likelihood_function(const gsl_vector *X, void *restrict params)
 
 
 static void
-__attribute__((__nonnull__))
+__attribute__((__nonnull__,__flatten__))
 mle_gauss_likelihood_gradient(const gsl_vector *X, void *restrict params,
                               gsl_vector *restrict g)
 {
@@ -148,8 +148,8 @@ mle_gauss_likelihood_gradient(const gsl_vector *X, void *restrict params,
     double gradX = 0.0, gradY = 0.0;
 
     for (size_t j = 0; j < p->no_anchors; j++) {
-        const double d2 = (thetaX - p->anchors[j].x) * (thetaX - p->anchors[j].x) +
-                          (thetaY - p->anchors[j].y) * (thetaY - p->anchors[j].y);
+        const double d2 =
+            distance_squared_sf(thetaX, thetaY, p->anchors[j].x, p->anchors[j].y);
         const double d = sqrt(d2);
         const double z = p->ranges[j];
         double x = ((2 * mle_gauss_mean * (thetaX - p->anchors[j].x) -
