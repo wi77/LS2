@@ -49,7 +49,7 @@
 
 #include <gsl/gsl_multimin.h>
 
-#include "algorithm/llsq_algorithm.c"
+#include "algorithm/nllsq_algorithm.c"
 
 #ifndef MLE_GAMMA_DEFAULT_SHAPE
 #define MLE_GAMMA_DEFAULT_SHAPE 3.0
@@ -230,7 +230,7 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     gsl_vector *x = gsl_vector_alloc(2);
 
     VECTOR sx, sy;
-    llsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
+    nllsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
 
     for (int i = 0; i < VECTOR_OPS; i++) {
         /* Step 2a: Initialize the parameters. */

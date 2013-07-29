@@ -48,7 +48,7 @@
 #include <assert.h>
 #include <gsl/gsl_multimin.h>
 
-#include "algorithm/llsq_algorithm.c"
+#include "algorithm/nllsq_algorithm.c"
 
 #ifndef MLE_GAUSS_DEFAULT_MEAN
 #define MLE_GAUSS_DEFAULT_MEAN 50.0
@@ -207,7 +207,7 @@ mle_gauss_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 
     /* Step 1: Calculate an initial estimate. */
     VECTOR sx, sy;
-    llsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
+    nllsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
 
     /* Step 2: Call the optimiser. */
     const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
