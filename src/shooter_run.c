@@ -184,52 +184,64 @@ ls2_handle_progress_bar(int signal __attribute__((__unused__)),
     char buffer [DEFAULT_WIDTH + 1];
     int pos = 0;
 
-    if (display_name != NULL) {
-        strncpy(buffer, display_name, (size_t)(DEFAULT_NAME - 1));
-        pos = (int) strlen(buffer);
-    } else {
-        pos = 0;
-    }
-    while (pos < DEFAULT_NAME + 2)
-        buffer[pos++] = ' ';
-    buffer[pos++] = '|';
-
-    const int ratio =
-      (int) ((DEFAULT_STEPS * progress_current) / progress_total);
-    while (pos < ratio + DEFAULT_NAME + 2) {
-        buffer[pos++] = '=';
-    }
-    if (ratio < (int) DEFAULT_STEPS)
-        buffer[pos++] = '>';
-    while (pos < DEFAULT_NAME + (int) DEFAULT_STEPS + 2) {
-        buffer[pos++] = ' ';
-    }
-
-    // Turn the spinner if not finished
-    if (progress_current < progress_total) {
-        buffer[pos++] = spinner_char[spinner];
-        if (progress_current != progress_last)
-            spinner = (spinner + 1U) & 0x3U;
-    } else {
+    if (isatty(STDERR_FILENO)) {
+        if (display_name != NULL) {
+            strncpy(buffer, display_name, (size_t)(DEFAULT_NAME - 1));
+            pos = (int) strlen(buffer);
+        } else {
+            pos = 0;
+        }
+        while (pos < DEFAULT_NAME + 2)
+            buffer[pos++] = ' ';
         buffer[pos++] = '|';
-    }
 
-    float progress =
-        ((float) progress_current) * 100.0f / ((float) progress_total);
-    if (ls2_num_threads < 100) {
-        pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
-                        " %5.1f%% %2zu/%2zu thr.", progress,
-                        running, ls2_num_threads);
-    } else {
-        pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
-                        " %5.1f%% %4zu thr.", progress, running);
+        const int ratio =
+          (int) ((DEFAULT_STEPS * progress_current) / progress_total);
+        while (pos < ratio + DEFAULT_NAME + 2) {
+            buffer[pos++] = '=';
+        }
+        if (ratio < (int) DEFAULT_STEPS)
+            buffer[pos++] = '>';
+        while (pos < DEFAULT_NAME + (int) DEFAULT_STEPS + 2) {
+            buffer[pos++] = ' ';
+        }
+
+        // Turn the spinner if not finished
+        if (progress_current < progress_total) {
+            buffer[pos++] = spinner_char[spinner];
+            if (progress_current != progress_last)
+                spinner = (spinner + 1U) & 0x3U;
+        } else {
+            buffer[pos++] = '|';
+        }
+
+        float progress =
+            ((float) progress_current) * 100.0f / ((float) progress_total);
+        if (ls2_num_threads < 100) {
+            pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
+                            " %5.1f%% %2zu/%2zu thr.", progress,
+                            running, ls2_num_threads);
+        } else {
+            pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
+                            " %5.1f%% %4zu thr.", progress, running);
+        }
+        pos = MIN(DEFAULT_WIDTH - 3, pos);
+        buffer[pos++] = '\r';
+        buffer[pos] = '\0';
+        if (write(STDERR_FILENO, buffer, (size_t) pos)) {}
+    } else { // Not a tty, just write the percent percentage.
+        float progress =
+            ((float) progress_current) * 100.0f / ((float) progress_total);
+        int s = snprintf(buffer, sizeof(buffer), " %5.1f%% %4zu\n",
+                         progress, running);
+        if (s > 0) {
+            if (write(STDERR_FILENO, buffer, (size_t)s)) {
+                // Do nothing.
+            }
+        }
     }
-    pos = MIN(DEFAULT_WIDTH - 3, pos);
-    buffer[pos++] = '\r';
-    buffer[pos] = '\0';
-    progress_last = progress_current;
-    if (write(STDERR_FILENO, buffer, (size_t) pos)) {}
     fdatasync(STDERR_FILENO);
+    progress_last = progress_current;
 }
 
 
