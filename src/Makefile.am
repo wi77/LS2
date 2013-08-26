@@ -27,6 +27,7 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/clurol_algorithm.h \
 	algorithm/const_algorithm.c \
 	algorithm/const_algorithm.h \
+	algorithm/convex_algorithm.c \
 	algorithm/eminmax_w2_algorithm.c \
 	algorithm/eminmax_w2_algorithm.h \
 	algorithm/eminmax_w4_algorithm.c \
@@ -106,7 +107,7 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	util/util_vcircle.c \
 	util/util_vector.c \
 	avx_mathfun.h \
-	sse_mathfun.h
+	sse_mathfun.h 
 
 
 dist_noinst_SCRIPTS = generate.py
