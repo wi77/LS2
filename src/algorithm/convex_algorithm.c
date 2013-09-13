@@ -62,7 +62,7 @@ VECTOR *restrict resy)
 				continue;
 			dist = distance_squared_sf(vx[i][0],vy[i][0],vx[j][0],vy[j][0]);
 			// If and only if  
-			if(dist >= r[i][0]*r[i][0]+ 2*r[i][0]*r[j][0]  + r[j][0])*r[j][0]{
+			if(dist >= r[i][0]*r[i][0]+ 2*r[i][0]*r[j][0]  + r[j][0])*r[j][0]){
 				(*resx)[0] = NAN;
 				(*resy)[0] = NAN;
 				return;
@@ -190,4 +190,33 @@ end:
 	(*resy)[0] = (float)(0.5f*resulty[0] + 0.5f*resulty[1]);
 	return;
 }
+
+
+// pixel iterator algorithm
+static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+pixel_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
+size_t no_anchors,
+int width __attribute__((__unused__)),
+int height __attribute__((__unused__)),
+VECTOR *restrict resx,
+VECTOR *restrict resy)
+{
+	for(int i = 0; i < 1000; i ++){
+		for(int j = 0; j < 1000; j++){
+			char inside = 1;
+			for(size_t k = 0; k < no_anchors; k++){
+				if(distance_s(i,j,vx[k][0],vy[k][0]) > r[k][0]){
+					inside = 0;
+				}
+			}
+			if(inside){
+				(*resx)[0] = (float)i;
+				(*resy)[0] = (float)j;
+			}
+		}
+	}
+	fprintf(convex_file,"((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f)", vx[0][0], vy[0][0], r[0][0]*r[0][0], vx[1][0], vy[1][0], r[1][0]*r[1][0], vx[2][0], vy[2][0], r[2][0]*r[2][0], vx[3][0], vy[3][0], f[3][0]*r[3][0]);
+	return;
+}
+
 #endif

@@ -228,7 +228,7 @@ VECTOR *restrict resx, VECTOR *restrict resy)
 	gsl_vector *x = gsl_vector_alloc(2);
 
 	VECTOR sx, sy;
-	convex_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
+	pixel_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
 	
 	//nllsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
 
