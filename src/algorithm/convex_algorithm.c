@@ -31,6 +31,7 @@ along with LS².  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef CONVEX_ALGORITHM_C_INCLUDED
 #define CONVEX_ALGORITHM_C_INCLUDED 1
+#define CONVEX_EPS 0.01f
 
 #include "util/util_circle.c"
 #include "util/util_vector.c"
@@ -49,11 +50,8 @@ int height __attribute__((__unused__)),
 VECTOR *restrict resx,
 VECTOR *restrict resy)
 {
-
-	// Definition of the needed variables
-	// for checking if any two disks
-	// do not intersect, or if one disk is inside all others.
-	// currently if one A_i is inside all other B_i
+	// first check if two disks are disjoint,
+	// or if one centerpoint is inside of all disks
 	double dist = 0.0f;
 	char onecircle = 1;
 	
@@ -61,21 +59,23 @@ VECTOR *restrict resy)
 		onecircle = 1;
 		for(size_t j = 0; j < no_anchors; j++){
 			if(i == j)
-			continue;
-			dist = distance_sf(vx[i][0],vy[i][0],vx[j][0],vy[j][0]);
-			if(dist >= r[i][0] + r[j][0]){
+				continue;
+			dist = distance_squared_sf(vx[i][0],vy[i][0],vx[j][0],vy[j][0]);
+			// If and only if  
+			if(dist >= r[i][0]*r[i][0]+ 2*r[i][0]*r[j][0]  + r[j][0])*r[j][0]{
 				(*resx)[0] = NAN;
 				(*resy)[0] = NAN;
 				return;
 			}
-			// if(dist >= fabs(r[j][0] - r[i][0]) || (dist == 0 && )){
-			// onecircle = 0;
-			// }
-			if(dist >= r[j][0]){
+			// If d(A_i,A_j) >= r_j, then
+			// A_i is not in B_j.
+			if(dist >= r[j][0]*r[j][0]){
 				onecircle = 0;
 			}
 
 		}
+		// return the centerpoint if it
+		// already is in I
 		if(onecircle){
 			(*resx)[0] = vx[i][0];
 			(*resy)[0] = vy[i][0];
@@ -84,12 +84,11 @@ VECTOR *restrict resy)
 	}
 
 	// From here on the two conditions before the upper
-	// loop should be false.
+	// loop should be false. Then also no disk can be completely
+	// inside all others.
 	// Therefore 2 intersection points of the circles
 	// are in all other closed disks iff and only if
 	// the intersection of all open disks is not empty.
-	
-
 	
 	size_t no_res = 0;
 	double resultx[2], resulty[2];
@@ -102,18 +101,20 @@ VECTOR *restrict resy)
 	resy1[0] = NAN;
 	resx1[1] = NAN;
 	resy1[1] = NAN;
-	
+	char nonefound = 1;
 	
 	
 	
 
 	// Loop over each pair of circles.
 	for (size_t i = 0; i < no_anchors; i++){
-		for(size_t j = i+1; j < no_anchors; j++){
+		for(size_t j = 0; j < no_anchors; j++){
+			if(i == j)
+				continue;
 			// find the intersection point/points
-			no_res = circle_get_intersection(vx[i][0],vy[i][0],r[i][0],vx[j][0],vy[j][0],r[j][0],resx1,resy1);
-			// if only one intersection point is found
+			no_res = circle_get_intersectionf(vx[i][0],vy[i][0],r[i][0],vx[j][0],vy[j][0],r[j][0],resx1,resy1);
 			if(no_res == 1){
+				// if only one intersection point is found
 				// then go to the code for the first intersection point
 				goto int1;
 			}
@@ -123,18 +124,19 @@ VECTOR *restrict resy)
 			for(size_t k = 0; k < no_anchors; k++){
 				// skip the circles from the outer loop
 				if(k == i || k == j)
-				continue;
+					continue;
 				dist = distance_squared_sf(vx[k][0],vy[k][0],resx1[1],resy1[1]);
-				if(dist > r[k]*r[k]){
+				if(dist > r[k][0]*r[k][0] + CONVEX_EPS){
 					goto int1;
 				}
 			}
 			
 			// Arriving here, we have found a point
-			if(resultx[0] == NAN && resx1[1] != NAN){
+			if(nonefound){
 				// if its the first one, write it to index 0
 				resultx[0] = resx1[1];
 				resulty[0] = resy1[1];
+				nonefound = 0;
 			}
 			else{
 				// if its the second one, write it to index 1
@@ -149,14 +151,14 @@ int1:
 			for(size_t k = 0; k < no_anchors; k++){
 				// skip the circles from the outer loop
 				if(k == i || k == j)
-				continue;
+					continue;
 				dist = distance_squared_sf(vx[k][0],vy[k][0],resx1[0],resy1[0]);
-				if(dist > r[k]*r[k]){
+				if(dist > r[k][0]*r[k][0] + CONVEX_EPS){
 					goto cont;
 				}
 			}
 			// Arriving here, we have found a point
-			if(resultx[0] == NAN && resx1[0] != NAN){
+			if(nonefound){
 				// if its the first one, write it to index 0
 				resultx[0] = resx1[0];
 				resulty[0] = resy1[0];
@@ -177,13 +179,14 @@ cont: ;
 	// That means the intersection is empty.
 	(*resx)[0] = NAN;
 	(*resy)[0] = NAN;	
+	fprintf(stderror,"((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f)", vx[0][0], vy[0][0], r[0][0], vx[1][0], vy[1][0], r[1][0], vx[2][0], vy[2][0], r[2][0], vx[3][0], vy[3][0], r[3][0]);
 	return;
 
 	// Here we found two according points.
 	// Then we construct a convex combination
 	// and return.
 end:
-	(*resx)[0] = (float)(0.5f*resultx[0] + 0.5f*resultx[1];
+	(*resx)[0] = (float)(0.5f*resultx[0] + 0.5f*resultx[1]);
 	(*resy)[0] = (float)(0.5f*resulty[0] + 0.5f*resulty[1]);
 	return;
 }
