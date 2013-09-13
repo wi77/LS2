@@ -69,9 +69,9 @@ VECTOR *restrict resy)
 				return;
 			}
 			// if(dist >= fabs(r[j][0] - r[i][0]) || (dist == 0 && )){
-				// onecircle = 0;
+			// onecircle = 0;
 			// }
-			if(dist >= r[j]{
+			if(dist >= r[j][0]){
 				onecircle = 0;
 			}
 
