@@ -50,6 +50,7 @@
 #include <gsl/gsl_multimin.h>
 
 #include "algorithm/nllsq_algorithm.c"
+#include "algorithm/convex_algorithm.c"
 
 #ifndef MLE_GAMMA_DEFAULT_SHAPE
 #define MLE_GAMMA_DEFAULT_SHAPE 3.0
@@ -77,7 +78,7 @@ static double mle_gamma_offset     = MLE_GAMMA_DEFAULT_OFFSET;
 static double mle_gamma_epsilon    = MLE_GAMMA_DEFAULT_EPSILON;
 static    int mle_gamma_iterations = MLE_GAMMA_DEFAULT_ITERATIONS;
 
-
+int count_convex_fail = 0;
 
 struct poptOption mle_gamma_arguments[] = {
         { "mle-gamma-rate", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -233,7 +234,8 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     convex_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
 	
 	if(sx[0] == NAN || sy[0] == NAN){
-		printf("CONVEX FAILED!\n\r");
+		count_convex_fail++;
+		nllsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
 	}
 
     for (int i = 0; i < VECTOR_OPS; i++) {

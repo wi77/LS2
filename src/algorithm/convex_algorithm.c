@@ -53,6 +53,7 @@ VECTOR *restrict resy)
 	// Definition of the needed variables
 	// for checking if any two disks
 	// do not intersect, or if one disk is inside all others.
+	// currently if one A_i is inside all other B_i
 	double dist = 0.0f;
 	char onecircle = 1;
 	
@@ -67,9 +68,13 @@ VECTOR *restrict resy)
 				(*resy)[0] = NAN;
 				return;
 			}
-			if(dist > fabs(r[j][0] - r[i][0]) || (dist == 0 && )){
+			// if(dist >= fabs(r[j][0] - r[i][0]) || (dist == 0 && )){
+				// onecircle = 0;
+			// }
+			if(dist >= r[j]{
 				onecircle = 0;
 			}
+
 		}
 		if(onecircle){
 			(*resx)[0] = vx[i][0];
