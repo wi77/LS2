@@ -179,7 +179,7 @@ cont: ;
 	// That means the intersection is empty.
 	(*resx)[0] = NAN;
 	(*resy)[0] = NAN;	
-	fprintf(stderror,"((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f)", vx[0][0], vy[0][0], r[0][0], vx[1][0], vy[1][0], r[1][0], vx[2][0], vy[2][0], r[2][0], vx[3][0], vy[3][0], r[3][0]);
+	fprintf(convex_file,"((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f) && ((x-%f)^2 + (y - %f)^2 < %f)", vx[0][0], vy[0][0], r[0][0], vx[1][0], vy[1][0], r[1][0], vx[2][0], vy[2][0], r[2][0], vx[3][0], vy[3][0], r[3][0]);
 	return;
 
 	// Here we found two according points.

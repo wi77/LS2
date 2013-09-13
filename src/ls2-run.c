@@ -107,13 +107,12 @@ static char const *output_format;             /* Format of the output files. */
 static char const *output[NUM_VARIANTS];      /* Names of output files.      */
 static char const *output_hdf5;               /* Names of raw output files.  */
 
-
-
-
+FILE * convex_file;
 
 int
 main(int argc, const char* argv[])
 {
+	convex_file = fopen("convex.txt","w");
     struct timeval start_tv, end_tv; /* For measuring the wall-clock time   */
     poptContext opt_con;        /* context for parsing command-line options */
     char const* anchor[MAX_ANCHORS*2+1];/* anchor parameters                */
@@ -501,5 +500,6 @@ main(int argc, const char* argv[])
         free(results[var]);
     free(result);
     poptFreeContext(opt_con);
+	fclose(convex_file);
     exit(EXIT_SUCCESS);
 }
