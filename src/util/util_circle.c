@@ -88,7 +88,7 @@ circle_get_intersectionf (const float  p1x, const float  p1y, const float  p2x,
                          const float  p2y, const float r1, const float r2,
                          double *restrict retx, double *restrict rety)
 {
-    float d = distance_s(p1x,p1y,p2x,p2y);
+    double d = distance_sf(p1x,p1y,p2x,p2y);
 
     // no solutions, the circles are separate || the circles are coincident || no solutions because one circle is contained within the other
     // => infinite number of solutions possible
