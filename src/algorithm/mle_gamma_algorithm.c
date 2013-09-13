@@ -230,7 +230,11 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     gsl_vector *x = gsl_vector_alloc(2);
 
     VECTOR sx, sy;
-    nllsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
+    convex_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
+	
+	if(sx[0] == NAN || sy[0] == NAN){
+		printf("CONVEX FAILED!\n\r");
+	}
 
     for (int i = 0; i < VECTOR_OPS; i++) {
         /* Step 2a: Initialize the parameters. */
