@@ -143,22 +143,22 @@ VECTOR *restrict resy)
 			if(insideflag){
 				// Arriving here, we have found a point.
 				// Write the result to the appropriate index.
-					resultx[found] = resx1[1];
-					resulty[found] = resy1[1];
-					if(found == 1){
-						if(distance_squared_sf(resultx[0],resulty[0],resultx[1],resulty[1]) > CONVEX_EPS)
-							found++;
-					}
-					else
-						found++;
-					if(found == 2)
-						goto end;
+				resultx[found] = resx1[1];
+				resulty[found] = resy1[1];
+				if(found == 1){
+					if(distance_squared_sf(resultx[0],resulty[0],resultx[1],resulty[1]) > CONVEX_EPS)
+					found++;
 				}
+				else
+				found++;
+				if(found == 2)
+				goto end;
+			}
 			
 			// do the same for the first intersection point
 int1: 
-// this label is just here for the case of one intersection point
-// and one circle is inside the other
+			// this label is just here for the case of one intersection point
+			// and one circle is inside the other
 
 			insideflag = 1;
 			for(size_t k = 0; k < no_anchors; k++){
@@ -174,20 +174,19 @@ int1:
 			if(insideflag){
 				// Arriving here, we have found a point.
 				// Write the result to the appropriate index.
-					resultx[found] = resx1[0];
-					resulty[found] = resy1[0];
-					if(found == 1){
-						if(distance_squared_sf(resultx[0],resulty[0],resultx[1],resulty[1]) > CONVEX_EPS)
-							found++;
-					}
-					else
-						found++;
-					if(found == 2)
-						goto end;
+				resultx[found] = resx1[0];
+				resulty[found] = resy1[0];
+				if(found == 1){
+					if(distance_squared_sf(resultx[0],resulty[0],resultx[1],resulty[1]) > CONVEX_EPS)
+					found++;
 				}
+				else
+				found++;
+				if(found == 2)
+				goto end;
 			}
 		}
-	fprintf(stderr, "error\r\n");	
+	}
 	// Arriving here means no two points
 	// on the boundary of the intersection
 	// of the open disks have been found.
@@ -232,8 +231,8 @@ VECTOR *restrict resy)
 				}
 			}
 			if(inside == 1){
-				(*resx)[0] = (float)i;
-				(*resy)[0] = (float)j;
+				(*resx)[0] = i;
+				(*resy)[0] = j;
 				return;
 			}
 		}
