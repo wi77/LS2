@@ -34,9 +34,26 @@
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
 
-static float gamma_shape = 3.0f;
-static float gamma_rate = 3.0f / 50.0f;   // mean = shape / rate
-static float gamma_offset = 0.0f;
+#ifndef GAMMA_NOISE_MEAN
+#define GAMMA_NOISE_MEAN 50.0f
+#endif
+
+/* The shape must be larger than 1, otherwise the mode is wrong. */
+#ifndef GAMMA_NOISE_SHAPE
+#define GAMMA_NOISE_SHAPE 3.0f
+#endif
+
+#ifndef GAMMA_NOISE_RATE
+#define GAMMA_NOISE_RATE (GAMMA_NOISE_SHAPE / GAMMA_NOISE_MEAN)
+#endif
+
+#ifndef GAMMA_NOISE_MODE
+#define GAMMA_NOISE_MODE ((GAMMA_NOISE_SHAPE - 1.0f) / GAMMA_NOISE_RATE)
+#endif
+
+static float gamma_shape  = GAMMA_NOISE_SHAPE;
+static float gamma_rate   = GAMMA_NOISE_RATE;
+static float gamma_offset = GAMMA_NOISE_MODE;
 
 
 #if defined(HAVE_POPT_H)
