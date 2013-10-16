@@ -58,7 +58,6 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/nllsq_algorithm.h \
 	algorithm/rlsm_algorithm.c \
 	algorithm/rlsm_algorithm.h \
-	algorithm/test_algorithm.c \
 	algorithm/trilateration_algorithm.c \
 	algorithm/trilateration_algorithm.h \
 	algorithm/vble_algorithm.c \
