@@ -38,6 +38,54 @@
  *******************************************************************/
 
 /**
+ * Returns the intersections of two vectors of circles.
+ * @ret: the number of intersection [0,1,2]
+ */
+static inline VECTOR
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+circle_get_intersection_ps(const VECTOR p1x, const VECTOR p1y, const VECTOR p2x,
+			   const VECTOR p2y, const VECTOR r1, const VECTOR r2,
+			   VECTOR *restrict retx, VECTOR *restrict rety)
+{
+    VECTOR d = distance(p1x, p1y, p2x, p2y);
+
+    // no solutions, the circles are separate || the circles are coincident || no solutions because one circle is contained within the other
+    // => infinite number of solutions possible
+    VECTOR one_sol = VECTOR_GE(r1 + r2, d);
+    one_sol = VECTOR_AND(one_sol, VECTOR_LE(VECTOR_ABS(r1 - r2), d));
+    one_sol = VECTOR_AND(one_sol, VECTOR_NE(VECTOR_ZERO(), d));
+
+    VECTOR a = (r1*r1 - r2*r2 + d*d) / (d + d);
+    VECTOR v = r1*r1 - a*a;
+    VECTOR h = VECTOR_SQRT(v);
+
+    VECTOR dx = (p2x - p1x) / d;
+    VECTOR dy = (p2y - p1y) / d;
+    VECTOR p3x = p1x + a * dx;
+    VECTOR p3y = p1y + a * dy;
+
+    dx *= h;
+    dy *= h;
+    VECTOR p4x = p3x + dy;
+    VECTOR p4y = p3y - dx;
+
+    VECTOR two_sol = VECTOR_OR(VECTOR_NE(p3x, p4x), VECTOR_NE(p3y, p4y));
+
+    retx[0] = p4x;
+    rety[0] = p4y;
+
+    p4x = p3x - dy;
+    p4y = p3y + dx;
+    retx[1] = p4x;
+    rety[1] = p4y;
+
+    static const VECTOR ones = VECTOR_CONST_BROADCAST(1.0f);
+    VECTOR result = VECTOR_AND(ones, one_sol) + VECTOR_AND(ones, two_sol);
+    return result;
+}
+
+
+/**
  * Returns the intersections of two circles.
  * @ret: the number of intersection [0,1,2]
  */
@@ -47,11 +95,11 @@ circle_get_intersection (const float  p1x, const float  p1y, const float  p2x,
                          const float  p2y, const float r1, const float r2,
                          float *restrict retx, float *restrict rety)
 {
-    float d = distance_s(p1x,p1y,p2x,p2y);
+    float d = distance_s(p1x, p1y, p2x, p2y);
 
     // no solutions, the circles are separate || the circles are coincident || no solutions because one circle is contained within the other
     // => infinite number of solutions possible
-    if (r1+r2 < d || fabs(r1-r2) > d || d == 0) {
+    if (r1+r2 < d || fabs(r1-r2) > d || 0 == d) {
         return 0;
     }
 
@@ -82,11 +130,12 @@ circle_get_intersection (const float  p1x, const float  p1y, const float  p2x,
     return count;
 }
 
+
 static inline size_t
 __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-circle_get_intersectionf (const float  p1x, const float  p1y, const float  p2x,
-                         const float  p2y, const float r1, const float r2,
-                         double *restrict retx, double *restrict rety)
+circle_get_intersection_f(const float  p1x, const float  p1y, const float  p2x,
+                          const float  p2y, const float r1, const float r2,
+                          double *restrict retx, double *restrict rety)
 {
     float d = distance_s(p1x,p1y,p2x,p2y);
 
