@@ -92,6 +92,7 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	error_model/nd_noise_em.c error_model/nd_noise_em.h \
 	error_model/nlosp_em.c error_model/nlosp_em.h \
 	error_model/ray_noise_em.c error_model/ray_noise_em.h \
+	error_model/rayleigh_em.c error_model/rayleigh_em.h \
 	util/util_circle.c \
 	util/util_colors.c \
 	util/util_math.c \
