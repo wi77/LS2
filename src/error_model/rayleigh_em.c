@@ -77,8 +77,9 @@ rayleigh_error(__m128i *restrict seed,
         VECTOR t = rnd(seed); // Uniform distributed in [0,1]
         t = VECTOR_MAX(t, low);
         t = VECTOR_MIN(t, high);
-        t *= minus_two;
         t = VECTOR_LOG(t);
+        t *= minus_two;
+        t = VECTOR_SQRT(t);
         t *= rayleigh_scale_vector;
       	result[k] = distances[k] + t;
     }
