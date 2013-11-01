@@ -19,7 +19,7 @@
 
  */
 
-/* @error_model_name: Rayleigh noise */
+/* @error_model_name: Weibull noise */
 
 
 #ifdef HAVE_CONFIG_H
