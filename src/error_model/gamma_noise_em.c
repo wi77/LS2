@@ -34,6 +34,11 @@
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
 
+/* Mean = shape / rate
+ * Variance = shape / (rate * rate)
+ *
+ * The defaults result in mean = 50.0f and sigma = 28.867
+ */
 static float gamma_shape = 3.0f;
 static float gamma_rate = 3.0f / 50.0f;   // mean = shape / rate
 static float gamma_offset = 0.0f;
