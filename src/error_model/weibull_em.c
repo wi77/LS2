@@ -86,8 +86,8 @@ weibull_error(__m128i *restrict seed,
         t = one - t;
         t = VECTOR_LOG(t);
         t = zero - t;
-        t /= weibull_scale_vector;
         t = VECTOR_POW(t, one / weibull_shape_vector);
+        t *= weibull_scale_vector;
       	result[k] = distances[k] + t;
     }
 }
