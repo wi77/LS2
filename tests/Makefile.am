@@ -25,7 +25,7 @@ DISTCLEANFILES =
 
 BUILT_SOURCES = 
 
-check_PROGRAMS = $(RDRND_TEST) test-minres-bf
+check_PROGRAMS = $(RDRND_TEST) test-minres-bf test-convex
 EXTRA_PROGRAMS = rdrand
 
 rdrand_SOURCES = rdrand.c
@@ -36,3 +36,8 @@ test_minres_bf_SOURCES = test-minres-bf.c
 test_minres_bf_CPPFLAGS = -I${top_srcdir}/src -I../src
 test_minres_bf_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize
 test_minres_bf_LDADD =
+
+test_convex_SOURCES = test-convex.c
+test_convex_CPPFLAGS = -I${top_srcdir}/src -I../src
+test_convex_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize
+test_convex_LDADD =
