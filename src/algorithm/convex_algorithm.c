@@ -40,7 +40,7 @@ along with LS².  If not, see <http://www.gnu.org/licenses/>.
 /*
 * This function finds a point in the intersection of
 * the no_anchors given open disks with center points
-* (vx[i][0],vy[i][0]) and radii r[i][0].
+* (vx[i][ii],vy[i][ii]) and radii r[i][ii].
 * If no such point exists it the result is (NAN,NAN).
 * Runtime is in O(no_anchors^3). Additional used space is in O(1).
 */
@@ -56,22 +56,23 @@ VECTOR *restrict resy)
 	// or if one centerpoint is inside of all disks
 	double dist = 0.0f;
 	char centerinside = 1;
-	
+
+    for (int ii = 0; ii < VECTOR_OPS; ii++) {
 	for(size_t i = 0; i < no_anchors; i++){
 		centerinside = 1;
 		for(size_t j = 0; j < no_anchors; j++){
 			if(i == j)
 			continue;
-			dist = distance_squared_sf(vx[i][0],vy[i][0],vx[j][0],vy[j][0]);
+			dist = distance_squared_sf(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii]);
 			// If and only if  
-			if(dist >= r[i][0]*r[i][0]+ 2*r[i][0]*r[j][0]  + r[j][0]*r[j][0]){
-				(*resx)[0] = NAN;
-				(*resy)[0] = NAN;
-				return;
+			if(dist >= r[i][ii]*r[i][ii]+ 2*r[i][ii]*r[j][ii]  + r[j][ii]*r[j][ii]){
+				(*resx)[ii] = NAN;
+				(*resy)[ii] = NAN;
+				goto next;
 			}
 			// If d(A_i,A_j) >= r_j, then
 			// A_i is not in B_j.
-			if(dist >= r[j][0]*r[j][0]){
+			if(dist >= r[j][ii]*r[j][ii]){
 				centerinside = 0;
 			}
 
@@ -79,9 +80,9 @@ VECTOR *restrict resy)
 		// return the centerpoint if it
 		// already is in I
 		if(centerinside){
-			(*resx)[0] = vx[i][0];
-			(*resy)[0] = vy[i][0];
-			return;
+			(*resx)[ii] = vx[i][ii];
+			(*resy)[ii] = vy[i][ii];
+			goto next;
 		}
 	}
 
@@ -113,7 +114,7 @@ VECTOR *restrict resy)
 	for (size_t i = 0; i < no_anchors - 1; i++){
 		for(size_t j = i+1; j < no_anchors; j++){
 			// find the intersection point/points
-			no_res = circle_get_intersection_f(vx[i][0],vy[i][0],vx[j][0],vy[j][0],r[i][0],r[j][0],resx1,resy1);
+			no_res = circle_get_intersection_f(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii],r[i][ii],r[j][ii],resx1,resy1);
 			if(no_res == 0){
 				// happens if one circle is inside of the other
 				continue;
@@ -133,8 +134,8 @@ VECTOR *restrict resy)
 				// skip the circles from the outer loop
 				if(k == i || k == j)
 				continue;
-				dist = distance_squared_sf(vx[k][0],vy[k][0],resx1[1],resy1[1]);
-				if(dist > r[k][0]*r[k][0]){
+				dist = distance_squared_sf(vx[k][ii],vy[k][ii],resx1[1],resy1[1]);
+				if(dist > r[k][ii]*r[k][ii]){
 					insideflag = 0;
 					break;
 				}
@@ -165,8 +166,8 @@ int1:
 				// skip the circles from the outer loop
 				if(k == i || k == j)
 				continue;
-				dist = distance_squared_sf(vx[k][0],vy[k][0],resx1[0],resy1[0]);
-				if(dist > r[k][0]*r[k][0]){
+				dist = distance_squared_sf(vx[k][ii],vy[k][ii],resx1[0],resy1[0]);
+				if(dist > r[k][ii]*r[k][ii]){
 					insideflag = 0;
 					break;
 				}
@@ -191,16 +192,19 @@ int1:
 	// on the boundary of the intersection
 	// of the open disks have been found.
 	// That means the intersection is empty.
-	(*resx)[0] = NAN;
-	(*resy)[0] = NAN;	
-	return;
+	(*resx)[ii] = NAN;
+	(*resy)[ii] = NAN;	
+	continue;
 
 	// Here we found two according points.
 	// Then we construct a convex combination
 	// and return.
 end:
-	(*resx)[0] = (float)(0.5f*resultx[0] + 0.5f*resultx[1]);
-	(*resy)[0] = (float)(0.5f*resulty[0] + 0.5f*resulty[1]);
+	(*resx)[ii] = (float)(0.5f*resultx[0] + 0.5f*resultx[1]);
+	(*resy)[ii] = (float)(0.5f*resulty[0] + 0.5f*resulty[1]);
+next:
+        continue;
+    }
 	return;
 }
 
@@ -220,24 +224,28 @@ VECTOR *restrict resy)
 {
 	char inside = 1;
 	float dist = 0.0f;
+    for (int ii = 0; ii < VECTOR_OPS; ii++) {
 	for(float i = 0.0f; i < width; i++){
 		for(float j = 0.0f; j < height; j++){
 			inside = 1;
 			for(size_t k = 0; k < no_anchors; k++){
-				dist = (i - vx[k][0])*(i - vx[k][0]) + (j - vy[k][0])*(j + vy[k][0]);
-				if(dist >= r[k][0]*r[k][0]){
+				dist = (i - vx[k][ii])*(i - vx[k][ii]) + (j - vy[k][ii])*(j + vy[k][ii]);
+				if(dist >= r[k][ii]*r[k][ii]){
 					inside = 0;
 					break;
 				}
 			}
 			if(inside == 1){
-				(*resx)[0] = i;
-				(*resy)[0] = j;
-				return;
+				(*resx)[ii] = i;
+				(*resy)[ii] = j;
+				goto next;
 			}
 		}
 	}
-	return;
+next:
+        continue;
+    }
+    return;
 }
 
 #endif
