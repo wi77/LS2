@@ -274,7 +274,7 @@ static const VECTOR eps =  VECTOR_CONST_BROADCAST(FLT_EPSILON);
 #endif
 
 // Include helper for algorithms
-#define IALG(D,M) QUOTEME(D/M##_algorithm.c)
+ #define IALG(D,M) QUOTEME(D/M##_algorithm.c)
 #define INCLUDE_ALG(M) IALG(ALG_DIR,M)
 
 #define IALGH(D,M) QUOTEME(D/M##_algorithm.h)
