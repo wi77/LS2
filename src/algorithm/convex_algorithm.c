@@ -66,6 +66,17 @@ VECTOR *restrict resy)
 			dist = distance_squared_sf(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii]);
 			// If and only if  
 			if(dist >= r[i][ii]*r[i][ii]+ 2*r[i][ii]*r[j][ii]  + r[j][ii]*r[j][ii]){
+#ifndef NDEBUG
+				const int size = 4096;
+				char buffer[size];
+				int p = 0;
+				p += snprintf(buffer, (size_t) size, "Failure for parameters:\n");
+				for (size_t k = 0; k < no_anchors; k++) {
+					p += snprintf(buffer + p, (size_t) (size - p), "\tA[%zu] = (%f,%f) range = %f\n", k, vx[k][ii], vy[k][ii], r[k][ii]);
+				}
+				buffer[(p < size) ? p : size - 1] = '\0';
+				fprintf(stderr, buffer);
+#endif
 				(*resx)[ii] = NAN;
 				(*resy)[ii] = NAN;
 				goto next;
@@ -192,8 +203,21 @@ int1:
 	// on the boundary of the intersection
 	// of the open disks have been found.
 	// That means the intersection is empty.
+#ifndef NDEBUG
 	(*resx)[ii] = NAN;
 	(*resy)[ii] = NAN;	
+	do {
+		const int size = 4096;
+		char buffer[size];
+		int p = 0;
+		p += snprintf(buffer, (size_t) size, "Empty intersection for parameters:\n");
+		for (size_t k = 0; k < no_anchors; k++) {
+			p += snprintf(buffer + p, (size_t) (size - p), "\tA[%zu] = (%f,%f), range = %f\n", k, vx[k][ii], vy[k][ii], r[k][ii]);
+		}
+		buffer[(p < size) ? p : size - 1] = '\0';
+		fprintf(stderr, buffer);
+	} while (0);
+#endif
 	continue;
 
 	// Here we found two according points.

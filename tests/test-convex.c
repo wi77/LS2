@@ -52,9 +52,9 @@ test1(void)
      const VECTOR ay[NO_ANCHORS] = { VECTOR_CONST_BROADCAST(300),
 			             VECTOR_CONST_BROADCAST(700),
 			             VECTOR_CONST_BROADCAST(300), };
-     const VECTOR r[NO_ANCHORS] = { { 332.84f, 282.85f, 282.85f, 282.85f, },
-                                    { 332.84f, 282.85f, 282.85f, 282.85f, },
-                                    { 332.84f, 282.85f, 282.85f, 282.85f, }, };
+     const VECTOR r[NO_ANCHORS] = { { 305.84f, 282.85f, 282.85f, 282.85f, },
+                                    { 486.05f, 282.85f, 282.85f, 282.85f, },
+                                    { 80.851f, 282.85f, 282.85f, 282.85f, }, };
      const VECTOR tagx = VECTOR_CONST_BROADCAST(500);
      const VECTOR tagy = VECTOR_CONST_BROADCAST(500);
 
