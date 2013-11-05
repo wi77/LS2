@@ -2,7 +2,7 @@
   This file is part of LS² - the Localization Simulation Engine of FU Berlin.
 
   Copyright 2011-2013  Heiko Will, Marcel Kyas, Thomas Hillebrandt,
-  Stefan Adler, Malte Rohde, Jonathan Gunthermann
+  Stefan Adler, Malte Rohde, Jonathan Gunthermann, Paul Podlech
 
   LS² is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -122,6 +122,7 @@ mle_gamma_likelihood_function(const gsl_vector *restrict X, void *restrict param
     const struct mle_gamma_params *const p = params;
     const double thetaX = gsl_vector_get(X, 0);
     const double thetaY = gsl_vector_get(X, 1);
+
     for (size_t j = 0; j < p->no_anchors; j++) {
         const double d = distance_sf(thetaX, thetaY, p->anchors[j].x, p->anchors[j].y);
         const double Z = p->ranges[j] + mle_gamma_offset - d;
@@ -150,6 +151,7 @@ mle_gamma_likelihood_gradient(const gsl_vector *restrict X, void *restrict param
     const double thetaX = gsl_vector_get(X, 0);
     const double thetaY = gsl_vector_get(X, 1);
     double gradX = 0.0, gradY = 0.0;
+
     for (size_t j = 0; j < p->no_anchors; j++) {
         if (thetaX != p->anchors[j].x && thetaY != p->anchors[j].y) {
             const double d2 = distance_squared_sf(thetaX, thetaY, p->anchors[j].x, p->anchors[j].y);
@@ -230,16 +232,30 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
     gsl_vector *x = gsl_vector_alloc(2);
 
     VECTOR sx, sy;
+
+    // Calculate the initial guess.
     nllsq_run(vx, vy, r, no_anchors, width, height, &sx, &sy);
 
     for (int i = 0; i < VECTOR_OPS; i++) {
-        /* Step 2a: Initialize the parameters. */
+        /* Step 2a: Check whether the initial guess can be used. */
+        if (__builtin_expect(isnan(sx[i]) || isnan(sy[i]), 0)) {
+#if !defined(NDEBUG)
+            fprintf(stderr, "initial guess is (%f, %f)\n", sx[i], sy[i]);
+#endif
+            (*resx)[i] = NAN;
+            (*resy)[i] = NAN;
+            continue;
+        }
+
+        /* Step 2b: Initialize the parameters. */
         for (size_t j = 0; j < no_anchors; j++) {
             p.ranges[j] = r[j][i];
         }
+            
         gsl_vector_set(x, 0, sx[i]);
         gsl_vector_set(x, 1, sy[i]);
 
+        /* Step 2c: Check for the validity of the likelihood value. */
         double likelihood = mle_gamma_likelihood_function(x, &p);
 #if !defined(NDEBUG)
         fprintf(stderr, "likelihood = %f\n", likelihood);
@@ -253,7 +269,7 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
             continue;
         }
 
-        /* Step 2c: Iterate the minimization algorithm. */
+        /* Step 2d: Iterate the minimization algorithm. */
         int iter = 0;
         int status;
         gsl_multimin_fdfminimizer_set(s, &fdf, x, 1e-2, 1e-4);
