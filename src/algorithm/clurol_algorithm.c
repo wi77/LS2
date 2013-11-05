@@ -237,7 +237,7 @@ if (width==height){};
         for (int i = 0; i < n-1; i++) {
             for (int j = i+1; j < n; j++) {
                 // Berechne Schnittpunkte mit aktueller Permutation
-                is += (int)circle_get_intersectionf(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii],r[i][ii],r[j][ii],&intersections_x[is],&intersections_y[is]);
+                is += (int)circle_get_intersection_f(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii],r[i][ii],r[j][ii],&intersections_x[is],&intersections_y[is]);
             }
         }
         

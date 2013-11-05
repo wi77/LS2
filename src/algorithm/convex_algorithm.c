@@ -113,7 +113,7 @@ VECTOR *restrict resy)
 	for (size_t i = 0; i < no_anchors - 1; i++){
 		for(size_t j = i+1; j < no_anchors; j++){
 			// find the intersection point/points
-			no_res = circle_get_intersectionf(vx[i][0],vy[i][0],vx[j][0],vy[j][0],r[i][0],r[j][0],resx1,resy1);
+			no_res = circle_get_intersection_f(vx[i][0],vy[i][0],vx[j][0],vy[j][0],r[i][0],r[j][0],resx1,resy1);
 			if(no_res == 0){
 				// happens if one circle is inside of the other
 				continue;
