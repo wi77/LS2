@@ -194,7 +194,7 @@ icla_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         // build all k-permutations
         for (int i = 0; i < bino; i++) {
             int is;
-            is = (int)circle_get_intersectionf(vx[p[0]][ii],vy[p[0]][ii],vx[p[1]][ii],vy[p[1]][ii],r[p[0]][ii],r[p[1]][ii],&intersections_x[icount],&intersections_y[icount]);
+            is = (int)circle_get_intersection_f(vx[p[0]][ii],vy[p[0]][ii],vx[p[1]][ii],vy[p[1]][ii],r[p[0]][ii],r[p[1]][ii],&intersections_x[icount],&intersections_y[icount]);
             icount += is;
             // build next permutation
             if (i == bino - 1) break;
