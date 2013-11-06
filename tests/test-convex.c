@@ -28,6 +28,10 @@
 #  define _GNU_SOURCE
 #endif
 
+#if HAVE_POPT_H
+#  include <popt.h>
+#endif
+
 #include <stdint.h>
 
 #include <immintrin.h>

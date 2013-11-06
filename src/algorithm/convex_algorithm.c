@@ -32,10 +32,33 @@ along with LS².  If not, see <http://www.gnu.org/licenses/>.
 #ifndef CONVEX_ALGORITHM_C_INCLUDED
 #define CONVEX_ALGORITHM_C_INCLUDED 1
 
+#if HAVE_CONFIG_H
+#  include "ls2/ls2-config.h"
+#endif
+
+#if HAVE_POPT_H
+#  include <popt.h>
+#endif
+
 #define CONVEX_EPS 1.0f
 
 #include "util/util_circle.c"
 #include "util/util_vector.c"
+
+#ifndef CONVEX_DEFAULT_OFFSET
+#define CONVEX_DEFAULT_OFFSET ((3.0f - 1.0f) / (3.0f / 50.0f))
+#endif
+
+static float convex_offset = CONVEX_DEFAULT_OFFSET;
+
+struct poptOption convex_arguments[] = {
+        { "convex-offset", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
+          &convex_offset, 0,
+          "increase all radii by this offset", NULL },
+        POPT_TABLEEND
+};
+
+
 
 /*
 * This function finds a point in the intersection of
@@ -44,18 +67,24 @@ along with LS².  If not, see <http://www.gnu.org/licenses/>.
 * If no such point exists it the result is (NAN,NAN).
 * Runtime is in O(no_anchors^3). Additional used space is in O(1).
 */
-static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
+static inline void
+__attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 convex_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
-size_t no_anchors,
-int width __attribute__((__unused__)),
-int height __attribute__((__unused__)),
-VECTOR *restrict resx,
-VECTOR *restrict resy)
+           size_t no_anchors,
+           int width __attribute__((__unused__)),
+           int height __attribute__((__unused__)),
+           VECTOR *restrict resx, VECTOR *restrict resy)
 {
 	// First check if two disks are disjoint,
 	// or if one centerpoint is inside of all disks
 	double dist = 0.0f;
 	char centerinside = 1;
+        VECTOR offset = VECTOR_BROADCAST(&convex_offset);
+        VECTOR rr[no_anchors];
+
+	for (size_t i = 0; i < no_anchors; i++) {
+		rr[i] = r[i] + offset;
+	}
 
     for (int ii = 0; ii < VECTOR_OPS; ii++) {
 	for(size_t i = 0; i < no_anchors; i++){
@@ -65,14 +94,14 @@ VECTOR *restrict resy)
 			continue;
 			dist = distance_squared_sf(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii]);
 			// If and only if  
-			if(dist >= r[i][ii]*r[i][ii]+ 2*r[i][ii]*r[j][ii]  + r[j][ii]*r[j][ii]){
+			if(dist >= rr[i][ii]*rr[i][ii]+ 2*rr[i][ii]*rr[j][ii]  + rr[j][ii]*rr[j][ii]){
 #ifndef NDEBUG
 				const int size = 4096;
 				char buffer[size];
 				int p = 0;
 				p += snprintf(buffer, (size_t) size, "Failure for parameters:\n");
 				for (size_t k = 0; k < no_anchors; k++) {
-					p += snprintf(buffer + p, (size_t) (size - p), "\tA[%zu] = (%f,%f) range = %f\n", k, vx[k][ii], vy[k][ii], r[k][ii]);
+					p += snprintf(buffer + p, (size_t) (size - p), "\tA[%zu] = (%f,%f) range = %f\n", k, vx[k][ii], vy[k][ii], rr[k][ii]);
 				}
 				buffer[(p < size) ? p : size - 1] = '\0';
 				fprintf(stderr, buffer);
@@ -83,7 +112,7 @@ VECTOR *restrict resy)
 			}
 			// If d(A_i,A_j) >= r_j, then
 			// A_i is not in B_j.
-			if(dist >= r[j][ii]*r[j][ii]){
+			if(dist >= rr[j][ii]*rr[j][ii]){
 				centerinside = 0;
 			}
 
@@ -125,7 +154,7 @@ VECTOR *restrict resy)
 	for (size_t i = 0; i < no_anchors - 1; i++){
 		for(size_t j = i+1; j < no_anchors; j++){
 			// find the intersection point/points
-			no_res = circle_get_intersection_f(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii],r[i][ii],r[j][ii],resx1,resy1);
+			no_res = circle_get_intersection_f(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii],rr[i][ii],rr[j][ii],resx1,resy1);
 			if(no_res == 0){
 				// happens if one circle is inside of the other
 				continue;
@@ -146,7 +175,7 @@ VECTOR *restrict resy)
 				if(k == i || k == j)
 				continue;
 				dist = distance_squared_sf(vx[k][ii],vy[k][ii],resx1[1],resy1[1]);
-				if(dist > r[k][ii]*r[k][ii]){
+				if(dist > rr[k][ii]*rr[k][ii]){
 					insideflag = 0;
 					break;
 				}
@@ -178,7 +207,7 @@ int1:
 				if(k == i || k == j)
 				continue;
 				dist = distance_squared_sf(vx[k][ii],vy[k][ii],resx1[0],resy1[0]);
-				if(dist > r[k][ii]*r[k][ii]){
+				if(dist > rr[k][ii]*rr[k][ii]){
 					insideflag = 0;
 					break;
 				}
@@ -212,7 +241,7 @@ int1:
 		int p = 0;
 		p += snprintf(buffer, (size_t) size, "Empty intersection for parameters:\n");
 		for (size_t k = 0; k < no_anchors; k++) {
-			p += snprintf(buffer + p, (size_t) (size - p), "\tA[%zu] = (%f,%f), range = %f\n", k, vx[k][ii], vy[k][ii], r[k][ii]);
+			p += snprintf(buffer + p, (size_t) (size - p), "\tA[%zu] = (%f,%f), range = %f\n", k, vx[k][ii], vy[k][ii], rr[k][ii]);
 		}
 		buffer[(p < size) ? p : size - 1] = '\0';
 		fprintf(stderr, buffer);

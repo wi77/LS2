@@ -22,9 +22,13 @@
 #ifndef CONVEX_ALGORITHM_H_INCLUDED
 #define CONVEX_ALGORITHM_H_INCLUDED 1
 
+#if HAVE_POPT_H
+extern struct poptOption convex_arguments[];
+#endif
+
 #if defined(STAND_ALONE)
 #  define ALGORITHM_NAME "Convex"
-#  undef ALGORITHM_ARGUMENTS
+#  define ALGORITHM_ARGUMENTS convex_arguments
 #endif
 
 #endif
