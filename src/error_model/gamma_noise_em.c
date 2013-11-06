@@ -121,6 +121,22 @@ gamma_noise_error(__m128i *restrict seed,
         x = (VECTOR_LOG(x) / VECTOR_BROADCASTF(-gamma_rate)) -
               VECTOR_BROADCASTF(gamma_offset);
 
+#if !defined(NDEBUG) && TRACE_ERROR_MODEL
+    do {
+#define BUFSZ 4096
+        char buffer[BUFSZ];
+        int p = 0;
+        p += snprintf(buffer + p, (size_t) (BUFSZ - p),
+                      "Gamma errors = (%f", x[0]);
+        for (int kk = 1; kk < VECTOR_OPS; kk++) {
+    	    p += snprintf(buffer + p, (size_t) (BUFSZ - p), ", %f", x[kk]);
+        }
+        p += snprintf(buffer + p, (size_t) (BUFSZ - p), ")\n");
+	buffer[(p < BUFSZ) ? p : BUFSZ - 1] = '\0';
+    } while (0);
+#undef BUFSZ
+#endif
+
       	result[k] = distances[k] + x;
     }
 }
