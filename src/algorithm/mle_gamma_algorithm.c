@@ -50,6 +50,7 @@
 #include <gsl/gsl_multimin.h>
 
 #include "algorithm/convex_algorithm.c"
+#include "util/util_residual.c"
 
 #ifndef MLE_GAMMA_DEFAULT_MEAN
 #define MLE_GAMMA_DEFAULT_MEAN 50.0f
@@ -252,8 +253,10 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
             /* If this is the case, the initial guess does not have
                a likelihood associated to it. We set the estimated coordinate
                to an undefined value and continue. */
-            (*resx)[i] = NAN;
-            (*resy)[i] = NAN;
+            fprintf(stderr, "Unlikely place, defaulting to (%f, %f)\n",
+                    sx[0], sy[0]);
+            (*resx)[i] = sx[i];
+            (*resy)[i] = sy[i];
             continue;
         }
 
@@ -272,8 +275,14 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         } while (status == GSL_CONTINUE && iter < mle_gamma_iterations);
 
         /* Step 2c: Store the result. */
-        (*resx)[i] = (float) gsl_vector_get(s->x, 0);
-        (*resy)[i] = (float) gsl_vector_get(s->x, 1);
+        const float rx = (float) gsl_vector_get(s->x, 0),
+                    ry = (float) gsl_vector_get(s->x, 1);
+        ;
+	fprintf(stderr, "Residual: (%f, %f) -> %f, likelihood = %f\n", rx, ry,
+                residual_vs(i, vx, vy, r, no_anchors, rx, ry),
+                mle_gamma_likelihood_function(s->x, &p));
+        (*resx)[i] = rx;
+        (*resy)[i] = ry;
     }
 
     /* Step 3: Clean up. */

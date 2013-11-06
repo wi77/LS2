@@ -102,6 +102,7 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	util/util_points.c \
 	util/util_points_opt.c \
 	util/util_random.c \
+	util/util_residual.c \
 	util/util_sort.c \
 	util/util_triangle.c \
 	util/util_vcircle.c \
