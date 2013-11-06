@@ -77,7 +77,7 @@ convex_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 {
 	// First check if two disks are disjoint,
 	// or if one centerpoint is inside of all disks
-	double dist = 0.0f;
+	float dist = 0.0f;
 	char centerinside = 1;
         VECTOR offset = VECTOR_BROADCAST(&convex_offset);
         VECTOR rr[no_anchors];
@@ -92,7 +92,7 @@ convex_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 		for(size_t j = 0; j < no_anchors; j++){
 			if(i == j)
 			continue;
-			dist = distance_squared_sf(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii]);
+			dist = distance_squared_s(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii]);
 			// If and only if  
 			if(dist >= rr[i][ii]*rr[i][ii]+ 2*rr[i][ii]*rr[j][ii]  + rr[j][ii]*rr[j][ii]){
 #ifndef NDEBUG
@@ -134,12 +134,12 @@ convex_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 	// the intersection of all open disks is not empty.
 	
 	size_t no_res = 0;
-	double resultx[2], resulty[2];
+	float resultx[2], resulty[2];
 	resultx[0] = NAN;
 	resultx[1] = NAN;
 	resulty[0] = NAN;
 	resulty[1] = NAN;
-	double resx1[2], resy1[2];
+	float resx1[2], resy1[2];
 	resx1[0] = NAN;
 	resy1[0] = NAN;
 	resx1[1] = NAN;
@@ -154,7 +154,7 @@ convex_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 	for (size_t i = 0; i < no_anchors - 1; i++){
 		for(size_t j = i+1; j < no_anchors; j++){
 			// find the intersection point/points
-			no_res = circle_get_intersection_f(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii],rr[i][ii],rr[j][ii],resx1,resy1);
+			no_res = circle_get_intersection(vx[i][ii],vy[i][ii],vx[j][ii],vy[j][ii],rr[i][ii],rr[j][ii],resx1,resy1);
 			if(no_res == 0){
 				// happens if one circle is inside of the other
 				continue;
@@ -174,7 +174,7 @@ convex_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 				// skip the circles from the outer loop
 				if(k == i || k == j)
 				continue;
-				dist = distance_squared_sf(vx[k][ii],vy[k][ii],resx1[1],resy1[1]);
+				dist = distance_squared_s(vx[k][ii],vy[k][ii],resx1[1],resy1[1]);
 				if(dist > rr[k][ii]*rr[k][ii]){
 					insideflag = 0;
 					break;
@@ -187,7 +187,7 @@ convex_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 				resultx[found] = resx1[1];
 				resulty[found] = resy1[1];
 				if(found == 1){
-					if(distance_squared_sf(resultx[0],resulty[0],resultx[1],resulty[1]) > CONVEX_EPS)
+					if(distance_squared_s(resultx[0],resulty[0],resultx[1],resulty[1]) > CONVEX_EPS)
 					found++;
 				}
 				else
@@ -206,7 +206,7 @@ int1:
 				// skip the circles from the outer loop
 				if(k == i || k == j)
 				continue;
-				dist = distance_squared_sf(vx[k][ii],vy[k][ii],resx1[0],resy1[0]);
+				dist = distance_squared_s(vx[k][ii],vy[k][ii],resx1[0],resy1[0]);
 				if(dist > rr[k][ii]*rr[k][ii]){
 					insideflag = 0;
 					break;
@@ -218,7 +218,7 @@ int1:
 				resultx[found] = resx1[0];
 				resulty[found] = resy1[0];
 				if(found == 1){
-					if(distance_squared_sf(resultx[0],resulty[0],resultx[1],resulty[1]) > CONVEX_EPS)
+					if(distance_squared_s(resultx[0],resulty[0],resultx[1],resulty[1]) > CONVEX_EPS)
 					found++;
 				}
 				else
