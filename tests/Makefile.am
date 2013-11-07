@@ -25,19 +25,24 @@ DISTCLEANFILES =
 
 BUILT_SOURCES = 
 
-check_PROGRAMS = $(RDRND_TEST) test-minres-bf test-convex
+check_PROGRAMS = $(RDRND_TEST) test-convex test-minres-bf test-mle-gamma
 EXTRA_PROGRAMS = rdrand
 
 rdrand_SOURCES = rdrand.c
 rdrand_CFLAGS = @ARCH_CFLAGS@ @RDRND_FLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize
 rdrand_LDADD =
 
+test_convex_SOURCES = test-convex.c
+test_convex_CPPFLAGS = -I${top_srcdir}/src -I../src
+test_convex_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize
+test_convex_LDADD =
+
 test_minres_bf_SOURCES = test-minres-bf.c
 test_minres_bf_CPPFLAGS = -I${top_srcdir}/src -I../src
 test_minres_bf_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize
 test_minres_bf_LDADD =
 
-test_convex_SOURCES = test-convex.c
-test_convex_CPPFLAGS = -I${top_srcdir}/src -I../src
-test_convex_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize
-test_convex_LDADD =
+test_mle_gamma_SOURCES = test-mle-gamma.c
+test_mle_gamma_CPPFLAGS = -I${top_srcdir}/src -I../src
+test_mle_gamma_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize $(GSL_CFLAGS)
+test_mle_gamma_LDADD = $(GSL_LIBS)
