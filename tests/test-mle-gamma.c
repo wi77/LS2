@@ -40,6 +40,12 @@
 #include "vector_shooter.h"
 #include "util/util_misc.c"
 #include "util/util_vector.c"
+
+#undef NDEBUG
+#undef DEBUG_TRACE_GRADIENT
+#define DEBUG_TRACE_ITERATIONS
+#undef DEBUG_TRACE_LIKELIHOOD
+
 #include "algorithm/mle_gamma_algorithm.h"
 #include "algorithm/mle_gamma_algorithm.c"
 
@@ -66,6 +72,7 @@ test1(void)
      char b1[255], b2[255];
 
      mle_gamma_run(ax, ay, r, no_anchors, width, height, &resx, &resy);
+
      printf("resx = %s\nresy = %s\n", vector_to_nstring(b1, 255, resx),
 	    vector_to_nstring(b2, 255, resy));
 }

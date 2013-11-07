@@ -52,14 +52,6 @@
 #include "algorithm/convex_algorithm.c"
 #include "util/util_residual.c"
 
-#ifndef DEBUG_TRACE_LIKELIHOOD
-#define DEBUG_TRACE_LIKELIHOOD 1
-#endif
-
-#ifndef DEBUG_TRACE_GRADIENT
-#define DEBUG_TRACE_GRADIENT 0
-#endif
-
 #ifndef MLE_GAMMA_DEFAULT_MEAN
 #define MLE_GAMMA_DEFAULT_MEAN 50.0f
 #endif
@@ -77,7 +69,7 @@
 #endif
 
 #ifndef MLE_GAMMA_DEFAULT_EPSILON
-#define MLE_GAMMA_DEFAULT_EPSILON 1e-2
+#define MLE_GAMMA_DEFAULT_EPSILON 1e-3
 #endif
 
 #ifndef MLE_GAMMA_DEFAULT_ITERATIONS
@@ -146,7 +138,7 @@ mle_gamma_likelihood_function(const gsl_vector *restrict X, void *restrict param
             log(p->factor * pow(Z, mle_gamma_shape - 1.0)) - mle_gamma_rate * Z;
         result -= likelihood;
     }
-#if !defined(NDEBUG) && DEBUG_TRACE_LIKELIHOOD
+#if defined(DEBUG_TRACE_LIKELIHOOD)
     fprintf(stdout, "f(%f, %f) = %f\n", thetaX, thetaY, result);
 #endif
     return result;
@@ -183,7 +175,7 @@ mle_gamma_likelihood_gradient(const gsl_vector *restrict X, void *restrict param
             gradY -= (thetaY -  p->anchors[j].y) * t;
         } // TODO: Otherwise the value of the gradient component is 0?
     }
-#if !defined(NDEBUG) && DEBUG_TRACE_GRADIENT
+#if defined(DEBUG_TRACE_GRADIENT)
     fprintf(stdout, "df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
 #endif
     gsl_vector_set(g, 0, gradX);
@@ -254,9 +246,9 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         gsl_vector_set(x, 1, sy[i]);
 
         double likelihood = mle_gamma_likelihood_function(x, &p);
-#if !defined(NDEBUG)
+#if defined(DEBUG_TRACE_ITERATIONS)
         fprintf(stdout, "Start point: f(%f,%f) = %f\n",
-		sx[i], sy[i], likelihood);
+		gsl_vector_get(x, 0), gsl_vector_get(x, 1), likelihood);
 #endif
         if (__builtin_expect(isinf(likelihood), 0)) {
             /* If this is the case, the initial guess does not have
@@ -274,6 +266,9 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         int status;
         gsl_multimin_fdfminimizer_set(s, &fdf, x, 1e-2, 1e-4);
 
+#if defined(DEBUG_TRACE_ITERATIONS)
+        fprintf(stdout, "\n");
+#endif
         do {
             iter++;
             status = gsl_multimin_fdfminimizer_iterate(s);
@@ -281,13 +276,22 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                 break;
             status =
                 gsl_multimin_test_gradient (s->gradient, mle_gamma_epsilon);
+#if defined(DEBUG_TRACE_ITERATIONS)
+            if (status == GSL_SUCCESS) {
+                fprintf(stdout, "Minimum found at: \n");
+            }
+            fprintf(stdout, "%5d %.5f %.5f %10.5f\n", iter,
+                    gsl_vector_get (s->x, 0), 
+                    gsl_vector_get (s->x, 1), 
+                    s->f);
+#endif
         } while (status == GSL_CONTINUE && iter < mle_gamma_iterations);
 
         /* Step 2c: Store the result. */
 	const gsl_vector *tr = gsl_multimin_fdfminimizer_x(s);
         const float rx = (float) gsl_vector_get(tr, 0),
                     ry = (float) gsl_vector_get(tr, 1);
-#if !defined(NDEBUG)
+#if defined(DEBUG_TRACE_ITERATIONS)
 	fprintf(stdout, "Residual: (%f, %f) -> %f, likelihood = %f\n", rx, ry,
                 residual_vs(i, vx, vy, r, no_anchors, rx, ry),
                 mle_gamma_likelihood_function(s->x, &p));
