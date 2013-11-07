@@ -52,6 +52,14 @@
 #include "algorithm/convex_algorithm.c"
 #include "util/util_residual.c"
 
+#ifndef DEBUG_TRACE_LIKELIHOOD
+#define DEBUG_TRACE_LIKELIHOOD 1
+#endif
+
+#ifndef DEBUG_TRACE_GRADIENT
+#define DEBUG_TRACE_GRADIENT 0
+#endif
+
 #ifndef MLE_GAMMA_DEFAULT_MEAN
 #define MLE_GAMMA_DEFAULT_MEAN 50.0f
 #endif
@@ -73,7 +81,7 @@
 #endif
 
 #ifndef MLE_GAMMA_DEFAULT_ITERATIONS
-#define MLE_GAMMA_DEFAULT_ITERATIONS 100
+#define MLE_GAMMA_DEFAULT_ITERATIONS 250
 #endif
 
 static double mle_gamma_shape      = MLE_GAMMA_DEFAULT_SHAPE;
@@ -138,8 +146,8 @@ mle_gamma_likelihood_function(const gsl_vector *restrict X, void *restrict param
             log(p->factor * pow(Z, mle_gamma_shape - 1.0)) - mle_gamma_rate * Z;
         result -= likelihood;
     }
-#if !defined(NDEBUG)
-    fprintf(stderr, "f(%f, %f) = %f\n", thetaX, thetaY, result);
+#if !defined(NDEBUG) && DEBUG_TRACE_LIKELIHOOD
+    fprintf(stdout, "f(%f, %f) = %f\n", thetaX, thetaY, result);
 #endif
     return result;
 }
@@ -175,8 +183,8 @@ mle_gamma_likelihood_gradient(const gsl_vector *restrict X, void *restrict param
             gradY -= (thetaY -  p->anchors[j].y) * t;
         } // TODO: Otherwise the value of the gradient component is 0?
     }
-#if !defined(NDEBUG)
-    fprintf(stderr, "df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
+#if !defined(NDEBUG) && DEBUG_TRACE_GRADIENT
+    fprintf(stdout, "df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
 #endif
     gsl_vector_set(g, 0, gradX);
     gsl_vector_set(g, 1, gradY);
@@ -247,13 +255,14 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
 
         double likelihood = mle_gamma_likelihood_function(x, &p);
 #if !defined(NDEBUG)
-        fprintf(stderr, "likelihood = %f\n", likelihood);
+        fprintf(stdout, "Start point: f(%f,%f) = %f\n",
+		sx[i], sy[i], likelihood);
 #endif
         if (__builtin_expect(isinf(likelihood), 0)) {
             /* If this is the case, the initial guess does not have
                a likelihood associated to it. We set the estimated coordinate
                to an undefined value and continue. */
-            fprintf(stderr, "Unlikely place, defaulting to (%f, %f)\n",
+            fprintf(stdout, "Unlikely place, defaulting to (%f, %f)\n",
                     sx[0], sy[0]);
             (*resx)[i] = sx[i];
             (*resy)[i] = sy[i];
@@ -275,12 +284,14 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         } while (status == GSL_CONTINUE && iter < mle_gamma_iterations);
 
         /* Step 2c: Store the result. */
-        const float rx = (float) gsl_vector_get(s->x, 0),
-                    ry = (float) gsl_vector_get(s->x, 1);
-        ;
-	fprintf(stderr, "Residual: (%f, %f) -> %f, likelihood = %f\n", rx, ry,
+	const gsl_vector *tr = gsl_multimin_fdfminimizer_x(s);
+        const float rx = (float) gsl_vector_get(tr, 0),
+                    ry = (float) gsl_vector_get(tr, 1);
+#if !defined(NDEBUG)
+	fprintf(stdout, "Residual: (%f, %f) -> %f, likelihood = %f\n", rx, ry,
                 residual_vs(i, vx, vy, r, no_anchors, rx, ry),
                 mle_gamma_likelihood_function(s->x, &p));
+#endif
         (*resx)[i] = rx;
         (*resy)[i] = ry;
     }
