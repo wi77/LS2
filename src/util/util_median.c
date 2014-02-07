@@ -30,13 +30,13 @@
 #define SELECT_TEMPLATE(T, NAME) \
 static inline T \
 __attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__)) \
-NAME(T const * const values, const size_t length, const size_t k) \
+NAME(T const * const values, const size_t length, const int k) \
 { \
     if (length <= 0) return 0.0; \
     T a[length]; \
     memcpy(a, values, length * sizeof(T)); \
     \
-    size_t i, j, l = 0, m = length - 1; \
+    int i, j, l = 0, m = (int) length - 1; \
     T x; \
     \
     while (l < m) { \
@@ -67,7 +67,7 @@ static inline float
 __attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__))
 fmedian_s(const size_t length, float const * const values)
 {
-    const size_t k = length / 2 - ((length & 1) ? 0 : 1);
+    const int k = (int) (length / 2) - ((length & 1u) ? 0 : 1);
     return fselect_s(values, length, k);
 }
 
@@ -82,7 +82,7 @@ static inline double
 __attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__))
 median_s(const size_t length, double const * const values)
 {
-    const size_t k = length / 2 - ((length & 1) ? 0 : 1);
+    const int k = (int) (length / 2) - ((length & 1u) ? 0 : 1);
     return select_s(values, length, k);
 }
 #endif
