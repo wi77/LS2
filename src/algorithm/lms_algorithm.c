@@ -157,7 +157,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
                 float residue = distance_s(iPos_x[j], iPos_y[j], vx[i][ii], vy[i][ii]) - r[i][ii];
                 tmpMedian[i] = residue * residue;
             }
-            medians[j] = fselect_s(tmpMedian, (size_t) N, (size_t) N / 2);
+            medians[j] = fmedian_s((size_t) N, tmpMedian);
         }
 
         // 3. Find index of least median
