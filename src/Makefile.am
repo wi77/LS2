@@ -128,7 +128,7 @@ AM_CFLAGS = -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
 	-Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wpacked \
 	-Winline \
 	-Werror -fdiagnostics-show-option \
-	@ARCH_CFLAGS@ @RDRND_FLAGS@ -pthread \
+	@ARCH_CFLAGS@ @RDRND_FLAGS@ -mno-avx2 -pthread \
 	-ffast-math -fpredictive-commoning -ftree-vectorize
 
 ls2_run_SOURCES  = ls2-run.c util/util_crash.c
