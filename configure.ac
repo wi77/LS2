@@ -134,7 +134,7 @@ CFLAGS="$my_save_cflags"
 unset my_save_cflags
 
 my_save_cflags="$CFLAGS"
-CFLAGS="-mavx"
+CFLAGS="$CFLAGS -mavx"
 AC_MSG_CHECKING([whether CC supports -mavx])
 AC_COMPILE_IFELSE([
      AC_LANG_PROGRAM([[#include <immintrin.h>]],
@@ -167,7 +167,7 @@ then
 fi
 
 my_save_cflags="$CFLAGS"
-CFLAGS="-mavx -mvzeroupper"
+CFLAGS="$CFLAGS -mavx -mvzeroupper"
 AC_MSG_CHECKING([whether CC supports -mvzeroupper])
 AC_COMPILE_IFELSE([
      AC_LANG_PROGRAM([[#include <immintrin.h>]],
@@ -180,6 +180,25 @@ AC_COMPILE_IFELSE([
     [cc_supports_vzeroupper=no])
 CFLAGS="$my_save_cflags"
 unset my_save_cflags
+
+my_save_cflags="$CFLAGS"
+CFLAGS="$CFLAGS -mavx2"
+AC_MSG_CHECKING([whether CC supports -mavx2])
+AC_COMPILE_IFELSE([
+     AC_LANG_PROGRAM([[#include <immintrin.h>]],
+                     [[__m256 v = { 0, 0, 0, 0, 0, 0, 0, 0, };
+                     ]])],
+    [AC_MSG_RESULT([yes])]
+    [cc_supports_avx2=yes],
+    [AC_MSG_RESULT([no])]
+    [cc_supports_avx2=no])
+CFLAGS="$my_save_cflags"
+unset my_save_cflags
+
+if test "$cc_supports_avx2" = "yes"
+then
+    CFLAGS="$CFLAGS -mno-avx2"
+fi
 
 my_save_cflags="$CFLAGS"
 CFLAGS="-mrdrnd"
