@@ -107,7 +107,7 @@ static char const *output_format;             /* Format of the output files. */
 static char const *output[NUM_VARIANTS];      /* Names of output files.      */
 static char const *output_hdf5;               /* Names of raw output files.  */
 
-
+double ls2_backend_steps;
 
 
 
@@ -172,6 +172,10 @@ main(int argc, const char* argv[])
         { "width", 'w', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
           &arg_width, 0,
           "width of the playing field.", NULL },
+        { "gradation", 'G',
+          POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+          &ls2_backend_steps, 0,
+         "number of gradation steps, 0 is unlimited", "steps" },
 #if !defined(ESTIMATOR)
         { "output-average", 'o',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,

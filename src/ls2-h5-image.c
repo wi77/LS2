@@ -52,6 +52,8 @@ static char const *inverted;      /* Name of inverted density output file. */
 static int stride = 10;
 static long runs;
 
+double ls2_backend_steps = 0.0;
+
 int main(int argc, const char* argv[])
 {
     poptContext opt_con;       /* context for parsing command-line options */
@@ -59,6 +61,10 @@ int main(int argc, const char* argv[])
 
     /* Command line arguments. */
     static struct poptOption cli_options[] = {
+        { "gradation", 'G',
+          POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+          &ls2_backend_steps, 0,
+          "number of gradation steps, 0 is unlimited", "steps" },
         { "output-average", 'o',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[AVERAGE_ERROR]), 0,

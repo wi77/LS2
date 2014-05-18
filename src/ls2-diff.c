@@ -48,8 +48,13 @@ static char *file[2];
 static char *compare[NUM_VARIANTS];
 static double similarity = 3.0;
 static double dynamic = 200.0;
+double ls2_backend_steps = 0.0;
 
 static struct poptOption cli_options[] = {
+    { "gradation", 'G',
+      POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
+      &ls2_backend_steps, 0,
+      "number of gradation steps, 0 is unlimited", "steps" },
      { "similarity", 'S', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
        &similarity, 0, "similarity threshold", NULL },
      { "dynamic", 'D', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
