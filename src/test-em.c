@@ -40,9 +40,9 @@
 
 #include <inttypes.h>
 
+#include "ls2/library.h"
 #include "vector_shooter.h"
 #include "ls2/ls2.h"
-#include "ls2/library.h"
 
 #include "util/util_median.c"
 #include "util/util_random.c"

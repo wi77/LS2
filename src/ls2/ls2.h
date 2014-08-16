@@ -58,19 +58,19 @@ typedef struct vector2 {
 extern int ls2_verbose;
 
 
-extern int
+extern algorithm_t
 get_algorithm_by_name(const char *)  __attribute__((__const__));
 
 extern const char * const *
 get_algorithms(void) __attribute__((__const__));
 
-extern int
+extern estimator_t
 get_estimator_by_name(const char *)  __attribute__((__const__));
 
 extern const char * const *
 get_estimators(void) __attribute__((__const__));
 
-extern int
+extern error_model_t
 get_error_model_by_name(const char *) __attribute__((__const__));
 
 extern const char * const *
@@ -118,7 +118,7 @@ double get_progress(int *threads);
  * \param[in] height     Height of the playing field.
  */
 extern void __attribute__((__nonnull__))
-ls2_distribute_work_shooter(int alg, int em,
+ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
                             const int num_threads, const int64_t runs,
                             const long seed,
                             const vector2* anchors, const size_t no_anchors,
@@ -144,14 +144,15 @@ ls2_distribute_work_shooter(int alg, int em,
  * \param[in] height Height of the playing field.
  */
 extern int __attribute__((__nonnull__))
-compute_locbased(const int alg, const int em, const int num_threads,
+compute_locbased(const algorithm_t alg, const error_model_t em,
+		 const int num_threads,
                  const int64_t runs, const float *anchor_x,
                  const float *anchor_y, const int no_anchors,
                  float* results[NUM_VARIANTS], const int width,
                  const int height);
 
 extern void __attribute__((__nonnull__))
-ls2_distribute_work_inverted(const int alg, const int em,
+ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
 			     const int num_threads, const int64_t runs,
                              const long seed, const float tag_x,
                              const float tag_y,
@@ -180,7 +181,8 @@ ls2_distribute_work_inverted(const int alg, const int em,
  * \arg[out] center_y  Y coordinate of the center of mass of all hits.
  */
 extern int __attribute__((__nonnull__))
-compute_inverse(const int alg, const int em, const int num_threads,
+compute_inverse(const algorithm_t alg, const error_model_t em,
+		const int num_threads,
 		const int64_t runs, const float *restrict anchor_x,
 		const float *restrict anchor_y, const int no_anchors,
 		const float tag_x, const float tag_y,
@@ -201,15 +203,15 @@ compute_inverse(const int alg, const int em, const int num_threads,
  * \param[in] height     Height of the playing field.
  */
 extern void __attribute__((__nonnull__))
-ls2_distribute_work_estimator(const int est, const int num_threads,
+ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
 			      const vector2* anchors, const size_t no_anchors,
 			      float *results[NUM_VARIANTS],
 			      const int width, const int height);
 
 extern int __attribute__((__nonnull__))
-compute_estimates(const int est, const int num_threads,
+compute_estimates(const estimator_t est, const int num_threads,
 		  const float *anchor_x, const float *anchor_y,
-		  const int no_anchors,
+		  const size_t no_anchors,
 		  float* results[NUM_VARIANTS], const int width,
 		  const int height);
 

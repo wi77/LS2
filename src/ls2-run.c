@@ -47,11 +47,11 @@
 #  include <popt.h>
 #endif
 
-#include "vector_shooter.h"
 #include "ls2/library.h"
 #include "ls2/ls2.h"
 #include "ls2/backend.h"
 #include "ls2/util.h"
+#include "vector_shooter.h"
 
 #include "util/util_math.c"
 #include "util/util_vector.c"

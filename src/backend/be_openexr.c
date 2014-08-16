@@ -35,6 +35,7 @@
 
 #include <OpenEXR/ImfCRgbaFile.h>
 
+#include "ls2/library.h"
 #include "ls2/ls2.h"
 #include "vector_shooter.h"
 #include "ls2/backend.h"

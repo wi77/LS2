@@ -9,9 +9,10 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
-#include "ls2/ls2.h"
-#include "ls2/library.h"
 #include <time.h>
+
+#include "ls2/library.h"
+#include "ls2/ls2.h"
 
 #include "vector_shooter.h"
 

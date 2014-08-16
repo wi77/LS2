@@ -48,8 +48,8 @@
 # include <popt.h>
 #endif
 
-#include "ls2/ls2.h"
 #include "ls2/library.h"
+#include "ls2/ls2.h"
 #include "vector_shooter.h"
 
 
@@ -641,7 +641,7 @@ ls2_shooter_run(void *rr)
  * \param[in] height     Height of the playing field.
  */
 void __attribute__((__nonnull__))
-ls2_distribute_work_shooter(const int alg, const int em,
+ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
                             const int num_threads, const int64_t runs,
                             const long seed,
                             const vector2* anchors, const size_t no_anchors,
@@ -725,7 +725,7 @@ ls2_distribute_work_shooter(const int alg, const int em,
  * This function should only be called by tha Java api.
  */
 extern int
-compute_locbased(const int alg, const int em,
+compute_locbased(const algorithm_t alg, const error_model_t em,
                  const int num_threads, const int64_t runs,
                  const float *anchor_x, const float *anchor_y,
                  const int no_anchors, float* results[NUM_VARIANTS],
@@ -893,7 +893,7 @@ static void* ls2_inverse_run(void *rr)
  ************************************************************************/
 
 void
-ls2_distribute_work_inverted(const int alg, const int em,
+ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
 			     const int num_threads, const int64_t runs,
                              const long seed,
                              const float tag_x, const float tag_y,
@@ -1007,7 +1007,8 @@ ls2_distribute_work_inverted(const int alg, const int em,
 
 
 extern int
-compute_inverse(const int alg, const int em, const int num_threads,
+compute_inverse(const algorithm_t alg, const error_model_t em,
+		const int num_threads,
                 const int64_t runs, const float *restrict anchor_x,
                 const float *restrict anchor_y, const int no_anchors,
                 const float tag_x, const float tag_y,
@@ -1132,7 +1133,7 @@ ls2_estimator_run(void *rr)
  * \param[in] height     Height of the playing field.
  */
 void
-ls2_distribute_work_estimator(const int est, const int num_threads,
+ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
 			      const vector2* anchors, const size_t no_anchors,
 			      float *results[NUM_VARIANTS],
 			      const int width, const int height)
@@ -1189,9 +1190,9 @@ ls2_distribute_work_estimator(const int est, const int num_threads,
 
 
 int
-compute_estimates(const int est, const int num_threads,
+compute_estimates(const estimator_t est, const int num_threads,
 		  const float *anchor_x, const float *anchor_y,
-		  const int no_anchors,
+		  const size_t no_anchors,
 		  float* results[NUM_VARIANTS], const int width,
 		  const int height)
 {
@@ -1200,19 +1201,19 @@ compute_estimates(const int est, const int num_threads,
     cancelled = false;
 
     // parse and normalize arguments
-    anchors = calloc((size_t) no_anchors, sizeof(vector2));
+    anchors = calloc(no_anchors, sizeof(vector2));
     if (anchors == NULL) {
         perror("compute_locbased(): calloc()");
         return -1;
     }
  
-    for (int i = 0; i < no_anchors; i++) {
+    for (size_t i = 0; i < no_anchors; i++) {
 	    anchors[i].x = anchor_x[i];
 	    anchors[i].y = anchor_y[i];
     }
 
     ls2_distribute_work_estimator(est, num_threads,
-				  anchors, (size_t) no_anchors,
+				  anchors, no_anchors,
 				  results, width, height);
 
     free(anchors);

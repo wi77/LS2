@@ -39,6 +39,7 @@
 #define H5_NO_DEPRECATED_SYMBOLS 1
 #include <hdf5.h>
 
+#include "ls2/library.h"
 #include "ls2/ls2.h"
 #include "ls2/backend.h"
 
