@@ -42,8 +42,6 @@
 #endif
 
 #include <glib.h>
-
-#include <assert.h>
 #include <gsl/gsl_multimin.h>
 
 #include "mle_gauss_algorithm.h"

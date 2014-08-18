@@ -41,9 +41,6 @@
 #  include "ls2/ls2-config.h"
 #endif
 
-#if HAVE_POPT_H
-#  include <popt.h>
-#endif
 #include <math.h>
 #include <string.h>
 #include "algorithm/nllsq_algorithm.c"

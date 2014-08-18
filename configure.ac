@@ -62,13 +62,13 @@ AC_ARG_ENABLE([assert],
   [ac_enable_assert=$enableval
    AS_IF(dnl
     [test "x$enableval" = xno],
-      [AC_DEFINE([NDEBUG], [1],
+      [AC_DEFINE([G_DISABLE_ASSERT], [1],
         [Define to 1 if assertions should be disabled.])],
     [test "x$enableval" != xyes],
       [AC_MSG_WARN([invalid argument supplied to --enable-assert])
       ac_enable_assert=yes])],
   [ac_enable_assert=no
-   AC_DEFINE([NDEBUG], [1])])
+   AC_DEFINE([G_DISABLE_ASSERT], [1])])
 AC_MSG_RESULT([$ac_enable_assert])
 
 AC_HEADER_STDBOOL

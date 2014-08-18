@@ -29,7 +29,6 @@
 
 #include <immintrin.h>
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -415,7 +414,7 @@ static void*
 __attribute__((__nonnull__,__hot__,__flatten__))
 ls2_shooter_run(void *rr)
 {
-    assert(rr != NULL);
+    g_assert(rr != NULL);
     locbased_runparams_t *params = (locbased_runparams_t *) rr;
 
     VECTOR vx[MAX_ANCHORS];
@@ -1078,7 +1077,7 @@ static void*
 ls2_estimator_run(void *rr)
 {
     estimator_runparams_t *params = (estimator_runparams_t *) rr;
-    assert(params != NULL);
+    g_assert(params != NULL);
 
     // Calculation for every pixel
     for (size_t pos = params->from; pos < params->from + params->count; pos++) {

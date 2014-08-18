@@ -93,7 +93,7 @@ gamma_noise_error(__m128i *restrict seed,
             x *= rnd(seed);
         }
         if (alpha > 0.0F) {
-            assert(alpha < 1.0F);
+            g_assert(alpha < 1.0F);
             // Ahrens-Dieter acceptance-rejection method
             const VECTOR v0 =
                 VECTOR_BROADCASTF(((float) M_E) / ((float) M_E + alpha));

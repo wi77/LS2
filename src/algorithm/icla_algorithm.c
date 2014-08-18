@@ -41,10 +41,6 @@
 #  include "ls2/ls2-config.h"
 #endif
 
-#if HAVE_POPT_H
-#  include <popt.h>
-#endif
-
 //#include "util/util_math.c"
 
 typedef struct Point2d{

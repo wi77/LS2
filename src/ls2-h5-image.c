@@ -28,7 +28,6 @@
 #define _GNU_SOURCE
 #endif
 
-#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>

@@ -77,7 +77,7 @@ ls2_pick_color_density(const float sample, double *restrict hue,
         *saturation = 1.0;
         *lightness = 0.5;
     } else {
-	assert(0.0 <= sample && sample <= 1.0);
+	g_assert(0.0 <= sample && sample <= 1.0);
         const double t = cbrt(1.0 - sample);
         if (sample <= 0.25) {
             *hue = 150.0;
@@ -118,16 +118,16 @@ ls2_pick_color_diff(const double sample, const double similar,
     if (sample < -similar && isinf(sample) == 0) {
         /* First was better                    */
 	/* The color is green and gets darker. */
-	assert(sample < 0);
+	g_assert(sample < 0);
         if (sample < -dynamic / 2.0) {
 	    *hue = 150.0;
         } else {
 	    *hue = 120.0;
         }
 	*saturation = MAX(min_saturation, 0.5 + sample / dynamic);
-	assert(min_saturation <= *saturation && *saturation <= 0.5);
+	g_assert(min_saturation <= *saturation && *saturation <= 0.5);
 	*lightness = MAX(0.0, 0.5 + sample / dynamic);
-	assert(0 <= *lightness && *lightness <= 0.5);
+	g_assert(0 <= *lightness && *lightness <= 0.5);
     } else if (-similar <= sample && sample <= similar) {    // Similar
 	*hue = 60.0;  // This is the color yellow
 	*lightness = 0.5;
@@ -135,23 +135,23 @@ ls2_pick_color_diff(const double sample, const double similar,
     } else if (similar < sample && isinf(sample) == 0) {
         /* Second was better                   */
 	/* We start with red and get brighter. */
-	assert (0 < sample);
+	g_assert (0 < sample);
 	if (sample < dynamic / 2.0 ) {
             *hue = 15.0;
         } else {
             *hue = 0.0;
         }
 	*saturation = MIN(0.5 + sample / dynamic, max_saturation);
-	assert(0.5 <= *saturation && *saturation <= max_saturation);
+	g_assert(0.5 <= *saturation && *saturation <= max_saturation);
 	*lightness = MIN(0.5 + sample / dynamic, 1.0);
-	assert(0.5 <= *lightness && *lightness <= 1.0);
+	g_assert(0.5 <= *lightness && *lightness <= 1.0);
     } else if (isnan(sample) != 0) {
         // Mark not-a-number in magenta.
         *hue = 300.0;
         *saturation = 1.0;
         *lightness = 0.5;
     } else {
-	assert(false);
+	g_assert(false);
     }
 }
 

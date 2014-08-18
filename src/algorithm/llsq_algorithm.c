@@ -37,7 +37,7 @@
 #ifndef ALGORITHM_LLSQ_C_INCLUDED
 #define ALGORITHM_LLSQ_C_INCLUDED 1
 
-#include <assert.h>
+#include <glib.h>
 
 #include "util/util_matrix.c"
 #include "util/util_triangle.c"
@@ -51,7 +51,7 @@ llsq_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
          VECTOR *restrict resy)
 {
     // Solve equation of form W*A*x = W*b
-    assert(num_anchors > 0);
+    g_assert(num_anchors > 0);
     const size_t m = num_anchors-1U;
     VECTOR b[m*1];
     VECTOR a[m*2];

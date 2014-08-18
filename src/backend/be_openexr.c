@@ -26,7 +26,6 @@
 
 #define _XOPEN_SOURCE 600
 
-#include <assert.h>
 #include <stdbool.h>
 #include <inttypes.h>
 #include <stdlib.h>

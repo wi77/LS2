@@ -23,7 +23,6 @@
 #  include "ls2/ls2-config.h"
 #endif
 
-#include <assert.h>
 #include <glib.h>
 
 #include "md_minmax_abs_algorithm.h"

@@ -41,9 +41,7 @@
 #  include "ls2/ls2-config.h"
 #endif
 
-#if HAVE_POPT_H
-#  include <popt.h>
-#endif
+#include <glib.h>
 
 #include "util/util_math.c"
 #include "util/util_median.c"
@@ -55,7 +53,7 @@ static inline int
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 toIndex(int row, int col, size_t N)
 {
-    assert(row != col);
+    g_assert(row != col);
     int idx = -1;
     if (row < col) {
         idx = row * ((int)N-1) - (row-1) * ((row-1) + 1)/2 + col - row - 1;
@@ -69,9 +67,9 @@ static inline size_t
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 robust_filter(size_t const count ,float *restrict resx,float *restrict resy)
 {
-    assert (count > 1);
+    g_assert (count > 1);
     const size_t N = count * (count - 1) / 2;
-    assert (N < INT_MAX);
+    g_assert (N < INT_MAX);
     float v[N];
     for (int i = 0; i < (int)count - 1; i++) {
         for (int j = i+1; j < (int)count; j++) {
@@ -101,7 +99,7 @@ robust_filter(size_t const count ,float *restrict resx,float *restrict resy)
             filtered_count++;
         }
     }
-    assert(filtered_count > 0);
+    g_assert(filtered_count > 0);
     memcpy(resx,filtered_x,sizeof(float) * filtered_count);
     memcpy(resy,filtered_y,sizeof(float) * filtered_count);
     return filtered_count;

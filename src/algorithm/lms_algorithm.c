@@ -41,11 +41,8 @@
 #  include "ls2/ls2-config.h"
 #endif
 
-#if HAVE_POPT_H
-#  include <popt.h>
-#endif
+#include <glib.h>
 
-#include <assert.h>
 //#include "algorithm/llsq_algorithm.c"
 #include "util/util_sort.c"
 #include <stdlib.h>
@@ -183,7 +180,7 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
             }
         }
 
-        assert(count > 0);
+        g_assert(count > 0);
         VECTOR anchors_x[count], anchors_y[count], ranges[count];
         int c=0;
         for (int i=0; i < N; i++) {
