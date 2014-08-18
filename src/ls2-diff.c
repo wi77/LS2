@@ -128,7 +128,7 @@ main(int argc, char **argv)
 	   * A positive number means that image one has the larger error.
 	   * A negative number means that image two has the larger error.
 	   */
-	  results = calloc((size_t)(a_width * a_height), sizeof(float));
+	  results = g_new(float, (size_t)(a_width * a_height));
 	  for (uint16_t y = 0; y < a_height; y++) {
 	       for (uint16_t x = 0; x < a_width; x++) {
 		    const int i = x + y * a_width;
@@ -145,6 +145,7 @@ main(int argc, char **argv)
 	  ls2_cairo_write_png_diff(compare[var], a_anchors, a_no_anchors,
 				   results, a_width, a_height,
                                    similarity, dynamic);
+	  g_free(results);
      }
      exit(EXIT_SUCCESS);
 }

@@ -135,11 +135,7 @@ ls2_write_inverted(ls2_output_format_t format, const char *filename,
     }
 
     double *converted;
-    converted = malloc((size_t)(width * height) * sizeof(*converted));
-    if (converted == NULL) {
-        perror(__FUNCTION__);
-        exit(EXIT_FAILURE);
-    }
+    converted = g_new(double, (size_t)(width * height));
     for (size_t i = 0; i < (size_t)width * height; i++) {
         if (maxval > 0) {
             double v = ((double) result[i] / (double) maxval);
@@ -168,5 +164,5 @@ ls2_write_inverted(ls2_output_format_t format, const char *filename,
     case NUM_OUTPUT_FORMATS:
 	break;
     }
-    free(converted);
+    g_free(converted);
 }

@@ -145,7 +145,7 @@ ls2_hdf5_read_anchors(hid_t file, vector2** anchors, size_t *no_anchors)
         return -1;
     }
     *no_anchors = (size_t) dims[0];
-    *anchors = (vector2 *) calloc(*no_anchors, sizeof(vector2));
+    *anchors = g_new(vector2, *no_anchors);
     memspace = H5Screate_simple(2, dims, NULL);
     H5Dread(dataset, H5T_NATIVE_FLOAT, memspace, dataspace, H5P_DEFAULT,
             *anchors);
@@ -190,7 +190,7 @@ ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
     H5Sget_simple_extent_dims(dataspace, dims, NULL);
     *width = (uint16_t) dims[1];
     *height = (uint16_t) dims[0];
-    *results = (float *) calloc((size_t) (*height * *width), sizeof(float));
+    *results = g_new(float, (size_t) (*height * *width));
     memspace = H5Screate_simple(2, dims, NULL);
     H5Dread(dataset, H5T_NATIVE_FLOAT, memspace, dataspace, H5P_DEFAULT,
             *results);
@@ -329,8 +329,7 @@ ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
     H5Sget_simple_extent_dims(dataspace, dims, NULL);
     *width = (uint16_t) dims[1];
     *height = (uint16_t) dims[0];
-    *results = (uint64_t*) calloc((size_t) (*height * *width),
-                                  sizeof(uint64_t));
+    *results = g_new(uint64_t, (size_t) (*height * *width));
     memspace = H5Screate_simple(2, dims, NULL);
     H5Dread(dataset, H5T_STD_U64LE, memspace, dataspace, H5P_DEFAULT,
             *results);

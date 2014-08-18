@@ -130,11 +130,7 @@ ls2_openexr_write_locbased(const char* filename,
 			   const float* restrict result, const uint16_t width,
 			   const uint16_t height)
 {
-    ImfRgba *image = (ImfRgba *) malloc((size_t) width * height * sizeof(ImfRgba));
-    if (image == NULL) {
-        perror("ls2_write_openexr(): malloc()");
-        exit(EXIT_FAILURE);
-    }
+    ImfRgba *image = g_new(ImfRgba, (size_t) width * height);
 
     ls2_draw_result_to_openexr(image, width, height, result);
     ls2_draw_anchors_to_openexr(image, width, height, anchors, no_anchors, 0);
@@ -147,6 +143,7 @@ ls2_openexr_write_locbased(const char* filename,
   // finish:
     ImfCloseOutputFile(file);
     ImfDeleteHeader(header);
+    g_free(image);
 }
 
 
@@ -158,11 +155,7 @@ ls2_openexr_write_inverted(const char* filename,
 			   const uint16_t width, const uint16_t height,
     			   const double center_x, const double center_y)
 {
-    ImfRgba *image = (ImfRgba *) calloc((size_t) width * height, sizeof(ImfRgba));
-    if (image == NULL) {
-        perror("ls2_write_inverted_openexr(): calloc()");
-        exit(EXIT_FAILURE);
-    }
+    ImfRgba *image = g_new(ImfRgba, (size_t) width * height);
 
     // Draw the result image.
     ls2_draw_inverted_to_openexr(image, width, height, result);
@@ -190,5 +183,5 @@ ls2_openexr_write_inverted(const char* filename,
   // finish:
     ImfCloseOutputFile(file);
     ImfDeleteHeader(header);
-    free(image);
+    g_free(image);
 }

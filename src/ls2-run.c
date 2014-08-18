@@ -274,7 +274,7 @@ main(int argc, char* argv[])
     // parse and normalize anchor coordinates
     const size_t no_anchors = no_anchor_args / 2;
 
-    anchors = calloc(no_anchors, sizeof(vector2));
+    anchors = g_new(vector2, no_anchors);
     for (int i = 0, j = 0; i < no_anchor_args; i += 2, j++) {
 	    anchors[j].x = (float) strtoul(anchor[i],   NULL, 10);
 	    anchors[j].y = (float) strtoul(anchor[i+1], NULL, 10);
@@ -463,7 +463,7 @@ main(int argc, char* argv[])
     }
 #endif
     // clean-ups.
-    free(anchors);
+    g_free(anchors);
     for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++)
         free(results[var]);
     free(result);

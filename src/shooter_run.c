@@ -657,17 +657,8 @@ ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
     error_model_setup(em, anchors, no_anchors);
 #endif
 
-    params = (locbased_runparams_t *) calloc(ls2_num_threads, sizeof(locbased_runparams_t));
-    if (params == NULL) {
-        perror("calloc()");
-        exit(EXIT_FAILURE);
-    }
-
-    ls2_thread = (pthread_t *) calloc(ls2_num_threads, sizeof(pthread_t));
-    if (ls2_thread == NULL) {
-        perror("calloc()");
-        exit(EXIT_FAILURE);
-    }
+    params = g_new(locbased_runparams_t, ls2_num_threads);
+    ls2_thread = g_new(pthread_t, ls2_num_threads);
 
     srand((unsigned int) seed);
 
@@ -710,8 +701,8 @@ ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
         running = 1;
         ls2_shooter_run(&(params[0]));
     }
-    free(ls2_thread);
-    free(params);
+    g_free(ls2_thread);
+    g_free(params);
 }
 
 
@@ -739,11 +730,7 @@ compute_locbased(const algorithm_t alg, const error_model_t em,
     display_name     = NULL;
 
     // parse and normalize arguments
-    anchors = calloc((size_t) no_anchors, sizeof(vector2));
-    if (anchors == NULL) {
-        perror("compute_locbased(): calloc()");
-        return -1;
-    }
+    anchors = g_new(vector2, (size_t) no_anchors);
  
     for (int i = 0; i < no_anchors; i++) {
 	    anchors[i].x = anchor_x[i];
@@ -754,7 +741,7 @@ compute_locbased(const algorithm_t alg, const error_model_t em,
                                 anchors, (size_t) no_anchors,
                                 results, width, height);
 
-    free(anchors);
+    g_free(anchors);
 
     if (cancelled)
 	return -1;
@@ -914,11 +901,7 @@ ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
 
     ls2_num_threads = (size_t) num_threads;
 
-    params = (inverted_runparams_t *) calloc(ls2_num_threads, sizeof(inverted_runparams_t));
-    if (params == NULL) {
-        perror("calloc()");
-        exit(EXIT_FAILURE);
-    }
+    params = g_new(inverted_runparams_t, ls2_num_threads);
 
     srand((unsigned int) seed);
 
@@ -941,16 +924,12 @@ ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
         memset(params[t].result, 0, sz);
     }
 
-    ls2_thread = (pthread_t *) calloc((size_t) num_threads, sizeof(pthread_t));
-    if (ls2_thread == NULL) {
-        perror("calloc()");
-        exit(EXIT_FAILURE);
-    }
+    ls2_thread = g_new(pthread_t, (size_t) num_threads);
 
     for (int t = 0; t < num_threads; t++) {
         if (pthread_create(&ls2_thread[t], NULL, ls2_inverse_run, &params[t])) {
             perror("pthread_create()");
-            free(ls2_thread);
+            g_free(ls2_thread);
             exit(EXIT_FAILURE);
         }
         running++;
@@ -960,7 +939,7 @@ ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
     for (int t = 0; t < num_threads; t++)
         pthread_join(ls2_thread[t], NULL);
 
-    free(ls2_thread);
+    g_free(ls2_thread);
 
     /*
      * Evaluate the results.
@@ -996,7 +975,7 @@ ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
     for (int t = 0; t < num_threads; t++) {
 	free(params[t].result);
     }
-    free(params);
+    g_free(params);
 }
 
 
@@ -1018,11 +997,7 @@ compute_inverse(const algorithm_t alg, const error_model_t em,
     cancelled = false;
 
     // parse and normalize arguments
-    anchors = calloc((size_t) no_anchors, sizeof(vector2));
-    if (anchors == NULL) {
-        perror("compute_locbased(): calloc()");
-        return -1;
-    }
+    anchors = g_new(vector2, (size_t) no_anchors);
  
     for (int i = 0; i < no_anchors; i++) {
 	    anchors[i].x = anchor_x[i];
@@ -1034,7 +1009,7 @@ compute_inverse(const algorithm_t alg, const error_model_t em,
                                  result, width, height,
                                  center_x, sdev_x, center_y, sdev_y);
 
-    free(anchors);
+    g_free(anchors);
 
     if (cancelled)
 	return -1;
@@ -1141,17 +1116,8 @@ ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
 
     running = 0;
 
-    params = (estimator_runparams_t *) calloc(ls2_num_threads, sizeof(estimator_runparams_t));
-    if (params == NULL) {
-        perror("calloc()");
-        exit(EXIT_FAILURE);
-    }
-
-    ls2_thread = (pthread_t *) calloc(ls2_num_threads, sizeof(pthread_t));
-    if (ls2_thread == NULL) {
-        perror("calloc()");
-        exit(EXIT_FAILURE);
-    }
+    params = g_new(estimator_runparams_t, ls2_num_threads);
+    ls2_thread = g_new(pthread_t, ls2_num_threads);
 
     // distribute work to threads
     for (size_t t = 0; t < ls2_num_threads; t++) {
@@ -1167,7 +1133,7 @@ ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
 
         if (pthread_create(&ls2_thread[t], NULL, ls2_estimator_run, &params[t])) {
             perror("pthread_create()");
-            free(ls2_thread);
+            g_free(ls2_thread);
             exit(EXIT_FAILURE);
         }
         running++;
@@ -1178,8 +1144,8 @@ ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
     for(size_t t = 0; t < ls2_num_threads; t++)
         pthread_join(ls2_thread[t], NULL);
 
-    free(ls2_thread);
-    free(params);
+    g_free(ls2_thread);
+    g_free(params);
 }
 
 
@@ -1198,11 +1164,7 @@ compute_estimates(const estimator_t est, const int num_threads,
     cancelled = false;
 
     // parse and normalize arguments
-    anchors = calloc(no_anchors, sizeof(vector2));
-    if (anchors == NULL) {
-        perror("compute_locbased(): calloc()");
-        return -1;
-    }
+    anchors = g_new(vector2, no_anchors);
  
     for (size_t i = 0; i < no_anchors; i++) {
 	    anchors[i].x = anchor_x[i];
@@ -1213,7 +1175,7 @@ compute_estimates(const estimator_t est, const int num_threads,
 				  anchors, no_anchors,
 				  results, width, height);
 
-    free(anchors);
+    g_free(anchors);
 
     if (cancelled)
 	return -1;
