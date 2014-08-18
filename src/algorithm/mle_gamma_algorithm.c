@@ -41,13 +41,13 @@
 #  include "ls2/ls2-config.h"
 #endif
 
-#if HAVE_POPT_H
-#  include <popt.h>
-#endif
+#include <glib.h>
 
 #include <assert.h>
 
 #include <gsl/gsl_multimin.h>
+
+#include "mle_gamma_algorithm.h"
 
 #include "algorithm/nllsq_algorithm.c"
 
@@ -79,24 +79,38 @@ static    int mle_gamma_iterations = MLE_GAMMA_DEFAULT_ITERATIONS;
 
 
 
-struct poptOption mle_gamma_arguments[] = {
-        { "mle-gamma-rate", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gamma_rate, 0,
+static GOptionEntry mle_gamma_arguments[] = {
+        { "mle-gamma-rate", 0, 0, G_OPTION_ARG_DOUBLE,
+          &mle_gamma_rate,
           "rate of the gamma distribution", NULL },
-        { "mle-gamma-shape", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gamma_shape, 0,
+        { "mle-gamma-shape", 0, 0, G_OPTION_ARG_DOUBLE,
+          &mle_gamma_shape,
           "shape of the gamma distribution", NULL },
-        { "mle-gamma-offset", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gamma_offset, 0,
+        { "mle-gamma-offset", 0, 0, G_OPTION_ARG_DOUBLE,
+          &mle_gamma_offset,
           "offset to the gamma distribution", NULL },
-        { "mle-gamma-epsilon", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gamma_epsilon, 0,
+        { "mle-gamma-epsilon", 0, 0, G_OPTION_ARG_DOUBLE,
+          &mle_gamma_epsilon,
           "maximum size of the simplex for termination", NULL },
-        { "mle-gamma-iterations", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gamma_iterations, 0,
+        { "mle-gamma-iterations", 0, 0, G_OPTION_ARG_INT,
+          &mle_gamma_iterations,
           "maximum number of iterations before termination", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
+
+
+
+void __attribute__((__nonnull__))
+ls2_add_mle_gamma_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("mle-gamma",
+                                "Parameters to the MLE Gamma algorithm",
+                                "Parameters to the MLE Gamma algorithm",
+                                NULL, NULL);
+     g_option_group_add_entries(group, mle_gamma_arguments);
+     g_option_context_add_group(context, group);
+}
 
 
 struct mle_gamma_point2d {

@@ -34,6 +34,8 @@
 #include <inttypes.h>
 #include <assert.h>
 
+#include <glib.h>
+
 #include <cairo.h>
 #include <cairo/cairo-pdf.h>
 

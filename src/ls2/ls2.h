@@ -85,7 +85,14 @@ get_number_of_result_views(void) __attribute__((__const__));
 extern ls2_output_variant
 ls2_get_view_by_name(const char *name);
 
+extern void __attribute__((__nonnull__))
+ls2_add_algorithm_option_groups(GOptionContext *context);
 
+extern void __attribute__((__nonnull__))
+ls2_add_error_model_option_groups(GOptionContext *context);
+
+extern void __attribute__((__nonnull__))
+ls2_add_estimator_option_groups(GOptionContext *context);
 
 void ls2_initialize_progress_bar(size_t __total, const char *__algorithm);
 void ls2_stop_progress_bar(void);

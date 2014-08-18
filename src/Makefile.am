@@ -43,6 +43,8 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/lms_algorithm.c \
 	algorithm/md_minmax_abs_algorithm.c \
 	algorithm/md_minmax_abs_algorithm.h \
+	algorithm/md_minmax_rel_algorithm.c \
+	algorithm/md_minmax_rel_algorithm.h \
 	algorithm/minmax_algorithm.c \
 	algorithm/minmax_algorithm.h \
 	algorithm/min_res1_bf_algorithm.c \
@@ -63,8 +65,6 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/vble_algorithm.h \
 	algorithm/vble_opt_algorithm.c \
 	algorithm/vble_opt_algorithm.h \
-	algorithm/weighted_minmax_algorithm.c \
-	algorithm/weighted_minmax_algorithm.h \
 	algorithm/res_bruteforce_algorithm.c \
 	algorithm/res_bruteforce_algorithm.h \
 	algorithm/rwgh_algorithm.c \
@@ -133,32 +133,36 @@ AM_CFLAGS = -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
 
 ls2_run_SOURCES  = ls2-run.c util/util_crash.c
 ls2_run_CPPFLAGS =
-ls2_run_LDADD    = $(LIBOBJS) libls2.la libls2be.la
+ls2_run_CFLAGS   = $(GLIB2_CFLAGS)
+ls2_run_LDADD    = $(LIBOBJS) libls2.la libls2be.la $(GLIB2_LIBS)
 
 ls2_bounds_SOURCES  = ls2-run.c util/util_crash.c
 ls2_bounds_CPPFLAGS = -DESTIMATOR
-ls2_bounds_LDADD    = $(LIBOBJS) libls2.la libls2be.la
+ls2_bounds_CFLAGS   = $(GLIB2_CFLAGS)
+ls2_bounds_LDADD    = $(LIBOBJS) libls2.la libls2be.la $(GLIB2_LIBS)
 
 ls2_diff_SOURCES  = ls2-diff.c
 ls2_diff_CPPFLAGS =
-ls2_diff_LDADD    = libls2be.la
+ls2_diff_CFLAGS   = $(GLIB2_CFLAGS)
+ls2_diff_LDADD    = libls2be.la $(GLIB2_LIBS)
 
 ls2_h5_image_SOURCES  = ls2-h5-image.c
 ls2_h5_image_CPPFLAGS =
-ls2_h5_image_LDADD    = libls2be.la
+ls2_h5_image_CFLAGS   = $(GLIB2_CFLAGS)
+ls2_h5_image_LDADD    = libls2be.la $(GLIB2_LIBS)
 
 libls2be_la_SOURCES = backend/backends.c backend/be_cairo.c \
 		      backend/be_openexr.c backend/be_hdf5.c \
 		      util/util_statistics.c ls2/util.h \
 		      ls2/backend.h ls2/output-variants.h
-libls2be_la_CPPFLAGS = $(CAIRO_CFLAGS) $(OPENEXR_CFLAGS)
+libls2be_la_CPPFLAGS = $(CAIRO_CFLAGS) $(GLIB2_CFLAGS) $(OPENEXR_CFLAGS)
 libls2be_la_LDFLAGS  = -version $(LS2_LIBRARY_VERSION)
-libls2be_la_LIBADD   = $(CAIRO_LIBS) $(OPENEXR_LIBS) $(LIBOBJS)
+libls2be_la_LIBADD   = $(CAIRO_LIBS) $(GLIB2_LIBS) $(OPENEXR_LIBS) $(LIBOBJS)
 
 libls2_la_SOURCES  = shooter_run.c vector_shooter.h
-libls2_la_CPPFLAGS = $(GSL_CFLAGS)
+libls2_la_CPPFLAGS = $(GLIB2_CFLAGS) $(GSL_CFLAGS)
 libls2_la_LDFLAGS  = -version $(LS2_LIBRARY_VERSION)
-libls2_la_LIBADD   = $(GSL_LIBS) $(LIBOBJS) -lrt
+libls2_la_LIBADD   = $(GLIB2_LIBS) $(GSL_LIBS) $(LIBOBJS) -lrt
 
 test_em_SOURCES  = test-em.c vector_shooter.h ls2/ls2.h
 test_em_CPPFLAGS =

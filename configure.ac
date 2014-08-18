@@ -43,11 +43,8 @@ AC_PROG_MAKE_SET
 
 # Checks for libraries.
 AC_CHECK_LIB([m], [sqrt])
-AC_CHECK_LIB([popt], [poptGetContext], [],
-[AC_MSG_FAILURE([You need to install libpopt and popt.h])])
-AC_CHECK_HEADERS([popt.h], [], [AC_MSG_FAILURE([You need to install popt.h])])
-
 AX_OPENCL(C)
+PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.32])
 PKG_CHECK_MODULES([GSL], [gsl >= 1.13])
 PKG_CHECK_MODULES([CAIRO], [cairo >= 1.8])
 PKG_CHECK_MODULES([OPENEXR], [OpenEXR >= 1.6])

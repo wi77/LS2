@@ -21,18 +21,29 @@
 
 /* @error_model_name: Constant error */
 
+#include <glib.h>
+
 #include "const_em.h"
 
-static float const_error_value = 50.0F;
+static double const_error_value = 50.0F;
 
-#ifdef HAVE_POPT_H
-struct poptOption const_arguments[] = {
-        { "const-error", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &const_error_value, 0,
+static GOptionEntry const_arguments[] = {
+        { "const-error", 0, 0, G_OPTION_ARG_DOUBLE, &const_error_value,
           "constant error", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
-#endif
+
+void __attribute__((__nonnull__))
+ls2_add_const_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("const",
+                                "Parameters to the constant value error model",
+                                "Parameters to the constant value error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, const_arguments);
+     g_option_context_add_group(context, group);
+}
 
 
 static VECTOR error_v;
@@ -42,7 +53,7 @@ void
 const_setup(const vector2 *anchors __attribute__((__unused__)),
             size_t nanchors __attribute__((__unused__)))
 {
-    error_v = VECTOR_BROADCASTF(const_error_value);
+    error_v = VECTOR_BROADCASTF((float) const_error_value);
 }
 
 

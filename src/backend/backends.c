@@ -29,6 +29,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <glib.h>
+
 #include "ls2/library.h"
 #include "ls2/ls2.h"
 #include "ls2/backend.h"

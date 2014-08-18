@@ -44,9 +44,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#ifdef HAVE_POPT_H
-# include <popt.h>
-#endif
+#include <glib.h>
 
 #include "ls2/library.h"
 #include "ls2/ls2.h"

@@ -25,39 +25,47 @@
 # include "ls2/ls2-config.h"
 #endif
 
-#ifdef HAVE_POPT_H
-# include <popt.h>
-#endif
+#include <glib.h>
 
 #include "gamma_noise_em.h"
 
 // Errormodels have to include all utils themselves
-#include "../util/util_random.c"
+#if defined(STAND_ALONE)
+#  include "../util/util_random.c"
+#endif
 
 /* Mean = shape / rate
  * Variance = shape / (rate * rate)
  *
  * The defaults result in mean = 50.0f and sigma = 28.867
  */
-static float gamma_shape = 3.0f;
-static float gamma_rate = 3.0f / 50.0f;   // mean = shape / rate
-static float gamma_offset = 0.0f;
+static double gamma_shape = 3.0;
+static double gamma_rate = 3.0 / 50.0;   // mean = shape / rate
+static double gamma_offset = 0.0;
 
 
-#if defined(HAVE_POPT_H)
-struct poptOption gamma_noise_arguments[] = {
-    { "gamma-shape", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-      &gamma_shape, 0,
+static GOptionEntry gamma_noise_arguments[] = {
+    { "gamma-shape", 0, 0, G_OPTION_ARG_DOUBLE, &gamma_shape,
       "shape of the gamma distribution", NULL },
-    { "gamma-rate", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-      &gamma_rate, 0,
+    { "gamma-rate", 0, 0, G_OPTION_ARG_DOUBLE, &gamma_rate,
       "rate of the gamma distribution", NULL },
-    { "gamma-offset", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-      &gamma_offset, 0,
+    { "gamma-offset", 0, 0, G_OPTION_ARG_DOUBLE, &gamma_offset,
       "additive offset to the gamma distribution", NULL },
-    POPT_TABLEEND
+    { NULL }
 };
-#endif
+
+
+void __attribute__((__nonnull__))
+ls2_add_gamma_noise_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("gamma-noise",
+                                "Parameters to the Gamma noise error model",
+                                "Parameters to the Gamma noise error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, gamma_noise_arguments);
+     g_option_context_add_group(context, group);
+}
 
 
 void
@@ -81,7 +89,7 @@ gamma_noise_error(__m128i *restrict seed,
     for (size_t k=0; k < anchors ; k++) {
         VECTOR x = VECTOR_BROADCASTF(1.0F);
         float alpha;
-	for (alpha = gamma_shape; alpha >= 1.0F; alpha -= 1.0F) {
+	for (alpha = (float) gamma_shape; alpha >= 1.0F; alpha -= 1.0F) {
             x *= rnd(seed);
         }
         if (alpha > 0.0F) {
@@ -106,8 +114,8 @@ gamma_noise_error(__m128i *restrict seed,
             } while (VECTOR_TEST_ALL_ONES(VECTOR_NE(mask, VECTOR_ZERO())));
             x *= xi;
         }
-        x = (VECTOR_LOG(x) / VECTOR_BROADCASTF(-gamma_rate)) -
-              VECTOR_BROADCASTF(gamma_offset);
+        x = (VECTOR_LOG(x) / VECTOR_BROADCASTF((float) -gamma_rate)) -
+                VECTOR_BROADCASTF((float) -gamma_offset);
 
       	result[k] = distances[k] + x;
     }

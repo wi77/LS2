@@ -22,15 +22,13 @@
 #ifndef INCLUDED_CONST_H
 #define INCLUDED_CONST_H
 
-extern void const_setup(const vector2 *, size_t);
+extern void __attribute__((__nonnull__))
+ls2_add_const_option_group(GOptionContext *context);
 
-#if HAVE_POPT_H
-extern struct poptOption const_arguments[];
-#endif
+extern void const_setup(const vector2 *, size_t);
 
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "Constant"
-#  define ERROR_MODEL_ARGUMENTS const_arguments
 #endif
 
 #endif

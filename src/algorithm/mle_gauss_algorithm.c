@@ -41,13 +41,12 @@
 #  include "ls2/ls2-config.h"
 #endif
 
-#if HAVE_POPT_H
-#  include <popt.h>
-#endif
+#include <glib.h>
 
 #include <assert.h>
 #include <gsl/gsl_multimin.h>
 
+#include "mle_gauss_algorithm.h"
 #include "algorithm/nllsq_algorithm.c"
 
 #ifndef MLE_GAUSS_DEFAULT_MEAN
@@ -66,27 +65,40 @@
 #define MLE_GAUSS_DEFAULT_ITERATIONS 100
 #endif
 
-static double mle_gauss_mean       = MLE_GAUSS_DEFAULT_MEAN;
-static double mle_gauss_deviation  = MLE_GAUSS_DEFAULT_DEVIATION;
-static double mle_gauss_epsilon    = MLE_GAUSS_DEFAULT_EPSILON;
-static    int mle_gauss_iterations = MLE_GAUSS_DEFAULT_ITERATIONS;
+double mle_gauss_mean       = MLE_GAUSS_DEFAULT_MEAN;
+double mle_gauss_deviation  = MLE_GAUSS_DEFAULT_DEVIATION;
+double mle_gauss_epsilon    = MLE_GAUSS_DEFAULT_EPSILON;
+   int mle_gauss_iterations = MLE_GAUSS_DEFAULT_ITERATIONS;
 
 
-struct poptOption mle_gauss_arguments[] = {
-        { "mle-gauss-deviation", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gauss_deviation, 0,
+static GOptionEntry mle_gauss_arguments[] = {
+        { "mle-gauss-deviation", 0, 0, G_OPTION_ARG_DOUBLE,
+          &mle_gauss_deviation,
           "deviation of the gauss distribution", NULL },
-        { "mle-gauss-mean", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gauss_mean, 0,
+        { "mle-gauss-mean", 0, 0, G_OPTION_ARG_DOUBLE,
+          &mle_gauss_mean,
           "mean of the gauss distribution", NULL },
-        { "mle-gauss-epsilon", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gauss_epsilon, 0,
+        { "mle-gauss-epsilon", 0, 0, G_OPTION_ARG_DOUBLE,
+          &mle_gauss_epsilon,
           "maximum size of the simplex for termination", NULL },
-        { "mle-gauss-iterations", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &mle_gauss_iterations, 0,
+        { "mle-gauss-iterations", 0, 0, G_OPTION_ARG_INT,
+          &mle_gauss_iterations,
           "maximum number of iterations before termination", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
+
+
+void __attribute__((__nonnull__))
+ls2_add_mle_gauss_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("mle-gauss",
+                                "Parameters to the MLE Gauss algorithm",
+                                "Parameters to the MLE Gauss algorithm",
+                                NULL, NULL);
+     g_option_group_add_entries(group, mle_gauss_arguments);
+     g_option_context_add_group(context, group);
+}
 
 
 struct mle_gauss_point2d {

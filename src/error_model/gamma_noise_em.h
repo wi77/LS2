@@ -22,15 +22,13 @@
 #ifndef INCLUDED_GAMMA_NOISE_H
 #define INCLUDED_GAMMA_NOISE_H
 
-extern void gamma_noise_setup(const vector2 *, size_t);
+extern void __attribute__((__nonnull__))
+ls2_add_gamma_noise_option_group(GOptionContext *context);
 
-#if HAVE_POPT_H
-extern struct poptOption gamma_noise_arguments[];
-#endif
+extern void gamma_noise_setup(const vector2 *, size_t);
 
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "Gamma noise"
-#  define ERROR_MODEL_ARGUMENTS gamma_noise_arguments
 #endif
 
 #endif

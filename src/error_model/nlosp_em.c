@@ -21,9 +21,6 @@
 
 /* @error_model_name: NLOS error (Normal + Exponential) */
 
-// Errormodels have to include all utils themselves
-#include "../util/util_random.c"
-
 #include <math.h>
 #include <float.h>
 
@@ -31,38 +28,42 @@
 # include "ls2/ls2-config.h"
 #endif
 
-#ifdef HAVE_POPT_H
-# include <popt.h>
-#endif
+#include <glib.h>
 
 #include "nlosp_em.h"
 
-static float nlosp_mean   = 50.0F;
-static float nlosp_sdev   = 15.0F;
-static float nlosp_nlos_p = 0.1F;
-static float nlosp_rate   = 2.0F;
-static float nlosp_scale  = 100.0F;
+static double nlosp_mean   = 50.0;
+static double nlosp_sdev   = 15.0;
+static double nlosp_nlos_p = 0.1;
+static double nlosp_rate   = 2.0;
+static double nlosp_scale  = 100.0;
 
-#if defined(HAVE_POPT_H)
-struct poptOption nlosp_arguments[] = {
-  { "nlosp-nd-mean", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &nlosp_mean, 0,
+static GOptionEntry nlosp_arguments[] = {
+  { "nlosp-nd-mean", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_mean,
     "mean value of the error", NULL },
-  { "nlosp-nd-sdev", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &nlosp_sdev, 0,
+  { "nlosp-nd-sdev", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_sdev,
     "standard deviation of the error", NULL },
-  { "nlosp-prob", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &nlosp_nlos_p, 0,
+  { "nlosp-prob", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_nlos_p,
     "Probability of an NLOS error", NULL },
-  { "nlosp-rate", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &nlosp_rate, 0,
+  { "nlosp-rate", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_rate,
     "Rate of exponential NLOS error", NULL },
-  { "nlosp-scale", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &nlosp_scale, 0,
+  { "nlosp-scale", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_scale,
     "Scale of exponential NLOS error", NULL },
-  POPT_TABLEEND
+  { NULL }
 };
-#endif
+
+
+void __attribute__((__nonnull__))
+ls2_add_nlosp_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("nlosp",
+                                "Parameters to the NLOSP error model",
+                                "Parameters to the NLOSP error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, nlosp_arguments);
+     g_option_context_add_group(context, group);
+}
 
 
 void
@@ -71,6 +72,12 @@ nlosp_setup(const vector2 *anchors __attribute__((__unused__)),
 {
     // Do nothing.
 }
+
+
+// Errormodels have to include all utils themselves
+#if defined(STAND_ALONE)
+#  include "../util/util_random.c"
+#endif
 
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,3,8)))
@@ -84,12 +91,11 @@ nlosp_error(__m128i *restrict seed,
             VECTOR *restrict result)
 {
     for (size_t k=0; k < anchors ; k++) {
-        VECTOR rn = gaussrand(seed, nlosp_mean, nlosp_sdev);
-        VECTOR help = VECTOR_LT(rnd(seed), VECTOR_BROADCASTF(nlosp_nlos_p));
-        VECTOR nlos = exp_rand(seed, VECTOR_BROADCASTF(nlosp_rate)) *
-                          VECTOR_BROADCASTF(nlosp_scale);
+            VECTOR rn = gaussrand(seed, (float) nlosp_mean, (float) nlosp_sdev);
+        VECTOR help = VECTOR_LT(rnd(seed), VECTOR_BROADCASTF((float) nlosp_nlos_p));
+        VECTOR nlos = exp_rand(seed, VECTOR_BROADCASTF((float) nlosp_rate)) *
+                          VECTOR_BROADCASTF((float) nlosp_scale);
 	rn += VECTOR_AND(nlos, help);  // Mask out members without nlos error
         result[k] = distances[k] + rn;
     }
 }
-

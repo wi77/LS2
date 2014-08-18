@@ -33,6 +33,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <glib.h>
+
 #include <OpenEXR/ImfCRgbaFile.h>
 
 #include "ls2/library.h"

@@ -22,15 +22,13 @@
 #ifndef INCLUDED_ND_NOISE_H
 #define INCLUDED_ND_NOISE_H
 
-extern void nd_noise_setup(const vector2 *vv, size_t num);
+extern void __attribute__((__nonnull__))
+ls2_add_nd_noise_option_group(GOptionContext *context);
 
-#if HAVE_POPT_H
-extern struct poptOption nd_noise_arguments[];
-#endif
+extern void nd_noise_setup(const vector2 *vv, size_t num);
 
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "Gaussian noise"
-#  define ERROR_MODEL_ARGUMENTS nd_noise_arguments
 #endif
 
 #endif

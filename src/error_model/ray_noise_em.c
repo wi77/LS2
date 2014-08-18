@@ -25,8 +25,6 @@
 #include <stdlib.h>
 #include <memory.h>
 
-#include "util/util_random.c"
-
 #include "ray_noise_em.h"
 
 #define DISTRIBUTION 2
@@ -67,13 +65,28 @@
 /*! The name of the wall file. */
 static char const * ls2_ray_noise_walls = "wall_txt/2r_walls.txt";
 
-#if HAVE_POPT_H
-struct poptOption ray_noise_arguments[] = {
-        { "walls", 0, POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &ls2_ray_noise_walls, 0,
+static GOptionEntry ray_noise_arguments[] = {
+        { "walls", 0, 0, G_OPTION_ARG_FILENAME, &ls2_ray_noise_walls,
           "files describing the walls", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
+
+
+void __attribute__((__nonnull__))
+ls2_add_ray_noise_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("ray-noise",
+                                "Parameters to the ray tracing error model",
+                                "Parameters to the ray tracing error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, ray_noise_arguments);
+     g_option_context_add_group(context, group);
+}
+
+
+#if defined(STAND_ALONE)
+#  include "util/util_random.c"
 #endif
 
 VECTOR fzero;

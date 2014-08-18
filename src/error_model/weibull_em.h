@@ -22,15 +22,13 @@
 #ifndef INCLUDED_WEIBULL_H
 #define INCLUDED_WEIBULL_H
 
-extern void weibull_setup(const vector2 *vv, size_t num);
+extern void __attribute__((__nonnull__))
+ls2_add_weibull_option_group(GOptionContext *context);
 
-#if HAVE_POPT_H
-extern struct poptOption weibull_arguments[];
-#endif
+extern void weibull_setup(const vector2 *vv, size_t num);
 
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "Weibull noise"
-#  define ERROR_MODEL_ARGUMENTS weibull_arguments
 #endif
 
 #endif

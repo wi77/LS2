@@ -35,9 +35,7 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef HAVE_POPT_H
-#  include <popt.h>
-#endif
+#include <glib.h>
 
 #include "ls2/library.h"
 #include "ls2/ls2.h"
@@ -54,95 +52,67 @@ static long runs;
 
 double ls2_backend_steps = 0.0;
 
-int main(int argc, const char* argv[])
+int main(int argc, char **argv)
 {
-    poptContext opt_con;       /* context for parsing command-line options */
-    int rc;
+    GOptionContext *opt_con;   /* context for parsing command-line options */
+    GError *error;
 
     /* Command line arguments. */
-    static struct poptOption cli_options[] = {
-        { "gradation", 'G',
-          POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-          &ls2_backend_steps, 0,
+    static GOptionEntry cli_options[] = {
+        { "gradation", 'G', 0, G_OPTION_ARG_DOUBLE,
+          &ls2_backend_steps,
           "number of gradation steps, 0 is unlimited", "steps" },
-        { "output-average", 'o',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[AVERAGE_ERROR]), 0,
+        { "output-average", 'o', 0, G_OPTION_ARG_STRING,
+          &(output[AVERAGE_ERROR]),
           "name of the average error output image file", "file name" },
-        { "output-maximum", 'M',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[MAXIMUM_ERROR]), 0,
+        { "output-maximum", 'M', 0, G_OPTION_ARG_STRING,
+          &(output[MAXIMUM_ERROR]),
           "name of the maximum error output image file", "file name" },
-        { "output-minimum", 'm',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[MINIMUM_ERROR]), 0,
+        { "output-minimum", 'm', 0, G_OPTION_ARG_STRING,
+          &(output[MINIMUM_ERROR]),
           "name of the minimum error output image file", "file name" },
-        { "output-variance", 's',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &(output[STANDARD_DEVIATION]), 0,
+        { "output-variance", 's', 0, G_OPTION_ARG_STRING,
+          &(output[STANDARD_DEVIATION]),
           "name of the output image file of the standard deviation", "file name" },
-        { "output-rmse", 'p',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[ROOT_MEAN_SQUARED_ERROR]), 0,
+        { "output-rmse", 'p', 0, G_OPTION_ARG_STRING,
+          &(output[ROOT_MEAN_SQUARED_ERROR]),
           "name of the root mean squared error output image", "file name" },
-        { "output-success", 'S',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[FAILURES]), 0,
+        { "output-success", 'S', 0, G_OPTION_ARG_STRING,
+          &(output[FAILURES]),
           "name of the failure rate output image file", "file name" },
-        { "output-phase", 'z',
-          POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
-          &(output[AVERAGE_X_ERROR]), 0,
+        { "output-phase", 'z', 0, G_OPTION_ARG_STRING,
+          &(output[AVERAGE_X_ERROR]),
           "name of the phase portrait output image", "file name" },
-        { "stride", 'S',
-          POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &stride, 0,
+        { "stride", 'S', 0, G_OPTION_ARG_INT, &stride,
           "stride of the phase portrait", "steps" },
-        { "inverted", 'i', POPT_ARG_STRING, &inverted, 0,
+        { "inverted", 'i', 0, G_OPTION_ARG_STRING, &inverted,
           "name of the inverted density file", "file name" },
-        { "maximum", 0,
-          POPT_ARG_LONG | POPT_ARGFLAG_SHOW_DEFAULT,
-          &runs, 0,
+        { "maximum", 0, 0, G_OPTION_ARG_INT64, &runs,
           "maximum frequency in inverted image", "runs" },
-        POPT_AUTOHELP
-        POPT_TABLEEND
+        { NULL }
     };
 
     output_format = "png";
 
-    opt_con = poptGetContext(NULL, argc, argv, cli_options, 0);
-    poptSetOtherOptionHelp(opt_con, "[OPTIONS] file.h5");
+    opt_con = g_option_context_new(" - generate picture of spatial distribution");
+    g_option_context_add_main_entries(opt_con, cli_options, NULL);
 
-    // Check for sufficient number of command line arguments
-    if (argc < 2) {
-        poptPrintUsage(opt_con, stderr, 0);
-        poptFreeContext(opt_con);
+    if (!g_option_context_parse( opt_con, &argc, &argv, &error)) {
+        g_print("option parsing failed: %s\n", error->message);
+        g_option_context_free(opt_con);
         exit(EXIT_FAILURE);
     }
 
-    // Parse the command line arguments.
-    while ((rc = poptGetNextOpt(opt_con)) >= 0) {
-        switch (rc) {
-        default:
-            break;
-        }
-    }
-
-    if (rc < -1) {
-        /* an error occurred during option processing */
-        fprintf(stderr, "%s: %s\n",
-                poptBadOption(opt_con, POPT_BADOPTION_NOALIAS),
-                poptStrerror(rc));
-        poptFreeContext(opt_con);
+    if (argc < 1) {
+        fprintf(stderr, "missing input file name.\n");
+        g_option_context_free(opt_con);
         exit(EXIT_FAILURE);
     }
-
-    // Handle the left-over arguments.
-    if (poptPeekArg(opt_con) != NULL) {
-        input_hdf5 = poptGetArg(opt_con);
-    }
-
-    if (poptPeekArg(opt_con) != NULL) {
+    if (argc > 1) {
         fprintf(stderr, "warning: too many arguments, some were ignored.\n");
     }
+
+    input_hdf5 = argv[1];
 
     ls2_output_format_t format = get_output_format(output_format);
 
@@ -207,6 +177,6 @@ int main(int argc, const char* argv[])
         free(result);
         free(anchors);
     }
-    poptFreeContext(opt_con);
+    g_option_context_free(opt_con);
     exit(EXIT_SUCCESS);
 }

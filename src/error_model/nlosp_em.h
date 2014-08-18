@@ -22,15 +22,13 @@
 #ifndef INCLUDED_NLOSP_EM_H
 #define INCLUDED_NLOSP_EM_H
 
-extern void nlosp_setup(const vector2 *, size_t);
+extern void __attribute__((__nonnull__))
+ls2_add_nlosp_option_group(GOptionContext *context);
 
-#if HAVE_POPT_H
-extern struct poptOption nlosp_arguments[];
-#endif
+extern void nlosp_setup(const vector2 *, size_t);
 
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "NLOS p"
-#  define ERROR_MODEL_ARGUMENTS nlosp_arguments
 #endif
 
 #endif

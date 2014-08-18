@@ -25,37 +25,39 @@
 # include "ls2/ls2-config.h"
 #endif
 
-#ifdef HAVE_POPT_H
-# include <popt.h>
-#endif
-
+#include <glib.h>
 #include "erlang_noise_em.h"
 
-// Errormodels have to include all utils themselves
-#include "../util/util_random.c"
-
 static int erlang_shape = 3;
-static float erlang_rate = 0.5228819579F;
-static float erlang_offset = 3.31060119642765F;
-static float erlang_scale = 50.0f / 2.85f;
+static double erlang_rate = 0.5228819579;
+static double erlang_offset = 3.31060119642765;
+static double erlang_scale = 50.0 / 2.85;
 
-#if defined(HAVE_POPT_H)
-struct poptOption erlang_noise_arguments[] = {
-    { "erlang-shape", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
-      &erlang_shape, 0,
+static GOptionEntry erlang_noise_arguments[] = {
+    { "erlang-shape", 0, 0, G_OPTION_ARG_INT, &erlang_shape,
       "shape of the erlang distribution", NULL },
-    { "erlang-rate", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-      &erlang_rate, 0,
+    { "erlang-rate", 0, 0, G_OPTION_ARG_DOUBLE, &erlang_rate,
       "rate of the erlang distribution", NULL },
-    { "erlang-offset", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-      &erlang_offset, 0,
+    { "erlang-offset", 0, 0, G_OPTION_ARG_DOUBLE, &erlang_offset,
       "additive offset to the erlang distribution", NULL },
-    { "erlang-scale", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-      &erlang_scale, 0,
+    { "erlang-scale", 0, 0, G_OPTION_ARG_DOUBLE, &erlang_scale,
       "multiplier to scale the erlang distribution", NULL },
-    POPT_TABLEEND
+    { NULL }
 };
-#endif
+
+
+void __attribute__((__nonnull__))
+ls2_add_erlang_noise_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("erlang-noise",
+                                "Parameters to the Erlang noise error model",
+                                "Parameters to the Erlang noise error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, erlang_noise_arguments);
+     g_option_context_add_group(context, group);
+}
+
 
 void
 erlang_noise_setup(const vector2 *anchors __attribute__((__unused__)),
@@ -63,6 +65,13 @@ erlang_noise_setup(const vector2 *anchors __attribute__((__unused__)),
 {
   // No setup needed.
 }
+
+
+// Errormodels have to include all utils themselves
+#if defined(STAND_ALONE)
+#  include "../util/util_random.c"
+#endif
+
 
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,3,8)))
@@ -79,11 +88,11 @@ erlang_noise_error(__m128i *restrict seed,
 	VECTOR x = VECTOR_BROADCASTF(1.0F);
 	for (int i = 0; i < erlang_shape; i++)
 	    x *= rnd(seed);
-        x = VECTOR_LOG(x) / VECTOR_BROADCASTF(-erlang_rate);
-        x -= VECTOR_BROADCASTF(erlang_offset);
+        x = VECTOR_LOG(x) / VECTOR_BROADCASTF((float) -erlang_rate);
+        x -= VECTOR_BROADCASTF((float) erlang_offset);
 
 	// HACK: Scale it to an expected value of 50.
-        x *= VECTOR_BROADCASTF(erlang_scale);
+        x *= VECTOR_BROADCASTF((float) erlang_scale);
       	result[k] = distances[k] + x;
     }
 }

@@ -22,13 +22,11 @@
 #ifndef CRLB_QI_ALGORITHM_H_INCLUDED
 #define CRLB_QI_ALGORITHM_H_INCLUDED 1
 
-#if HAVE_POPT_H
-extern struct poptOption crlb_qi_arguments[];
-#endif
-
 #if defined(STAND_ALONE)
 #  define ALGORITHM_NAME "CRLB Qi"
-#  define ALGORITHM_ARGUMENTS crlb_qi_arguments
 #endif
+
+extern void __attribute__((__nonnull__))
+ls2_add_crlb_qi_option_group(GOptionContext *context);
 
 #endif

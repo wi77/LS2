@@ -22,15 +22,13 @@
 #ifndef INCLUDED_RAYLEYGH_H
 #define INCLUDED_RAYLEYGH_H
 
-extern void rayleigh_setup(const vector2 *vv, size_t num);
+extern void __attribute__((__nonnull__))
+ls2_add_rayleigh_option_group(GOptionContext *context);
 
-#if HAVE_POPT_H
-extern struct poptOption reyleigh_arguments[];
-#endif
+extern void rayleigh_setup(const vector2 *vv, size_t num);
 
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "Rayleigh noise"
-#  define ERROR_MODEL_ARGUMENTS rayleigh_arguments
 #endif
 
 #endif

@@ -100,7 +100,7 @@ def find_error_model_name(em):
 def find_command_line_arguments(f):
     """Checks whether an algorithm, estimator, or error model defines command
     line parameters."""
-    expr = re.compile(".* poptOption (.*)\[\].*")
+    expr = re.compile(".*GOptionEntry (.*)\[\].*")
     for line in open(f):
         m = expr.match(line)
         if m:
@@ -285,28 +285,24 @@ lib.writelines([ "    }\n",
 
 # Collect and write out the command line parameter tables if each file
 # defines one.
-lib.write("#if HAVE_POPT_H\nstruct poptOption algorithm_arguments[] = {\n")
+lib.write("extern void __attribute__((__nonnull__))\nls2_add_algorithm_option_groups(GOptionContext *context)\n{\n")
 for alg in algs:
     args = find_command_line_arguments(algorithm_file(alg))
     if args:
-        lib.writelines(["    { NULL, '\\0', POPT_ARG_INCLUDE_TABLE, " + args + ", 0,\n",
-                        "      \"Options of " + find_algorithm_name(alg) + "\", NULL },\n"])
-lib.write("    POPT_TABLEEND\n};\n\n")
-lib.write("struct poptOption error_model_arguments[] = {\n")
+        lib.write("    ls2_add_%s_option_group(context);\n" % alg)
+lib.write("\n}\n\n")
+lib.write("extern void __attribute__((__nonnull__))\nls2_add_error_model_option_groups(GOptionContext *context)\n{\n")
 for em in ems:
     args = find_command_line_arguments(error_model_file(em))
     if args:
-        lib.writelines(["    { NULL, '\\0', POPT_ARG_INCLUDE_TABLE, " + args + ", 0,\n",
-                        "      \"Options of " + find_error_model_name(em) + "\", NULL },\n"])
-lib.write("    POPT_TABLEEND\n};\n\n")
-lib.write("struct poptOption estimator_arguments[] = {\n")
+        lib.write("    ls2_add_%s_option_group(context);\n" % em)
+lib.write("\n}\n\n")
+lib.write("extern void __attribute__((__nonnull__))\nls2_add_estimator_option_groups(GOptionContext *context)\n{\n")
 for est in ests:
     args = find_command_line_arguments(estimator_file(est))
     if args:
-        lib.writelines(["    { NULL, '\\0', POPT_ARG_INCLUDE_TABLE, " + args + ", 0,\n",
-                        "      \"Options of " + find_estimator_name(est) + "\", NULL },\n"])
-lib.write("    POPT_TABLEEND\n};\n#endif\n")
-
+        lib.write("    ls2_add_%s_option_group(context);\n" % est)
+lib.write("\n}\n")
 
 head.flush()
 head.close()

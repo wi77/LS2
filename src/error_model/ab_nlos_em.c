@@ -19,42 +19,57 @@
 
  */
 
+#include <glib.h>
+
+#include "ab_nlos_em.h"
+
 /* @error_model_name: Anchor Based NLOS error */
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
-#include "ab_nlos_em.h"
 
-static float ab_nlos_mean   = 50.0F;
-static float ab_nlos_sdev   = 15.0F;
+static double ab_nlos_mean   = 50.0F;
+static double ab_nlos_sdev   = 15.0F;
 static int ab_nlos_count    = 3;
-static float ab_nlos_rate   = 2.0F;
-static float ab_nlos_scale  = 100.0F;
+static double ab_nlos_rate   = 2.0F;
+static double ab_nlos_scale  = 100.0F;
 static VECTOR ab_nlos_oscale;
 static int ab_nlos_norm = 1;
 
-#if defined(HAVE_POPT_H)
-struct poptOption ab_nlos_arguments[] = {
-  { "ab_nlos-nd-mean", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &ab_nlos_mean, 0,
+static GOptionEntry ab_nlos_arguments[] = {
+  { "ab_nlos-nd-mean", 0, 0, G_OPTION_ARG_DOUBLE,
+    &ab_nlos_mean,
     "mean value of the error", NULL },
-  { "ab_nlos-nd-sdev", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &ab_nlos_sdev, 0,
+  { "ab_nlos-nd-sdev", 0, 0, G_OPTION_ARG_DOUBLE,
+    &ab_nlos_sdev,
     "standard deviation of the error", NULL },
-  { "ab_nlos-count", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &ab_nlos_count, 0,
+  { "ab_nlos-count", 0, 0, G_OPTION_ARG_INT,
+    &ab_nlos_count,
     "First n anchors with NLOS ERROR", NULL },
-  { "ab_nlos-norm", 0, POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &ab_nlos_norm, 0,
+  { "ab_nlos-norm", 0, 0, G_OPTION_ARG_INT,
+    &ab_nlos_norm,
     "Normalize error?", NULL },
-  { "ab_nlos-rate", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &ab_nlos_rate, 0,
+  { "ab_nlos-rate", 0, 0, G_OPTION_ARG_DOUBLE,
+    &ab_nlos_rate,
     "Rate of exponential NLOS error", NULL },
-  { "ab_nlos-scale", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-    &ab_nlos_scale, 0,
+  { "ab_nlos-scale", 0, 0, G_OPTION_ARG_DOUBLE,
+    &ab_nlos_scale,
     "Scale of exponential NLOS error", NULL },
-  POPT_TABLEEND
+  { NULL }
 };
-#endif
+
+
+void __attribute__((__nonnull__))
+ls2_add_ab_nlos_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("ab-nlos",
+                                "Parameters to the AB NLOS error model",
+                                "Parameters to the AB NLOS error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, ab_nlos_arguments);
+     g_option_context_add_group(context, group);
+}
+
 
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,3,8)))
@@ -70,11 +85,11 @@ ab_nlos_error(__m128i *restrict seed,
     VECTOR rn;
     for (size_t k=0; k < anchors ; k++) {
         if (k < (size_t)ab_nlos_count) {
-            rn = gaussrand(seed, ab_nlos_mean, ab_nlos_sdev);
-            VECTOR nlos = exp_rand(seed, VECTOR_BROADCASTF(ab_nlos_rate)) * VECTOR_BROADCASTF(ab_nlos_scale);
+                rn = gaussrand(seed, (float) ab_nlos_mean, (float) ab_nlos_sdev);
+                VECTOR nlos = exp_rand(seed, VECTOR_BROADCASTF((float) ab_nlos_rate)) * VECTOR_BROADCASTF((float) ab_nlos_scale);
 	        rn += nlos;               
         } else {
-            rn = gaussrand(seed, ab_nlos_mean, ab_nlos_sdev);
+                rn = gaussrand(seed, (float) ab_nlos_mean, (float) ab_nlos_sdev);
 	    }
         result[k] = distances[k] + (rn*ab_nlos_oscale);
     }

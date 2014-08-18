@@ -23,9 +23,9 @@
 #  include "ls2/ls2-config.h"
 #endif
 
-#if HAVE_POPT_H
-#  include <popt.h>
-#endif
+#include <glib.h>
+
+#include "md_minmax_rel_algorithm.h"
 
 /********************************************************************
  **
@@ -42,40 +42,53 @@
 
 /* @algorithm_name: Weighted MinMax */
 
-static float md_minmax_rel_left         = -25;
-static float md_minmax_rel_middle_left  = 50;
-static float md_minmax_rel_middle_right = 50;
-static float md_minmax_rel_right        = 125;
+double md_minmax_rel_left         = -25;
+double md_minmax_rel_middle_left  = 50;
+double md_minmax_rel_middle_right = 50;
+double md_minmax_rel_right        = 125;
 
-struct poptOption md_minmax_rel_arguments[] = {
-        { "mf-left", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &md_minmax_rel_left, 0,
+GOptionEntry md_minmax_rel_arguments[] = {
+        { "mf-left", 0, 0, G_OPTION_ARG_DOUBLE,
+          &md_minmax_rel_left,
           "left value of the membership function", NULL },
-        { "mf-middle-left", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &md_minmax_rel_middle_left, 0,
+        { "mf-middle-left", 0, 0, G_OPTION_ARG_DOUBLE,
+          &md_minmax_rel_middle_left,
           "middle left value of the membership function", NULL },
-        { "mf-middle-right", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &md_minmax_rel_middle_right, 0,
+        { "mf-middle-right", 0, 0, G_OPTION_ARG_DOUBLE,
+          &md_minmax_rel_middle_right,
           "middle right value of the membership function", NULL },
-        { "mf-right", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &md_minmax_rel_right, 0,
+        { "mf-right", 0, 0, G_OPTION_ARG_DOUBLE,
+          &md_minmax_rel_right,
           "middle right value of the membership function", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
 
 
+void __attribute__((__nonnull__))
+ls2_add_md_minmax_rel_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("md-minmax-rel",
+                                "Parameters to the MD MINMAX (relative) algorithm",
+                                "Parameters to the MD MINMAX (relative) algorithm",
+                                NULL, NULL);
+     g_option_group_add_entries(group, md_minmax_rel_arguments);
+     g_option_context_add_group(context, group);
+}
+
+
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-weighted_minmax_run (const VECTOR* vx, const VECTOR* vy,
+md_minmax_rel_run (const VECTOR* vx, const VECTOR* vy,
                      const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy)
 {
     const float left_rate      =
-        (1.00F - 0.00F) / (md_minmax_rel_middle_left - md_minmax_rel_left);
+        (float)((1.00 - 0.00) / (md_minmax_rel_middle_left - md_minmax_rel_left));
     const float left_const     =
-        -1.00F * left_rate * md_minmax_rel_left;
+        (float)(-1.00 * left_rate * md_minmax_rel_left);
     const float right_rate     =
-        (0.00F - 1.00F) / (md_minmax_rel_right - md_minmax_rel_middle_right);
+        (float)((0.00 - 1.00) / (md_minmax_rel_right - md_minmax_rel_middle_right));
     const float right_const    =
-        -1.00F * right_rate * md_minmax_rel_right;
+        (float)(-1.00 * right_rate * md_minmax_rel_right);
 
     const VECTOR v_left_rate   = VECTOR_BROADCASTF(left_rate);
     const VECTOR v_left_const  = VECTOR_BROADCASTF(left_const);

@@ -23,11 +23,10 @@
 #  include "ls2/ls2-config.h"
 #endif
 
-#if HAVE_POPT_H
-#  include <popt.h>
-#endif
-
 #include <assert.h>
+#include <glib.h>
+
+#include "md_minmax_abs_algorithm.h"
 
 /********************************************************************
  **
@@ -45,45 +44,62 @@
 /* @algorithm_name: MD MinMax (absolute) */
 
 /*
-static float md_minmax_abs_left         = -2.161;*(50.0/5.0);
-static float md_minmax_abs_middle_left  = 1.6362*(50.0/5.0);
-static float md_minmax_abs_middle_right = 1.6362*(50.0/5.0);
-static float md_minmax_abs_right        = 16.0428*(50.0/5.0);
+static double md_minmax_abs_left         = -2.161;*(50.0/5.0);
+static double md_minmax_abs_middle_left  = 1.6362*(50.0/5.0);
+static double md_minmax_abs_middle_right = 1.6362*(50.0/5.0);
+static double md_minmax_abs_right        = 16.0428*(50.0/5.0);
 */
 
-static float md_minmax_abs_left         = -50.0f;
-static float md_minmax_abs_middle_left  = 50.0f;
-static float md_minmax_abs_middle_right = 50.0f;
-static float md_minmax_abs_right        = 150.0f;
+double md_minmax_abs_left         = -50.0f;
+double md_minmax_abs_middle_left  = 50.0f;
+double md_minmax_abs_middle_right = 50.0f;
+double md_minmax_abs_right        = 150.0f;
 
-struct poptOption md_minmax_abs_arguments[] = {
-        { "mf-left", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &md_minmax_abs_left, 0,
-          "left value of the membership function", NULL },
-        { "mf-middle-left", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &md_minmax_abs_middle_left, 0,
-          "middle left value of the membership function", NULL },
-        { "mf-middle-right", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &md_minmax_abs_middle_right, 0,
-          "middle right value of the membership function", NULL },
-        { "mf-right", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &md_minmax_abs_right, 0,
-          "right value of the membership function", NULL },
-        POPT_TABLEEND
+static GOptionEntry md_minmax_abs_arguments[] = {
+        { "mf-left", 0, 0, G_OPTION_ARG_DOUBLE,
+          &md_minmax_abs_left,
+          "left value of the membership function",
+          "left value" },
+        { "mf-middle-left", 0, 0, G_OPTION_ARG_DOUBLE,
+          &md_minmax_abs_middle_left,
+          "middle left value of the membership function",
+          "middle left value" },
+        { "mf-middle-right", 0, 0, G_OPTION_ARG_DOUBLE,
+          &md_minmax_abs_middle_right,
+          "middle right value of the membership function",
+          "middle right value" },
+        { "mf-right", 0, 0, G_OPTION_ARG_DOUBLE,
+          &md_minmax_abs_right,
+          "right value of the membership function",
+          "right value" },
+        { NULL }
 };
+
+
+void __attribute__((__nonnull__))
+ls2_add_md_minmax_abs_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("md-minmax-abs",
+                                "Parameters to the MD MINMAX (abs) algorithm",
+                                "Parameters to the MD MINMAX (abs) algorithm",
+                                NULL, NULL);
+     g_option_group_add_entries(group, md_minmax_abs_arguments);
+     g_option_context_add_group(context, group);
+}
 
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 md_minmax_abs_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
 
-    const float left_rate      =
-        (1.00F - 0.00F) / (md_minmax_abs_middle_left - md_minmax_abs_left);
+    const float left_rate =
+        (float) ((1.00 - 0.00) / (md_minmax_abs_middle_left - md_minmax_abs_left));
     const float left_const     =
-        -1.00F * left_rate * md_minmax_abs_left;
-    const float right_rate     =
-        (0.00F - 1.00F) / (md_minmax_abs_right - md_minmax_abs_middle_right);
-    const float right_const    =
-        -1.00F * right_rate * md_minmax_abs_right;
+        (float) (-1.00 * left_rate * md_minmax_abs_left);
+    const float right_rate =
+        (float) ((0.00 - 1.00) / (md_minmax_abs_right - md_minmax_abs_middle_right));
+    const float right_const =
+        (float) (-1.00 * right_rate * md_minmax_abs_right);
 
     const VECTOR v_left_rate   = VECTOR_BROADCASTF(left_rate);
     const VECTOR v_left_const  = VECTOR_BROADCASTF(left_const);

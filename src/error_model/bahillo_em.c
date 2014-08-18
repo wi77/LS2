@@ -19,20 +19,14 @@
 
  */
 
+#include <glib.h>
+
 #include "bahillo_em.h"
 
 /* @error_model_name: NLOS (Bahillo) */
 
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
-
-void
-bahillo_setup(const vector2 *anchors __attribute__((__unused__)),
-              size_t nanchors __attribute__((__unused__)))
-{
-    /* Do nothing. */
-}
-
 
 static const float mean = 5.0f;
 static const float sdev = 2.5f;
@@ -43,6 +37,14 @@ static const float sdev = 2.5f;
  */
 static float bahillo_ua = 2.38419e-07f;
 static float bahillo_ub = 3.0f;
+
+
+void
+bahillo_setup(const vector2 *anchors __attribute__((__unused__)),
+              size_t nanchors __attribute__((__unused__)))
+{
+    /* Do nothing. */
+}
 
 
 /* NLOS Error model proposed by Bahillo. 

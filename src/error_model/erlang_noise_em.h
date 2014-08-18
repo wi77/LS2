@@ -22,15 +22,13 @@
 #ifndef INCLUDED_ERLANG_NOISE_H
 #define INCLUDED_ERLANG_NOISE_H
 
-extern void erlang_noise_setup(const vector2 *, size_t);
+extern void __attribute__((__nonnull__))
+ls2_add_erlang_noise_option_group(GOptionContext *context);
 
-#if HAVE_POPT_H
-extern struct poptOption erlang_noise_arguments[];
-#endif
+extern void erlang_noise_setup(const vector2 *, size_t);
 
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "Erlang noise"
-#  define ERROR_MODEL_ARGUMENTS erlang_noise_arguments
 #endif
 
 #endif

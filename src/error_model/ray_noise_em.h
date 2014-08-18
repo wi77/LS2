@@ -22,15 +22,13 @@
 #ifndef INCLUDED_RAY_NOISE_H
 #define INCLUDED_RAY_NOISE_H
 
-extern void ray_noise_setup(const vector2 *, size_t);
+extern void __attribute__((__nonnull__))
+ls2_add_ray_noise_option_group(GOptionContext *context);
 
-#if HAVE_POPT_H
-extern struct poptOption ray_noise_arguments[];
-#endif
+extern void ray_noise_setup(const vector2 *, size_t);
 
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "Raylaunching Erromodel with Map Support"
-#  define ERROR_MODEL_ARGUMENTS ray_noise_arguments
 #endif
 
 #endif

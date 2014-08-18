@@ -33,7 +33,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#include <popt.h>
+#include <glib.h>
 
 #include "ls2/library.h"
 #include "ls2/ls2.h"
@@ -51,95 +51,61 @@ static double similarity = 3.0;
 static double dynamic = 200.0;
 double ls2_backend_steps = 0.0;
 
-static struct poptOption cli_options[] = {
-    { "gradation", 'G',
-      POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-      &ls2_backend_steps, 0,
+static GOptionEntry cli_options[] = {
+    { "gradation", 'G', 0,
+      G_OPTION_ARG_DOUBLE,
+      &ls2_backend_steps,
       "number of gradation steps, 0 is unlimited", "steps" },
-     { "similarity", 'S', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-       &similarity, 0, "similarity threshold", NULL },
-     { "dynamic", 'D', POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
-       &dynamic, 0, "dynamic range", NULL },
-     { "average", 'o', POPT_ARG_STRING, &(compare[AVERAGE_ERROR]), 0,
+     { "similarity", 'S', 0, G_OPTION_ARG_DOUBLE,
+       &similarity, "similarity threshold", NULL },
+     { "dynamic", 'D', 0, G_OPTION_ARG_DOUBLE,
+       &dynamic, "dynamic range", NULL },
+     { "average", 'o', 0, G_OPTION_ARG_STRING, &(compare[AVERAGE_ERROR]),
        "compare average values.", NULL },
-     { "maximum", 'M', POPT_ARG_STRING, &(compare[MAXIMUM_ERROR]), 0,
+     { "maximum", 'M', 0, G_OPTION_ARG_STRING, &(compare[MAXIMUM_ERROR]),
        "compare maximum values.", NULL },
-     { "minimum", 'm', POPT_ARG_STRING, &(compare[MINIMUM_ERROR]), 0,
+     { "minimum", 'm', 0, G_OPTION_ARG_STRING, &(compare[MINIMUM_ERROR]),
        "compare minimum values.", NULL },
-     { "standard-deviation", 's', POPT_ARG_STRING, &(compare[STANDARD_DEVIATION]), 0,
-       "compare variances.", NULL },
-     { "rmse", 'r', POPT_ARG_STRING, &(compare[ROOT_MEAN_SQUARED_ERROR]), 0,
+     { "standard-deviation", 's', 0, G_OPTION_ARG_STRING, &(compare[STANDARD_DEVIATION]),
+       "compare standard deviations.", NULL },
+     { "rmse", 'r', 0, G_OPTION_ARG_STRING, &(compare[ROOT_MEAN_SQUARED_ERROR]),
        "compare root mean squared errors.", NULL },
-     POPT_AUTOHELP
-     POPT_TABLEEND
+     { NULL }
 };
 
 int
-main(int argc, const char **argv)
+main(int argc, char **argv)
 {
-     poptContext opt_con;        /* context for parsing command-line options */
-     int rc;
+     GOptionContext *opt_con;   /* context for parsing command-line options */
+     GError *error;
      uint16_t a_height, a_width, b_height, b_width;
      size_t a_no_anchors, b_no_anchors;
      vector2 *a_anchors, *b_anchors;
      float *a_results, *b_results, *results;
 
-     opt_con = poptGetContext(NULL, argc, argv, cli_options, 0);
-     poptSetOtherOptionHelp(opt_con, "[OPTIONS] <file1> <file2>");
+     opt_con = g_option_context_new(" - differences between two spatial "
+                                    "distributions");
+     g_option_context_add_main_entries(opt_con, cli_options, NULL);
 
-     // Check for sufficient number of command line arguments
+     if (!g_option_context_parse(opt_con, &argc, &argv, &error)) {
+          g_print("option parsing failed: %s\n", error->message);
+          g_option_context_free(opt_con);
+          exit(EXIT_FAILURE);
+     }
+
      if (argc < 3) {
-	  poptPrintUsage(opt_con, stderr, 0);
-	  poptFreeContext(opt_con);
-	  exit(EXIT_FAILURE);
-     }
-
-     // Parse the command line arguments.
-     while ((rc = poptGetNextOpt(opt_con)) >= 0) {
-	  switch (rc) {
-	  default:
-	       break;
-	  }
-     }
-
-     if (rc < -1) {
-	  /* an error occurred during option processing */
-	  fprintf(stderr, "%s: %s\n",
-		  poptBadOption(opt_con, POPT_BADOPTION_NOALIAS),
-		  poptStrerror(rc));
-	  poptFreeContext(opt_con);
-	  exit(EXIT_FAILURE);
-     }
-
-     // Handle the left-over arguments.
-     if (poptPeekArg(opt_con) != NULL) {
-	  file[0] = strdup(poptGetArg(opt_con));
-     } else {
 	  fprintf(stderr, "error: missing input file name\n");
 	  fflush(stderr);
-	  poptPrintUsage(opt_con, stderr, 0);
-	  poptFreeContext(opt_con);
-	  exit(EXIT_FAILURE);
-     }
-
-     // Handle the left-over arguments.
-     if (poptPeekArg(opt_con) != NULL) {
-	  file[1] = strdup(poptGetArg(opt_con));
-     } else {
-	  fprintf(stderr, "error: missing input file name\n");
-	  fflush(stderr);
-	  poptPrintUsage(opt_con, stderr, 0);
-	  poptFreeContext(opt_con);
 	  exit(EXIT_FAILURE);
      }
 
      for (ls2_output_variant var = AVERAGE_ERROR; var < NUM_VARIANTS; var++) {
           if (compare[var] == NULL)
               continue;
-	  ls2_hdf5_read_locbased(file[0], var, &a_anchors, &a_no_anchors,
+	  ls2_hdf5_read_locbased(argv[1], var, &a_anchors, &a_no_anchors,
 				 &a_results, &a_width, &a_height);
 
-	  ls2_hdf5_read_locbased(file[1], var, &b_anchors, &b_no_anchors,
+	  ls2_hdf5_read_locbased(argv[2], var, &b_anchors, &b_no_anchors,
 				 &b_results, &b_width, &b_height);
 	  if (a_width != b_width || a_height != b_height) {
 	       fprintf(stderr, "Sizes differ. Cannot continue.\n");

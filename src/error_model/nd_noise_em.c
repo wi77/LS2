@@ -26,29 +26,38 @@
 # include "ls2/ls2-config.h"
 #endif
 
-#ifdef HAVE_POPT_H
-# include <popt.h>
-#endif
+#include <glib.h>
 
 #include "nd_noise_em.h"
 
 // Errormodels have to include all utils themselves
-#include "../util/util_random.c"
-
-static float nd_noise_mean = 50.0F;
-static float nd_noise_sdev = 25.0F;
-
-#if defined(HAVE_POPT_H)
-struct poptOption nd_noise_arguments[] = {
-        { "nd-mean", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &nd_noise_mean, 0,
-          "mean value of the error", NULL },
-        { "nd-sdev", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &nd_noise_sdev, 0,
-          "standard deviation of the error", NULL },
-        POPT_TABLEEND
-};
+#if defined(STAND_ALONE)
+#  include "../util/util_random.c"
 #endif
+
+static double nd_noise_mean = 50.0F;
+static double nd_noise_sdev = 25.0F;
+
+static GOptionEntry nd_noise_arguments[] = {
+        { "nd-mean", 0, 0, G_OPTION_ARG_DOUBLE, &nd_noise_mean,
+          "mean value of the error", NULL },
+        { "nd-sdev", 0, 0, G_OPTION_ARG_DOUBLE, &nd_noise_sdev,
+          "standard deviation of the error", NULL },
+        { NULL }
+};
+
+
+void __attribute__((__nonnull__))
+ls2_add_nd_noise_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("nd-noise",
+                                "Parameters to the Gaussian noise error model",
+                                "Parameters to the Gaussian noise error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, nd_noise_arguments);
+     g_option_context_add_group(context, group);
+}
 
 
 void
@@ -70,7 +79,8 @@ nd_noise_error(__m128i *restrict seed,
                VECTOR *restrict result)
 {
     for (size_t k=0; k < anchors ; k++) {
-        VECTOR rn = gaussrand(seed, nd_noise_mean, nd_noise_sdev);
+            VECTOR rn = gaussrand(seed, (float) nd_noise_mean,
+                                  (float) nd_noise_sdev);
         //if negative Values are not acceptable, use this (about 10% slower, half a sec)
         /*
         while(rn[0]<0||rn[1]<0||rn[2]<0||rn[3]<0){

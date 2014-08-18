@@ -21,22 +21,33 @@
 
 /* @error_model_name: Uniform error */
 
+#include <glib.h>
 #include "eq_noise_em.h"
 
-float eq_error_min = 0.0F;
-float eq_error_max = 100.0F;
+double eq_error_min = 0.0F;
+double eq_error_max = 100.0F;
 
-#ifdef HAVE_POPT_H
-struct poptOption eq_arguments[] = {
-        { "eq-error-min", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &eq_error_min, 0,
+static GOptionEntry eq_noise_arguments[] = {
+        { "eq-error-min", 0, 0, G_OPTION_ARG_DOUBLE, &eq_error_min,
           "minimum value of error", NULL },
-        { "eq-error-max", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &eq_error_max, 0,
+        { "eq-error-max", 0, 0, G_OPTION_ARG_DOUBLE, &eq_error_max,
           "maximum value of error", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
-#endif
+
+
+void __attribute__((__nonnull__))
+ls2_add_eq_noise_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("eq-noise",
+                                "Parameters to the uniform distributed noise error model",
+                                "Parameters to the uniform distributed noise error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, eq_noise_arguments);
+     g_option_context_add_group(context, group);
+}
+
 
 // Errormodels have to include all utils themselves
 #if defined(STAND_ALONE)
@@ -50,8 +61,8 @@ void
 eq_noise_setup(const vector2 *anchors __attribute__((__unused__)),
                size_t nanchors __attribute__((__unused__)))
 {
-    eq_error_min_v = VECTOR_BROADCASTF(eq_error_min);
-    eq_error_rng_v = VECTOR_BROADCASTF(eq_error_max - eq_error_min);
+        eq_error_min_v = VECTOR_BROADCASTF((float) eq_error_min);
+        eq_error_rng_v = VECTOR_BROADCASTF((float) (eq_error_max - eq_error_min));
 }
 
 

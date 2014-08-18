@@ -19,6 +19,11 @@
 
  */
 
+#include <glib.h>
+
+#include "crlb_malaney_algorithm.h"
+
+
 /********************************************************************
  **
  **  This file is made only for including in the lib_lat project
@@ -32,31 +37,38 @@
  ***
  *******************************************************************/
 
-/* @algorithm_name: CRLB (Qi & Kobayashi) */
+/* @algorithm_name: CRLB (Malaney) */
 
-static float crlb_malaney_sigma = 3.0f;
+static double crlb_malaney_sigma = 3.0;
+static double crlb_malaney_pathloss = 2.0;
+static double crlb_malaney_scale = 1.0;
 
-static float crlb_malaney_pathloss = 2.0f;
-
-static float crlb_malaney_scale = 1.0f;
-
-#if HAVE_POPT_H
-struct poptOption crlb_malaney_arguments[] = {
-        { "crlb-malaney-noise", 'S',
-          POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &crlb_malaney_sigma, 0,
+GOptionEntry crlb_malaney_arguments[] = {
+        { "crlb-malaney-noise", 0, 0, G_OPTION_ARG_DOUBLE,
+          &crlb_malaney_sigma,
           "noise variable", NULL },
-	{ "crlb-malaney-exponent", 'n',
-          POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &crlb_malaney_pathloss, 0,
+	{ "crlb-malaney-exponent", 0, 0, G_OPTION_ARG_DOUBLE,
+          &crlb_malaney_pathloss,
           "path loss exponent", NULL },
-	{ "crlb-malaney-scale", 'Z',
-          POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &crlb_malaney_scale, 0,
+	{ "crlb-malaney-scale", 0, 0, G_OPTION_ARG_DOUBLE,
+          &crlb_malaney_scale,
           "scale factor for root mean square error", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
-#endif
+
+
+void __attribute__((__nonnull__))
+ls2_add_crlb_malaney_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("crlb-qi",
+                                "Parameters to the CRLB model of Malaney",
+                                "Parameters to the CRLB model of Malaney",
+                                NULL, NULL);
+     g_option_group_add_entries(group, crlb_malaney_arguments);
+     g_option_context_add_group(context, group);
+}
+
 
 /*!
  * Do not use an error model with this one, it computes nonesense in this
@@ -73,7 +85,7 @@ crlb_malaney_run (const vector2 *anchor, const size_t num_anchors,
 	          const vector2 *location)
 {
     const float alpha =
-        (10 * crlb_malaney_pathloss) / (crlb_malaney_sigma * logf(10.0f));
+        (float) ((10.0 * crlb_malaney_pathloss) / (crlb_malaney_sigma * log(10.0)));
 
     // Calculate the CRLB
     float numer = 0.0f;

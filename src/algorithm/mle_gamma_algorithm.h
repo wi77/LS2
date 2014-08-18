@@ -22,13 +22,11 @@
 #ifndef MLE_GAMMA_ALGORITHM_H_INCLUDED
 #define MLE_GAMMA_ALGORITHM_H_INCLUDED 1
 
-#if HAVE_POPT_H
-extern struct poptOption mle_gamma_arguments[];
-#endif
-
 #if defined(STAND_ALONE)
 #  define ALGORITHM_NAME "Maximum Likelihood Estimator (Gamma)"
-#  define ALGORITHM_ARGUMENTS mle_gamma_arguments[];
 #endif
+
+extern void __attribute__((__nonnull__))
+ls2_add_mle_gamma_option_group(GOptionContext *context);
 
 #endif

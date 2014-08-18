@@ -24,13 +24,11 @@
 
 extern void eq_noise_setup(const vector2 *, size_t);
 
-#if HAVE_POPT_H
-extern struct poptOption eq_arguments[];
-#endif
+extern void __attribute__((__nonnull__))
+ls2_add_eq_noise_option_group(GOptionContext *context);
 
 #if defined(STAND_ALONE)
 #  define ERROR_MODEL_NAME "Uniform noise"
-#  define ERROR_MODEL_ARGUMENTS eq_arguments
 #endif
 
 #endif

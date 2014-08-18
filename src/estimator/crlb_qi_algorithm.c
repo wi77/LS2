@@ -19,6 +19,10 @@
 
  */
 
+#include <glib.h>
+
+#include "crlb_qi_algorithm.h"
+
 /********************************************************************
  **
  **  This file is made only for including in the lib_lat project
@@ -38,26 +42,37 @@
 
 // That is 5 million divided by square root of 3, as found in Qi's
 // thesis (p. 18, eq. 2.29)
-static float crlb_qi_beta = 2886751.345948129f;
+static double crlb_qi_beta = 2886751.345948129;
 
-static float crlb_qi_su = 0.1f;
+static double crlb_qi_su = 0.1;
 
-static float crlb_qi_scale = 1.0f;
+static double crlb_qi_scale = 1.0;
 
-#if HAVE_POPT_H
-struct poptOption crlb_qi_arguments[] = {
-        { "bandwidth", 'b', POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &crlb_qi_beta, 0,
+GOptionEntry crlb_qi_arguments[] = {
+        { "bandwidth", 0, 0, G_OPTION_ARG_DOUBLE,
+          &crlb_qi_beta,
           "effective bandwidth of the signal waveform", NULL },
-	{ "scale", 's', POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &crlb_qi_scale, 0,
+	{ "scale", 0, 0, G_OPTION_ARG_DOUBLE,
+          &crlb_qi_scale,
           "scale factor for root mean square error", NULL },
-	{ "unit", 'u', POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &crlb_qi_su, 0,
+	{ "unit", 0, 0, G_OPTION_ARG_DOUBLE,
+          &crlb_qi_su,
           "length of a simulation unit in meters", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
-#endif
+
+void __attribute__((__nonnull__))
+ls2_add_crlb_qi_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("crlb-qi",
+                                "Parameters to the CRLB model of Qi and Kobayashi",
+                                "Parameters to the CRLB model of Qi and Kobayashi",
+                                NULL, NULL);
+     g_option_group_add_entries(group, crlb_qi_arguments);
+     g_option_context_add_group(context, group);
+}
+
 
 #include "algorithm/trilateration_algorithm.c"
 
@@ -82,10 +97,10 @@ crlb_qi_run(const vector2 *anchor, const size_t count, const vector2 *location)
 {
     const float pi = (float) M_PI;
     // speed of light in su / s, assumes su = 1dm
-    const float c = 299792458.0f / crlb_qi_su;
+    const float c = (float) (299792458.0 / crlb_qi_su);
     // Constant alpha of the paper
     const float alpha =
-         (c * c) / (8.0f * pi * pi * crlb_qi_beta * crlb_qi_beta);
+         (float) ((c * c) / (8.0 * pi * pi * crlb_qi_beta * crlb_qi_beta));
 
     // Calculate the CRLB
     float numer = 0.0f;

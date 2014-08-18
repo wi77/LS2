@@ -26,44 +26,54 @@
 # include "ls2/ls2-config.h"
 #endif
 
-#ifdef HAVE_POPT_H
-# include <popt.h>
-#endif
+#include <glib.h>
 
 #include <float.h>
 
 #include "weibull_em.h"
 
 // Errormodels have to include all utils themselves
-#include "../util/util_random.c"
+#if defined(STAND_ALONE)
+#  include "../util/util_random.c"
+#endif
 
 /* Mean value is scale * sqrtf(M_PI / 2.0f). */
-static float weibull_scale = 55.571f;
-static float weibull_shape = 3.5f;
+static double weibull_scale = 55.571f;
+static double weibull_shape = 3.5f;
 
 static VECTOR weibull_scale_vector;
 static VECTOR weibull_shape_vector;
 
-#if defined(HAVE_POPT_H)
-struct poptOption weibull_arguments[] = {
-        { "weibull-scale", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &weibull_scale, 0,
+static GOptionEntry weibull_arguments[] = {
+        { "weibull-scale", 0, 0, G_OPTION_ARG_DOUBLE, &weibull_scale,
           "scale parameter of the Weibull noise", NULL },
-        { "weibull-shape", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &weibull_shape, 0,
+        { "weibull-shape", 0, 0, G_OPTION_ARG_DOUBLE, &weibull_shape,
           "shape parameter of the Weibull noise", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
-#endif
+
+
+void __attribute__((__nonnull__))
+ls2_add_weibull_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("weibull",
+                                "Parameters to the Weibull error model",
+                                "Parameters to the Weibull error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, weibull_arguments);
+     g_option_context_add_group(context, group);
+}
+
 
 void
 weibull_setup(const vector2 *anchors __attribute__((__unused__)),
                size_t nanchors __attribute__((__unused__)))
 {
-    VECTOR t = VECTOR_CONST_BROADCAST(weibull_scale);
-    weibull_scale_vector = t;
-    VECTOR u = VECTOR_CONST_BROADCAST(weibull_shape);
-    weibull_shape_vector = u;
+        VECTOR t = VECTOR_CONST_BROADCAST((float) weibull_scale);
+        weibull_scale_vector = t;
+        VECTOR u = VECTOR_CONST_BROADCAST((float) weibull_shape);
+        weibull_shape_vector = u;
 }
 
 

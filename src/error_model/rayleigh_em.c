@@ -26,37 +26,48 @@
 # include "ls2/ls2-config.h"
 #endif
 
-#ifdef HAVE_POPT_H
-# include <popt.h>
-#endif
+#include <glib.h>
 
 #include <float.h>
 
 #include "rayleigh_em.h"
 
 // Errormodels have to include all utils themselves
-#include "../util/util_random.c"
+#if defined(STAND_ALONE)
+#  include "../util/util_random.c"
+#endif
 
 /* Mean value is scale * sqrtf(M_PI / 2.0f). */
-static float rayleigh_scale = 39.8942280401f;
+static double rayleigh_scale = 39.8942280401f;
 
 static VECTOR rayleigh_scale_vector;
 
-#if defined(HAVE_POPT_H)
-struct poptOption rayleigh_arguments[] = {
-        { "rayleigh-scale", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &rayleigh_scale, 0,
+static GOptionEntry rayleigh_arguments[] = {
+        { "rayleigh-scale", 0, 0, G_OPTION_ARG_DOUBLE, &rayleigh_scale,
           "scale parameter of the Rayleigh noise", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
-#endif
+
+
+void __attribute__((__nonnull__))
+ls2_add_rayleigh_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("rayleigh",
+                                "Parameters to the Rayleigh error model",
+                                "Parameters to the Rayleigh error model",
+                                NULL, NULL);
+     g_option_group_add_entries(group, rayleigh_arguments);
+     g_option_context_add_group(context, group);
+}
+
 
 void
 rayleigh_setup(const vector2 *anchors __attribute__((__unused__)),
                size_t nanchors __attribute__((__unused__)))
 {
-    VECTOR t = VECTOR_CONST_BROADCAST(rayleigh_scale);
-    rayleigh_scale_vector = t;
+        VECTOR t = VECTOR_CONST_BROADCAST((float) rayleigh_scale);
+        rayleigh_scale_vector = t;
 }
 
 
@@ -84,4 +95,3 @@ rayleigh_error(__m128i *restrict seed,
       	result[k] = distances[k] + t;
     }
 }
-
