@@ -133,22 +133,22 @@ AM_CFLAGS = -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
 
 ls2_run_SOURCES  = ls2-run.c util/util_crash.c
 ls2_run_CPPFLAGS =
-ls2_run_CFLAGS   = $(GLIB2_CFLAGS)
+ls2_run_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS)
 ls2_run_LDADD    = $(LIBOBJS) libls2.la libls2be.la $(GLIB2_LIBS)
 
 ls2_bounds_SOURCES  = ls2-run.c util/util_crash.c
 ls2_bounds_CPPFLAGS = -DESTIMATOR
-ls2_bounds_CFLAGS   = $(GLIB2_CFLAGS)
+ls2_bounds_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS)
 ls2_bounds_LDADD    = $(LIBOBJS) libls2.la libls2be.la $(GLIB2_LIBS)
 
 ls2_diff_SOURCES  = ls2-diff.c
 ls2_diff_CPPFLAGS =
-ls2_diff_CFLAGS   = $(GLIB2_CFLAGS)
+ls2_diff_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS)
 ls2_diff_LDADD    = libls2be.la $(GLIB2_LIBS)
 
 ls2_h5_image_SOURCES  = ls2-h5-image.c
 ls2_h5_image_CPPFLAGS =
-ls2_h5_image_CFLAGS   = $(GLIB2_CFLAGS)
+ls2_h5_image_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS)
 ls2_h5_image_LDADD    = libls2be.la $(GLIB2_LIBS)
 
 libls2be_la_SOURCES = backend/backends.c backend/be_cairo.c \
@@ -166,11 +166,13 @@ libls2_la_LIBADD   = $(GLIB2_LIBS) $(GSL_LIBS) $(LIBOBJS) -lrt
 
 test_em_SOURCES  = test-em.c vector_shooter.h ls2/ls2.h
 test_em_CPPFLAGS =
-test_em_LDADD    = $(GSL_LIBS) $(LIBOBJS)
+test_em_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS)
+test_em_LDADD    = $(GSL_LIBS) $(GLIB2_LIBS) $(LIBOBJS)
 
 test_alg_SOURCES  = debug.c vector_shooter.h ls2/ls2.h
 test_alg_CPPFLAGS =
-test_alg_LDADD    = $(GSL_LIBS) $(LIBOBJS)
+test_alg_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS)
+test_alg_LDADD    = $(GSL_LIBS) $(GLIB2_LIBS) $(LIBOBJS)
 
 library.c: ${srcdir}/generate.py ${srcdir}/Makefile.am
 	test -d ls2 || mkdir ls2

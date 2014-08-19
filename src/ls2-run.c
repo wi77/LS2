@@ -121,10 +121,9 @@ main(int argc, char* argv[])
     uint16_t no_anchor_args = 0; /* number of anchor parameters seen.       */
 #if !defined(ESTIMATOR)
     /* Center of mass of estimations (inverted only) */
-    float center_x, sdev_x, center_y, sdev_y;
+    float centre_x, sdev_x, centre_y, sdev_y;
 #endif
     vector2 *anchors;
-    int rc;
 
 #if !defined(ESTIMATOR)
     /* Command line options specific to the inverted shooter. */
@@ -216,8 +215,8 @@ main(int argc, char* argv[])
 #if !defined(ESTIMATOR)
     algorithm = ALGORITHM_DEFAULT;
     error_model = ERROR_MODEL_DEFAULT;
-    tag_x = arg_width / 2.0F;
-    tag_y = arg_height / 2.0F;
+    tag_x = (float) arg_width / 2.0F;
+    tag_y = (float) arg_height / 2.0F;
     output[AVERAGE_ERROR] = OUTPUT_DEFAULT;
     runs = RUNS;
     seed = time(NULL);
@@ -385,10 +384,10 @@ main(int argc, char* argv[])
 	    ls2_initialize_progress_bar((size_t) runs, buffer);
 	}
 	ls2_distribute_work_inverted(alg, em, num_threads, runs, seed,
-                                     tag_x, tag_y,
+                                     (float) tag_x, (float) tag_y,
 				     anchors, no_anchors, result, width,
-				     height, &center_x, &sdev_x,
-                                     &center_y, &sdev_y);
+				     height, &centre_x, &sdev_x,
+                                     &centre_y, &sdev_y);
     }
 #else
     ls2_distribute_work_estimator(est, num_threads, anchors, no_anchors,
@@ -416,8 +415,8 @@ main(int argc, char* argv[])
 	fprintf(stdout, "Centroid of location estimations: (%f, %f)"
                         "\n    standard deviations: (%f, %f)\n"
                         "    mean average error: %f\n",
-		center_x, center_y, sdev_x, sdev_y,
-                distance_s(tag_x, tag_y, center_x, center_y));
+		centre_x, centre_y, sdev_x, sdev_y,
+                distance_s((float) tag_x, (float) tag_y, centre_x, centre_y));
     }
 #endif
 
@@ -448,17 +447,19 @@ main(int argc, char* argv[])
     } else {
         if (relative) {
 	    ls2_write_inverted(get_output_format(output_format), output[0],
-			       0, tag_x, tag_y, anchors, no_anchors,
-			       result, width, height, center_x, center_y);
+			       0, (float) tag_x, (float) tag_y,
+                               anchors, no_anchors,
+			       result, width, height, centre_x, centre_y);
         } else {
 	    ls2_write_inverted(get_output_format(output_format), output[0],
-			       (uint64_t) runs, tag_x, tag_y, anchors, no_anchors,
-			       result, width, height, center_x, center_y);
+			       (uint64_t) runs, (float) tag_x, (float) tag_y,
+                               anchors, no_anchors,
+			       result, width, height, centre_x, centre_y);
         }
         if (output_hdf5 != NULL && *output_hdf5 != '\0') {
-	    ls2_hdf5_write_inverted(output_hdf5, tag_x, tag_y, anchors,
-                                    no_anchors, result, width, height,
-                                    center_x, center_y);
+	    ls2_hdf5_write_inverted(output_hdf5, (float) tag_x, (float) tag_y,
+				    anchors, no_anchors, result, width, height,
+                                    centre_x, centre_y);
         }
     }
 #endif

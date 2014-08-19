@@ -45,7 +45,6 @@
 #endif
 
 
-static char *file[2];
 static char *compare[NUM_VARIANTS];
 static double similarity = 3.0;
 static double dynamic = 200.0;

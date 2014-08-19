@@ -34,9 +34,7 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef HAVE_POPT_H
-#  include <popt.h>
-#endif
+#include <glib.h>
 
 #include <inttypes.h>
 

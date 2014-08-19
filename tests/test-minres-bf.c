@@ -33,6 +33,8 @@
 #include <immintrin.h>
 #include <stdio.h>
 #include <string.h>
+#include <glib.h>
+
 #include "ls2/library.h"
 #include "vector_shooter.h"
 #include "util/util_misc.c"

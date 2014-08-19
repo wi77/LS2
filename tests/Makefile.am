@@ -34,5 +34,5 @@ rdrand_LDADD =
 
 test_minres_bf_SOURCES = test-minres-bf.c
 test_minres_bf_CPPFLAGS = -I${top_srcdir}/src -I../src
-test_minres_bf_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize
-test_minres_bf_LDADD =
+test_minres_bf_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize $(GLIB2_CFLAGS)
+test_minres_bf_LDADD = $(GLIB2_LIBS)
