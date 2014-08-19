@@ -135,13 +135,12 @@ ls2_hdf5_read_anchors(hid_t file, vector2** anchors, size_t *no_anchors)
     dataspace = H5Dget_space(dataset);
     rank = H5Sget_simple_extent_ndims(dataspace);
     if (rank != 2) {
-        fprintf(stderr, "/Anchors wrong rank %d\n", (int) rank);
+        g_error("/Anchors wrong rank %d\n", (int) rank);
         return -1;
     }
     H5Sget_simple_extent_dims(dataspace, dims, NULL);
     if (dims[1] != 2) {
-        fprintf(stderr, "/Anchors dimension (%d, %d)\n",
-                (int) dims[0], (int) dims[1]);
+        g_error("/Anchors dimension (%d, %d)\n", (int) dims[0], (int) dims[1]);
         return -1;
     }
     *no_anchors = (size_t) dims[0];
@@ -184,7 +183,7 @@ ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
     dataspace = H5Dget_space(dataset);
     rank = H5Sget_simple_extent_ndims(dataspace);
     if (rank != 2) {
-        fprintf(stderr, "%s wrong rank %d\n", name, (int) rank);
+        g_error("%s wrong rank %d\n", name, (int) rank);
         return -1;
     }
     H5Sget_simple_extent_dims(dataspace, dims, NULL);
@@ -284,7 +283,7 @@ ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
     dataspace = H5Dget_space(dataset);
     rank = H5Sget_simple_extent_ndims(dataspace);
     if (rank != 2) {
-        fprintf(stderr, "/Tag wrong rank %d\n", (int) rank);
+        g_error("/Tag wrong rank %d\n", (int) rank);
         return -1;
     }
     H5Sget_simple_extent_dims(dataspace, dims, NULL);
@@ -303,7 +302,7 @@ ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
     dataspace = H5Dget_space(dataset);
     rank = H5Sget_simple_extent_ndims(dataspace);
     if (rank != 2) {
-        fprintf(stderr, "/Result/Center wrong rank %d\n", (int) rank);
+        g_error("/Result/Center wrong rank %d\n", (int) rank);
         return -1;
     }
     H5Sget_simple_extent_dims(dataspace, dims, NULL);
@@ -323,7 +322,7 @@ ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
     dataspace = H5Dget_space(dataset);
     rank = H5Sget_simple_extent_ndims(dataspace);
     if (rank != 2) {
-        fprintf(stderr, "/Result/Frequencies wrong rank %d\n", (int) rank);
+        g_error("/Result/Frequencies wrong rank %d\n", (int) rank);
         return -1;
     }
     H5Sget_simple_extent_dims(dataspace, dims, NULL);

@@ -53,11 +53,7 @@ get_output_format(const char *format)
 		return i;
 	}
     }
-    fprintf(stderr, "warning: output format \"%s\" unknown (use ", format);
-    for (i = 0; format_names[i+1] != NULL; i++)
-	fprintf(stderr, "%s, ", format_names[i]);
-    fprintf(stderr, "or %s). Using png.\n", format_names[i+1]);
-    fflush(stderr);
+    g_warning("warning: output format \"%s\" unknown. Using png.\n", format);
     return OUTPUT_PNG;
 }
 

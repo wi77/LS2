@@ -103,12 +103,12 @@ int main(int argc, char **argv)
     }
 
     if (argc < 1) {
-        fprintf(stderr, "missing input file name.\n");
+        g_printerr("missing input file name.\n");
         g_option_context_free(opt_con);
         exit(EXIT_FAILURE);
     }
     if (argc > 1) {
-        fprintf(stderr, "warning: too many arguments, some were ignored.\n");
+        g_printerr("warning: too many arguments, some were ignored.\n");
     }
 
     input_hdf5 = argv[1];
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 	            float mu, sigma, min, max;
 	            ls2_statistics(results, (size_t) width * height,
 			           &mu, &sigma, &min, &max);
-	            fprintf(stdout, "MAE = %f, sdev = %f, min = %f, max = %f\n",
+	            g_print("MAE = %f, sdev = %f, min = %f, max = %f\n",
 		            mu, sigma, min, max);
 		    if (var != FAILURES)
 			ls2_write_locbased(format, output[var], anchors, no_anchors,
@@ -169,7 +169,7 @@ int main(int argc, char **argv)
         uint64_t maximum = 0;
         for (int i = 0; i < width * height; i++)
             maximum = MAX(result[i], maximum);
-        fprintf(stdout, "Actual maximum: %" PRIu64 ", used maximum: %" PRIu64 "\n",
+        g_print("Actual maximum: %" PRIu64 ", used maximum: %" PRIu64 "\n",
                 maximum, ((runs == 0) ? maximum : (uint64_t) runs));
 	ls2_write_inverted(format, inverted, (uint64_t) runs, tag_x, tag_y, anchors, no_anchors,
 			   result, width, height, (float) center_x, (float) center_y);

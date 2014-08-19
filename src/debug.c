@@ -59,19 +59,20 @@ int main(int argc __attribute__((__unused__)),
     VECTOR resx, resy;
 
     if (argc > 2) {
-        fprintf(stderr, "Usage: %s [algorithm].\n", argv[0]);
+        g_printerr("Usage: %s [algorithm].\n", argv[0]);
         exit(EXIT_FAILURE);
     }
     int alg = ALG_TRILATERATION; 
     if (argc == 2)
 	alg = get_algorithm_by_name(argv[1]);
     if (alg == -1) {
-        fprintf(stderr, "Unknown algorithm %s.\nTry one of "
+        g_printerr("Unknown algorithm %s.\nTry one of "
                 ALGORITHMS "\n", argv[1]);
         exit(EXIT_FAILURE);
     }
 
     srand((unsigned int)time(NULL));
     algorithm(alg, vx, vy, r, 8, 1000, 1000, &resx, &resy);
-    printf ("\nResult x=%f y=%f\n",resx[1],resy[1]);
+    g_print("Result x=%f y=%f\n",resx[1],resy[1]);
+    return EXIT_SUCCESS;
 }

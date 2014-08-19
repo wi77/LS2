@@ -93,7 +93,7 @@ main(int argc, char **argv)
      }
 
      if (argc < 3) {
-	  fprintf(stderr, "error: missing input file name\n");
+	  g_printerr("error: missing input file name\n");
 	  fflush(stderr);
 	  exit(EXIT_FAILURE);
      }
@@ -107,18 +107,18 @@ main(int argc, char **argv)
 	  ls2_hdf5_read_locbased(argv[2], var, &b_anchors, &b_no_anchors,
 				 &b_results, &b_width, &b_height);
 	  if (a_width != b_width || a_height != b_height) {
-	       fprintf(stderr, "Sizes differ. Cannot continue.\n");
+	       g_printerr("Sizes differ. Cannot continue.\n");
 	       exit(EXIT_FAILURE);
 	  }
 
 	  /* Check whether both images are comparable. */
 	  if (a_no_anchors != b_no_anchors) {
-	       fprintf(stderr, "warning: number of anchors do not match\n");
+	       g_printerr("warning: number of anchors do not match\n");
 	  } else {
 	       for (size_t i = 0; i < a_no_anchors; i++) {
 		    if (a_anchors[i].x != b_anchors[i].x ||
 			a_anchors[i].y != b_anchors[i].y) {
-			 fprintf(stderr, "warning: anchor positions differ\n");
+			 g_printerr("warning: anchor positions differ\n");
 		    }
 	       }
 	  }
@@ -138,7 +138,7 @@ main(int argc, char **argv)
 	  float mu, sigma, min, max;
 	  ls2_statistics(results, (size_t) a_width * a_height,
 			 &mu, &sigma, &min, &max);
-	  fprintf(stdout, "Average difference = %f, sdev = %f, min = %f, "
+	  g_print("Average difference = %f, sdev = %f, min = %f, "
 		  "max = %f\n", mu, sigma, min, max);
 	  
 	  ls2_cairo_write_png_diff(compare[var], a_anchors, a_no_anchors,

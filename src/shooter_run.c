@@ -581,10 +581,9 @@ ls2_shooter_run(void *rr)
                 ((float) failures) / ((float) params->runs);
             if (__builtin_expect(ls2_verbose > 0, 0)) {
                 if (__builtin_expect(params->results[FAILURES][pos] > 0.0, 0)) {
-                    fprintf(stderr, "Warning: %" PRIuFAST64 " of %" PRIuFAST64
-                                    " runs failed at (%d, %d)\n",
-                            failures, params->runs, x, y);
-                    fflush(stderr);
+                    g_warning("%" PRIuFAST64 " of %" PRIuFAST64
+                              " runs failed at (%d, %d)\n",
+                              failures, params->runs, x, y);
                 }
             }
         }
@@ -611,9 +610,8 @@ ls2_shooter_run(void *rr)
     if (__builtin_expect(ls2_verbose >= 2, 0)) {
         struct rusage resources;
         getrusage(RUSAGE_THREAD, &resources);
-        fprintf(stderr, "Thread %zu: %d.%06d sec.\n", params->id,
-                (int)resources.ru_utime.tv_sec, (int)resources.ru_utime.tv_usec);
-        fflush(stderr);
+        g_message("Thread %zu: %d.%06d sec.\n", params->id,
+                  (int)resources.ru_utime.tv_sec, (int)resources.ru_utime.tv_usec);
     }
     return NULL;
 }
@@ -861,9 +859,9 @@ static void* ls2_inverse_run(void *rr)
     if (ls2_verbose >= 2) {
         struct rusage resources;
         getrusage(RUSAGE_THREAD, &resources);
-        fprintf(stderr, "Thread %d: %d.%06d sec.\n", params->id,
-                (int)resources.ru_utime.tv_sec, (int)resources.ru_utime.tv_usec);
-        fflush(stderr);
+        g_message("Thread %d: %d.%06d sec.\n", params->id,
+                  (int)resources.ru_utime.tv_sec,
+                  (int)resources.ru_utime.tv_usec);
     }
     return NULL;
 }
@@ -918,7 +916,7 @@ ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
 	params[t].algorithm = alg;
 	params[t].error_model = em;
         if (posix_memalign((void **) &(params[t].result), ALIGNMENT, sz) != 0) {
-            fprintf(stderr, "allocate result\n");
+            g_error("allocate result\n");
             exit(EXIT_FAILURE);
         }
         memset(params[t].result, 0, sz);
@@ -1076,9 +1074,9 @@ ls2_estimator_run(void *rr)
     if (ls2_verbose >= 2) {
         struct rusage resources;
         getrusage(RUSAGE_THREAD, &resources);
-        fprintf(stderr, "Thread %zu: %d.%06d sec.\n", params->id,
-                (int)resources.ru_utime.tv_sec, (int)resources.ru_utime.tv_usec);
-        fflush(stderr);
+        g_message("Thread %zu: %d.%06d sec.\n", params->id,
+                  (int)resources.ru_utime.tv_sec,
+                  (int)resources.ru_utime.tv_usec);
     }
     return NULL;
 }

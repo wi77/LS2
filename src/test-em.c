@@ -69,19 +69,19 @@ main(int argc, const char* argv[])
     memset(distances, 0, sizeof(distances));
 
     if (argc != 3) {
-        fprintf(stderr, "Usage: %s <error-model> <samples>.\n", argv[0]);
+        g_printerr("Usage: %s <error-model> <samples>.\n", argv[0]);
         exit(EXIT_FAILURE);
     }
     const int em = get_error_model_by_name(argv[1]);
     if (em == -1) {
-        fprintf(stderr, "Unknown error model %s.\nTry one of "
-                ERROR_MODELS "\n", argv[1]);
+        g_printerr("Unknown error model %s.\nTry one of " ERROR_MODELS "\n",
+		   argv[1]);
         exit(EXIT_FAILURE);
     }
     const long samples = atol(argv[2]);
     if (samples <= 0) {
-        fprintf(stderr, "Invalid number of samples %s.\nMust be positive\n",
-                argv[2]);
+        g_printerr("Invalid number of samples %s.\nMust be positive\n",
+                   argv[2]);
         exit(EXIT_FAILURE);
     }
 
@@ -89,7 +89,7 @@ main(int argc, const char* argv[])
     for (int i = 0; i < samples; i += VECTOR_OPS) {
 	error_model(em, &seed, distances, vx, vy, 4, tagx, tagy, result);
 	for (int ii = 0; ii < VECTOR_OPS; ii++) {
-	    printf("%f\n", result[0][ii]);
+	    g_print("%f\n", result[0][ii]);
 	}
     }
     exit(EXIT_SUCCESS);

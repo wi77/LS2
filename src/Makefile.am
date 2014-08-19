@@ -155,12 +155,12 @@ libls2be_la_SOURCES = backend/backends.c backend/be_cairo.c \
 		      backend/be_openexr.c backend/be_hdf5.c \
 		      util/util_statistics.c ls2/util.h \
 		      ls2/backend.h ls2/output-variants.h
-libls2be_la_CPPFLAGS = $(CAIRO_CFLAGS) $(GLIB2_CFLAGS) $(OPENEXR_CFLAGS)
+libls2be_la_CPPFLAGS = $(CAIRO_CFLAGS) $(GLIB2_CFLAGS) $(OPENEXR_CFLAGS) -DG_LOG_DOMAIN='"libls2be"'
 libls2be_la_LDFLAGS  = -version $(LS2_LIBRARY_VERSION)
 libls2be_la_LIBADD   = $(CAIRO_LIBS) $(GLIB2_LIBS) $(OPENEXR_LIBS) $(LIBOBJS)
 
 libls2_la_SOURCES  = shooter_run.c vector_shooter.h
-libls2_la_CPPFLAGS = $(GLIB2_CFLAGS) $(GSL_CFLAGS)
+libls2_la_CPPFLAGS = $(GLIB2_CFLAGS) $(GSL_CFLAGS) -DG_LOG_DOMAIN='"libls2"'
 libls2_la_LDFLAGS  = -version $(LS2_LIBRARY_VERSION)
 libls2_la_LIBADD   = $(GLIB2_LIBS) $(GSL_LIBS) $(LIBOBJS) -lrt
 

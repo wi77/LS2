@@ -259,13 +259,13 @@ main(int argc, char* argv[])
     }
 
     if (no_anchor_args < 6) {
-        fprintf(stderr, "insufficient number of anchor coordinates.\n");
+        g_printerr("insufficient number of anchor coordinates.\n");
         g_option_context_free(opt_con);
         exit(EXIT_FAILURE);
     }
 
     if (no_anchor_args % 2 != 0) {
-        fprintf(stderr, "missing anchor coordinate.\n");
+        g_printerr("missing anchor coordinate.\n");
         g_option_context_free(opt_con);
         exit(EXIT_FAILURE);
     }
@@ -282,20 +282,20 @@ main(int argc, char* argv[])
 #if !defined(ESTIMATOR)
     int alg = get_algorithm_by_name(algorithm);
     if (alg < 0) {
-        fprintf(stderr, "Algorithm \"%s\" unknown, choose one of " ALGORITHMS
+        g_printerr("Algorithm \"%s\" unknown, choose one of " ALGORITHMS
                 "\n", algorithm);
         exit(EXIT_FAILURE);
     }
     int em = get_error_model_by_name(error_model);
     if (em < 0) {
-        fprintf(stderr, "Error model \"%s\" unknown, choose one of "
+        g_printerr("Error model \"%s\" unknown, choose one of "
                 ERROR_MODELS "\n", error_model);
         exit(EXIT_FAILURE);
     }
 #else
     int est = get_estimator_by_name(estimator);
     if (est < 0) {
-        fprintf(stderr, "Estimator \"%s\" unknown, choose one of "
+        g_printerr("Estimator \"%s\" unknown, choose one of "
                 ESTIMATORS "\n", estimator);
         exit(EXIT_FAILURE);
     }    
@@ -303,19 +303,18 @@ main(int argc, char* argv[])
 
     if (ls2_verbose >= 1) {
 #if !defined(ESTIMATOR)
-        fprintf(stdout,
-                "\nAlgorithm %s, error model %s using %d threads and %ld runs.\n",
+        g_print("Algorithm %s, error model %s using %d threads and %ld runs.\n",
 		algorithm, error_model, num_threads, runs);
 #else
-        fprintf(stdout, "\nEstimator %s using %d threads.\n",
+        g_print("Estimator %s using %d threads.\n",
 		estimator, num_threads);
 #endif
-        fprintf(stdout, "%zu anchors: (%f; %f)",
+        g_print("%zu anchors: (%f; %f)",
                 no_anchors, anchors[0].x, anchors[0].y);
         for (size_t i = 1; i < no_anchors; i++) {
-            fprintf(stdout, ", (%f; %f)", anchors[i].x, anchors[i].y);
+            g_print(", (%f; %f)", anchors[i].x, anchors[i].y);
         }
-        fprintf(stdout, "\n");
+        g_print("\n");
     }
 
     /* We need at least one thread. */
@@ -366,7 +365,7 @@ main(int argc, char* argv[])
             t = iceil((long) runs, (long) num_threads * VECTOR_OPS);
         if (t != runs) {
     	    runs = t;
-    	    fprintf(stderr, "warning: number of runs rounded to %ld\n", runs);
+    	    g_printerr("warning: number of runs rounded to %ld\n", runs);
         }
     } while (0);
 
@@ -407,14 +406,13 @@ main(int argc, char* argv[])
         if (results[AVERAGE_ERROR] != NULL) {
 	    ls2_statistics(results[AVERAGE_ERROR], (size_t) width * height,
 		           &mu, &sigma, &min, &max);
-	    fprintf(stdout, "MAE = %f, sdev = %f, min = %f, max = %f\n",
+	    g_print("MAE = %f, sdev = %f, min = %f, max = %f\n",
 		    mu, sigma, min, max);
-            fflush(stderr);
         }
     } else {
-	fprintf(stdout, "Centroid of location estimations: (%f, %f)"
-                        "\n    standard deviations: (%f, %f)\n"
-                        "    mean average error: %f\n",
+	g_print("Centroid of location estimations: (%f, %f)"
+                "\n    standard deviations: (%f, %f)\n"
+                "    mean average error: %f\n",
 		centre_x, centre_y, sdev_x, sdev_y,
                 distance_s((float) tag_x, (float) tag_y, centre_x, centre_y));
     }
@@ -422,12 +420,11 @@ main(int argc, char* argv[])
 
     struct rusage resources;
     getrusage(RUSAGE_SELF, &resources);
-    fprintf(stdout, "real %.6f s, user %lu.%06lu s, sys %lu.%06lu s\n",
+    g_print("real %.6f s, user %lu.%06lu s, sys %lu.%06lu s\n",
             (double) (end_tv.tv_sec - start_tv.tv_sec) +
-              (double) (end_tv.tv_usec - start_tv.tv_usec) / 1000000.0,
+            (double) (end_tv.tv_usec - start_tv.tv_usec) / 1000000.0,
             resources.ru_utime.tv_sec, resources.ru_utime.tv_usec,
             resources.ru_stime.tv_sec, resources.ru_stime.tv_usec);
-    fflush(stdout);
 
 #if !defined(ESTIMATOR)
     if (inverted == 0) {
