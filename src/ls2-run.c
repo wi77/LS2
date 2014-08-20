@@ -308,6 +308,12 @@ main(int argc, const char* argv[])
         exit(EXIT_FAILURE);
     }
 
+    if (no_anchor_args == 2 * MAX_ANCHORS && poptPeekArg(opt_con) != NULL) {
+        fprintf(stderr, "too many anchors.\n");
+        poptFreeContext(opt_con);
+        exit(EXIT_FAILURE);
+    }
+
     // parse and normalize anchor coordinates
     const size_t no_anchors = no_anchor_args / 2;
 
