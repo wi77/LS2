@@ -42,6 +42,10 @@
 #endif
 
 //#include "util/util_math.c"
+//
+#ifndef ICLA_MAX_NODES_IN_RANGE
+#  define ICLA_MAX_NODES_IN_RANGE (MAX_ANCHORS * MAX_ANCHORS)
+#endif
 
 typedef struct Point2d{
     double x;
@@ -55,10 +59,10 @@ typedef struct IcmPoint {
     int movingDirection;
     Point2d intersection;
     Point2d currentLocation;
-    struct IcmPoint *nodesInRange[90];
+    struct IcmPoint *nodesInRange[ICLA_MAX_NODES_IN_RANGE];
     int nin_fill ;
     double attractingBoundary;
-    struct IcmPoint *mergeList[90];
+    struct IcmPoint *mergeList[ICLA_MAX_NODES_IN_RANGE];
     int ml_fill;
 } IcmPoint;
 
@@ -149,6 +153,7 @@ static inline void computeMovingDirection(IcmPoint *points, int count) {
                 count++;
             }
         }
+	assert (ICLA_MAX_NODES_IN_RANGE >= count);
         if (count > 0) {
             count = 0;
             for (int i = 0; i < pcount; i++) {
@@ -159,6 +164,7 @@ static inline void computeMovingDirection(IcmPoint *points, int count) {
                 }
             }
         }
+
         return count;
     }
 
