@@ -270,9 +270,9 @@ main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    if (no_anchor_args == 2 * MAX_ANCHORS && poptPeekArg(opt_con) != NULL) {
+    if (no_anchor_args == 2 * MAX_ANCHORS && no_anchor_args < argc) {
         fprintf(stderr, "too many anchors.\n");
-        poptFreeContext(opt_con);
+        g_option_context_free(opt_con);
         exit(EXIT_FAILURE);
     }
 

@@ -153,7 +153,7 @@ static inline void computeMovingDirection(IcmPoint *points, int count) {
                 count++;
             }
         }
-	assert (ICLA_MAX_NODES_IN_RANGE >= count);
+	g_assert (ICLA_MAX_NODES_IN_RANGE >= count);
         if (count > 0) {
             count = 0;
             for (int i = 0; i < pcount; i++) {
