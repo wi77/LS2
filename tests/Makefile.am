@@ -25,14 +25,31 @@ DISTCLEANFILES =
 
 BUILT_SOURCES = 
 
-check_PROGRAMS = $(RDRND_TEST) test-minres-bf
+AM_CFLAGS = @ARCH_CFLAGS@ @RDRND_FLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize
+
+check_PROGRAMS = $(RDRND_TEST) test-minres-bf test-algorithm test-error-model
 EXTRA_PROGRAMS = rdrand
 
 rdrand_SOURCES = rdrand.c
-rdrand_CFLAGS = @ARCH_CFLAGS@ @RDRND_FLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize
+rdrand_CFLAGS = $(AM_CFLAGS)
 rdrand_LDADD =
 
 test_minres_bf_SOURCES = test-minres-bf.c
 test_minres_bf_CPPFLAGS = -I${top_srcdir}/src -I../src
-test_minres_bf_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize $(GLIB2_CFLAGS)
-test_minres_bf_LDADD = $(GLIB2_LIBS)
+test_minres_bf_CFLAGS = @ARCH_CFLAGS@ -pthread -ffast-math -fpredictive-commoning -ftree-vectorize $(AM_CFLAGS) $(GLIB2_CFLAGS)
+test_minres_bf_LDADD = $(GLIB2_LIBS) $(LIBOBJS)
+
+test_error_model_SOURCES  = test-error-model.c \
+	${top_srcdir}/src/vector_shooter.h \
+	${top_srcdir}/src/ls2/ls2.h
+test_error_model_CPPFLAGS = -I${top_srcdir}/src -I../src
+test_error_model_CFLAGS   = -pthread $(AM_CFLAGS) $(GLIB2_CFLAGS)
+test_error_model_LDADD    = $(GSL_LIBS) $(GLIB2_LIBS) $(LIBOBJS)
+
+test_algorithm_SOURCES  = test-algorithm.c  \
+	${top_srcdir}/src/vector_shooter.h \
+	${top_srcdir}/src/ls2/ls2.h
+test_algorithm_CPPFLAGS = -I${top_srcdir}/src -I../src
+test_algorithm_CFLAGS   = -pthread $(AM_CFLAGS) $(GLIB2_CFLAGS)
+test_algorithm_LDADD    = $(GSL_LIBS) $(GLIB2_LIBS) $(LIBOBJS)
+

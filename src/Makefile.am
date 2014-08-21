@@ -122,8 +122,6 @@ lib_LTLIBRARIES = libls2.la libls2be.la
 nobase_include_HEADERS = ls2/ls2-config.h ls2/backend.h ls2/ls2.h \
 	ls2/library.h ls2/output-variants.h
 
-check_PROGRAMS = test-em test-alg
-
 AM_CFLAGS = -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
 	-Wconversion -Wstrict-prototypes -Wmissing-prototypes -Wpacked \
 	-Winline \
@@ -163,16 +161,6 @@ libls2_la_SOURCES  = shooter_run.c vector_shooter.h
 libls2_la_CPPFLAGS = $(GLIB2_CFLAGS) $(GSL_CFLAGS) -DG_LOG_DOMAIN='"libls2"'
 libls2_la_LDFLAGS  = -version $(LS2_LIBRARY_VERSION)
 libls2_la_LIBADD   = $(GLIB2_LIBS) $(GSL_LIBS) $(LIBOBJS) -lrt
-
-test_em_SOURCES  = test-em.c vector_shooter.h ls2/ls2.h
-test_em_CPPFLAGS =
-test_em_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS)
-test_em_LDADD    = $(GSL_LIBS) $(GLIB2_LIBS) $(LIBOBJS)
-
-test_alg_SOURCES  = debug.c vector_shooter.h ls2/ls2.h
-test_alg_CPPFLAGS =
-test_alg_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS)
-test_alg_LDADD    = $(GSL_LIBS) $(GLIB2_LIBS) $(LIBOBJS)
 
 library.c: ${srcdir}/generate.py ${srcdir}/Makefile.am
 	test -d ls2 || mkdir ls2
