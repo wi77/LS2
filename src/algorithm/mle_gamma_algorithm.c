@@ -146,7 +146,7 @@ mle_gamma_likelihood_function(const gsl_vector *restrict X, void *restrict param
         result -= likelihood;
     }
 #if !defined(NDEBUG)
-    fprintf(stderr, "f(%f, %f) = %f\n", thetaX, thetaY, result);
+    g_debug("f(%f, %f) = %f\n", thetaX, thetaY, result);
 #endif
     return result;
 }
@@ -184,7 +184,7 @@ mle_gamma_likelihood_gradient(const gsl_vector *restrict X, void *restrict param
         } // TODO: Otherwise the value of the gradient component is 0?
     }
 #if !defined(NDEBUG)
-    fprintf(stderr, "df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
+    g_debug("df(%f, %f) = (%f, %f)\n", thetaX, thetaY, gradX, gradY);
 #endif
     gsl_vector_set(g, 0, gradX);
     gsl_vector_set(g, 1, gradY);
@@ -251,7 +251,7 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         /* Step 2a: Check whether the initial guess can be used. */
         if (__builtin_expect(isnan(sx[i]) || isnan(sy[i]), 0)) {
 #if !defined(NDEBUG)
-            fprintf(stderr, "initial guess is (%f, %f)\n", sx[i], sy[i]);
+            g_debug("initial guess is (%f, %f)\n", sx[i], sy[i]);
 #endif
             (*resx)[i] = NAN;
             (*resy)[i] = NAN;
@@ -269,7 +269,7 @@ mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         /* Step 2c: Check for the validity of the likelihood value. */
         double likelihood = mle_gamma_likelihood_function(x, &p);
 #if !defined(NDEBUG)
-        fprintf(stderr, "likelihood = %f\n", likelihood);
+        g_debug("likelihood = %f\n", likelihood);
 #endif
         if (__builtin_expect(isinf(likelihood), 0)) {
             /* If this is the case, the initial guess does not have
