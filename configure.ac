@@ -254,10 +254,14 @@ AC_SUBST(ARCH_CFLAGS)
 # Checks for library functions.
 AC_CHECK_FUNCS([memset sqrt strtoul])
 
+# Test suite.
+AC_CONFIG_TESTDIR([tests], [src])
+
 AC_CONFIG_FILES([ls2be.pc
                  ls2.pc
                  Makefile
                  src/Makefile
+		 tests/atlocal
                  tests/Makefile
                  Doxyfile])
 AC_OUTPUT

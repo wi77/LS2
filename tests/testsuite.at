@@ -1,0 +1,122 @@
+dnl Makefile.am - Use automake to create Makefile.in
+dnl
+dnl This file is part of creoltools
+dnl
+dnl Written and Copyright (c) 2007 by Marcel Kyas
+dnl
+dnl This program is free software; you can redistribute it and/or
+dnl modify it under the terms of the GNU General Public License as
+dnl published by the Free Software Foundation; either version 3 of the
+dnl License, or (at your option) any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful, but
+dnl WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+dnl General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
+dnl
+
+AT_INIT([ls2-run])
+AT_TESTED([ls2-run])
+
+AT_SETUP([bilateration])
+AT_CHECK([ls2-run -a bilateration -h 100 -w 100 -r 8 -t 2 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([centroid])
+AT_CHECK([ls2-run -a centroid -h 100 -w 100 -r 8 -t 2 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([clurol])
+AT_CHECK([ls2-run -a clurol -h 100 -w 100 -r 8 -t 2 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([const])
+AT_CHECK([ls2-run -a const -h 100 -w 100 -r 8 -t 2 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([eminmax-w2])
+AT_CHECK([ls2-run -a eminmax-w2 -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([eminmax-w4])
+AT_CHECK([ls2-run -a eminmax-w4 -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([geo3])
+AT_CHECK([ls2-run -a geo3 -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([geon])
+AT_CHECK([ls2-run -a geon -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([icla])
+AT_CHECK([ls2-run -a icla -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([llsq])
+AT_CHECK([ls2-run -a llsq -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([lms])
+AT_CHECK([ls2-run -a lms -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([md-minmax-abs])
+AT_CHECK([ls2-run -a md-minmax-abs -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([md-minmax-rel])
+AT_CHECK([ls2-run -a md-minmax-rel -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([min-res1-bf])
+AT_CHECK([ls2-run -a min-res1-bf -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([min-res2-bf])
+AT_CHECK([ls2-run -a min-res2-bf -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([minmax])
+AT_CHECK([ls2-run -a minmax -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([mle-gamma])
+AT_CHECK([ls2-run -a mle-gamma -h 10 -w 10 -r 8 -t 1 2 2 8 8 2 8 8 2], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([mle-gauss])
+AT_CHECK([ls2-run -a mle-gauss -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([nllsq])
+AT_CHECK([ls2-run -a nllsq -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([res-bruteforce])
+AT_CHECK([ls2-run -a res-bruteforce -h 10 -w 10 -r 8 -t 1 2 2 8 8 2 8 8 2], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([rlsm])
+AT_CHECK([ls2-run -a rlsm -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([rwgh])
+AT_CHECK([ls2-run -a rwgh -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([trilateration])
+AT_CHECK([ls2-run -a trilateration -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([vble])
+AT_CHECK([ls2-run -a vble -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP
+
+AT_SETUP([vble-opt])
+AT_CHECK([ls2-run -a vble-opt -h 100 -w 100 -r 8 -t 1 20 20 80 80 20 80 80 20], 0, ignore)
+AT_CLEANUP

@@ -18,10 +18,23 @@
 #
 
 R = R --vanilla
-EXTRA_DIST = analyze.r
 
+MOSTLYCLEANFILES =
 CLEANFILES = 
-DISTCLEANFILES = 
+DISTCLEANFILES = atconfig
+MAINTAINERCLEANFILES = 
+
+AUTOM4TE = $(SHELL) $(top_srcdir)/missing --run autom4te
+AUTOTEST = $(AUTOM4TE) --language=autotest
+TESTSUITE = $(srcdir)/testsuite
+TESTPARTS = $(srcdir)/testsuite.at
+
+EXTRA_DIST = $(srcdir)/analyze.r \
+	$(srcdir)/atlocal.in \
+	$(srcdir)/package.m4 \
+	$(TESTPARTS) \
+	$(TESTSUITE) \
+	$(TESTFILES) 
 
 BUILT_SOURCES = 
 
@@ -53,3 +66,26 @@ test_algorithm_CPPFLAGS = -I${top_srcdir}/src -I../src
 test_algorithm_CFLAGS   = -pthread $(AM_CFLAGS) $(GLIB2_CFLAGS)
 test_algorithm_LDADD    = $(GSL_LIBS) $(GLIB2_LIBS) $(LIBOBJS)
 
+
+check-local: atconfig atlocal $(TESTSUITE)
+	$(SHELL) $(TESTSUITE) $(TESTSUITEFLAGS)
+
+installcheck-local: atconfig atlocal $(TESTSUITE)
+	$(SHELL) $(TESTSUITE) AUTOTEST_PATH='$(bindir)' $(TESTSUITEFLAGS)
+
+clean-local:
+	test ! -f $(TESTSUITE) || \
+	  $(SHELL) $(TESTSUITE) --clean $(TESTSUITEFLAGS)
+
+$(TESTSUITE): $(TESTPARTS) $(srcdir)/package.m4
+	$(AUTOTEST) -I $(srcdir) $(srcdir)/testsuite.at -o $@.tmp
+	mv $@.tmp $@
+
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac
+	@:;{ echo '# Signature of the current package.';                      \
+	   echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])';        \
+	   echo 'm4_define([AT_PACKAGE_TARNAME],   [@PACKAGE_TARNAME@])';     \
+	   echo 'm4_define([AT_PACKAGE_VERSION],   [@PACKAGE_VERSION@])';     \
+	   echo 'm4_define([AT_PACKAGE_STRING],    [@PACKAGE_STRING@])';      \
+	   echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])';   \
+	} > $(srcdir)/package.m4

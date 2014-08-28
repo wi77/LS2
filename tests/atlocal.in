@@ -1,0 +1,6 @@
+# top source directory
+abs_top_srcdir=@abs_top_srcdir@
+export abs_top_srcdir
+
+PATH=@builddir@/../src:${PATH}
+export PATH
