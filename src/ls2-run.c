@@ -264,7 +264,7 @@ main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    if (no_anchor_args % 2 != 0) {
+    if (no_anchor_args % 2 == 0) {
         g_printerr("missing anchor coordinate.\n");
         g_option_context_free(opt_con);
         exit(EXIT_FAILURE);
@@ -333,31 +333,20 @@ main(int argc, char* argv[])
      */
     uint16_t width = (uint16_t) arg_width;
     uint16_t height = (uint16_t) arg_height;
-    const size_t sz = ((size_t) width) * ((size_t) height) * sizeof(float);
     memset(results, 0, sizeof(results));
 #if !defined(ESTIMATOR)
     if (inverted == 0) {
         for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
             if ((output[var] != NULL && *output[var] != '\0') ||
                 (output_hdf5 != NULL && *output_hdf5 != '\0')) {
-                if (posix_memalign((void**)&(results[var]), ALIGNMENT, sz) != 0) {
-	            perror("posix_memalign()");
-	            exit(EXIT_FAILURE);
-                }
+		results[var] = g_new0(float, width * height);
             }
         }
     } else {
-        const size_t s = (size_t) width * (size_t) height * sizeof(uint64_t);
-        if (posix_memalign((void**)&(result), ALIGNMENT, s) != 0) {
-	    perror("posix_memalign()");
-	    exit(EXIT_FAILURE);
-        }
+	result = g_new(uint64_t, width * height);
     }
 #else
-    if (posix_memalign((void**)&(results[ROOT_MEAN_SQUARED_ERROR]), ALIGNMENT, sz) != 0) {
-      perror("posix_memalign()");
-      exit(EXIT_FAILURE);
-    }
+    results[ROOT_MEAN_SQUARED_ERROR] = g_new(float, width * height);
 #endif
     gettimeofday(&start_tv, NULL);
 
@@ -469,8 +458,8 @@ main(int argc, char* argv[])
     // clean-ups.
     g_free(anchors);
     for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++)
-        free(results[var]);
-    free(result);
+        g_free(results[var]);
+    g_free(result);
     g_option_context_free(opt_con);
     exit(EXIT_SUCCESS);
 }
