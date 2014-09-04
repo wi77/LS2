@@ -69,41 +69,41 @@ typedef struct IcmPoint {
 static int MAPPING_TABLE[3][3] = {{6, 7, 8},{5, 9, 1},{4, 3, 2}};
 static Point2d MOVING_DIRECTIONS[10] = { {0,0}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 0} };
 
-static inline void icmp_new(double x, double y, int id, IcmPoint *this) {
-            this->id = id;
-            this->intersection = (Point2d){x,y};
-            this->ml_fill = 0;
-            this->currentLocation = (Point2d){x, y};
-            this->merged = 0;
-            this->weight = 1;
-            this->nin_fill = 0;
+static inline void icmp_new(double x, double y, int id, IcmPoint *point) {
+            point->id = id;
+            point->intersection = (Point2d){x,y};
+            point->ml_fill = 0;
+            point->currentLocation = (Point2d){x, y};
+            point->merged = 0;
+            point->weight = 1;
+            point->nin_fill = 0;
         }
 
-static inline int icmp_getAttractingForceDirection(IcmPoint *p, IcmPoint *this) {
-            double d = distance_sf(p->currentLocation.x,p->currentLocation.y,this->currentLocation.x,this->currentLocation.y);
-            long int x = lround((double)(p->currentLocation.x - this->currentLocation.x) / d);
-            long int y = lround((double)(p->currentLocation.y - this->currentLocation.y) / d);
+static inline int icmp_getAttractingForceDirection(IcmPoint *p, IcmPoint *point) {
+            double d = distance_sf(p->currentLocation.x,p->currentLocation.y,point->currentLocation.x,point->currentLocation.y);
+            long int x = lround((double)(p->currentLocation.x - point->currentLocation.x) / d);
+            long int y = lround((double)(p->currentLocation.y - point->currentLocation.y) / d);
             return MAPPING_TABLE[x+1][y+1];
         }
 
-static inline void icmp_move(double step, IcmPoint *this) {
-            Point2d dir = MOVING_DIRECTIONS[this->movingDirection];
+static inline void icmp_move(double step, IcmPoint *point) {
+            Point2d dir = MOVING_DIRECTIONS[point->movingDirection];
             double dirLength = sqrt(dir.x * dir.x + dir.y * dir.y);
             if (dirLength == 0.0) return; // no movement
-            this->currentLocation.x = this->currentLocation.x + (step / dirLength) * dir.x;
-            this->currentLocation.y = this->currentLocation.y + (step / dirLength) * dir.y;
+            point->currentLocation.x = point->currentLocation.x + (step / dirLength) * dir.x;
+            point->currentLocation.y = point->currentLocation.y + (step / dirLength) * dir.y;
         }
 
-static inline void icmp_merge(IcmPoint *p, IcmPoint *this) {
+static inline void icmp_merge(IcmPoint *p, IcmPoint *point) {
             p->merged = 1;
-            this->mergeList[this->ml_fill] = p;
-            this->ml_fill++;
+            point->mergeList[point->ml_fill] = p;
+            point->ml_fill++;
             for (int i = 0; i < p->ml_fill; i++) {
-                this->mergeList[this->ml_fill] = p->mergeList[i];
-                this->ml_fill++;
+                point->mergeList[point->ml_fill] = p->mergeList[i];
+                point->ml_fill++;
             }
-            this->weight += p->weight;
-            this->attractingBoundary = fmax(this->attractingBoundary, p->attractingBoundary);
+            point->weight += p->weight;
+            point->attractingBoundary = fmax(point->attractingBoundary, p->attractingBoundary);
         }
 
 // computes initial radius of each points' attracting boundary as longest

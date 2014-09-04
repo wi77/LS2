@@ -89,18 +89,18 @@ center_of_mass_eqwp(const Point2dC *pts,const int count,
          */
     static inline void 
     __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-    PairwiseDistanceTuple_new(Point2dC *x, Point2dC *y, PairwiseDistanceTuple *this) {
-         this->x = x;
-         this->y = y;
-         this->d = distance_sf(x->x,x->y,y->x,y->y);
+    PairwiseDistanceTuple_new(Point2dC *x, Point2dC *y, PairwiseDistanceTuple *tuple) {
+         tuple->x = x;
+         tuple->y = y;
+         tuple->d = distance_sf(x->x,x->y,y->x,y->y);
     }
 
     static inline int 
     __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-    PairwiseDistanceTuple_compareTo(const void *o_, const void *this_) {
+    PairwiseDistanceTuple_compareTo(const void *o_, const void *tuple_) {
         PairwiseDistanceTuple *o = (PairwiseDistanceTuple*) o_;
-        PairwiseDistanceTuple *this = (PairwiseDistanceTuple*) this_;
-        return o->d < this->d ? -1 : o->d > this->d;            
+        PairwiseDistanceTuple *tuple = (PairwiseDistanceTuple*) tuple_;
+        return o->d < tuple->d ? -1 : o->d > tuple->d;            
     }
 
     static inline int 
