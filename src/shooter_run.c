@@ -47,6 +47,7 @@
 
 #include "ls2/library.h"
 #include "ls2/ls2.h"
+#include "ls2/progress.h"
 #include "vector_shooter.h"
 
 
@@ -77,6 +78,11 @@
 #endif
 
 
+#ifndef DEFAULT_RUNS
+#define DEFAULT_RUNS  0x8000U
+#endif
+
+
 /*******************************************************************
  *******************************************************************
  ***
@@ -89,20 +95,20 @@
 static volatile bool cancelled;
 
 /*! The number of still running threads. */
-static volatile size_t running;
+volatile size_t ls2_running;
 
 /*! An array of thread identifiers. */
 static pthread_t *ls2_thread;
 
 /*! The total number of threads that are running. */
-static volatile size_t ls2_num_threads;
+volatile size_t ls2_num_threads;
 
 
 
 int
 cancel_running(void)
 {
-    if (running <= 0)
+    if (ls2_running <= 0)
         return 0;
     for(size_t t = 0; t < ls2_num_threads; t++)
     	pthread_cancel(ls2_thread[t]);
@@ -110,224 +116,6 @@ cancel_running(void)
     return 1;
 }
 
-
-
-
-
-/*******************************************************************
- *******************************************************************
- ***
- ***   Progress bar.
- ***
- *******************************************************************
- *******************************************************************/
-
-static volatile size_t progress_total;
-static volatile size_t progress_current;
-static volatile size_t progress_last;
-static volatile unsigned int spinner;
-static char const* display_name;
-
-
-static timer_t timer_id;
-
-#define DEFAULT_WIDTH 80
-
-#define DEFAULT_NAME  24
-
-#define DEFAULT_STEPS 32U
-
-#define DEFAULT_RUNS  0x8000U
-
-static pthread_mutex_t progress_bar_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-static inline void
-__attribute__((__always_inline__,__gnu_inline__))
-ls2_update_progress_bar(size_t value)
-{
-    pthread_mutex_lock(&progress_bar_mutex);
-    progress_current = MIN(progress_current + value, progress_total);
-    pthread_mutex_unlock(&progress_bar_mutex);
-}
-
-
-/*
- *
- */
-double
-get_progress(int *threads)
-{
-    double result;
-    if (threads != NULL)
-        *threads = (int) running;
-    if (progress_total > 0)
-        result = (double) progress_current / (double) progress_total;
-    else
-        result = 0.0;
-    return result;
-}
-
-
-
-/*
- * Handle a progress event and draw the bar to the console.
- */
-static void
-ls2_handle_progress_bar(int signal __attribute__((__unused__)),
-                        siginfo_t *si __attribute__((__unused__)),
-                        void *uc __attribute__((__unused__)))
-{
-    static const char spinner_char[4] = { '|', '/', '-', '\\' };
-    char buffer [DEFAULT_WIDTH + 1];
-    int pos = 0;
-
-    if (isatty(STDERR_FILENO)) {
-        if (display_name != NULL) {
-            strncpy(buffer, display_name, (size_t)(DEFAULT_NAME - 1));
-            pos = (int) strlen(buffer);
-        } else {
-            pos = 0;
-        }
-        while (pos < DEFAULT_NAME + 2)
-            buffer[pos++] = ' ';
-        buffer[pos++] = '|';
-
-        const int ratio =
-          (int) ((DEFAULT_STEPS * progress_current) / progress_total);
-        while (pos < ratio + DEFAULT_NAME + 2) {
-            buffer[pos++] = '=';
-        }
-        if (ratio < (int) DEFAULT_STEPS)
-            buffer[pos++] = '>';
-        while (pos < DEFAULT_NAME + (int) DEFAULT_STEPS + 2) {
-            buffer[pos++] = ' ';
-        }
-
-        // Turn the spinner if not finished
-        if (progress_current < progress_total) {
-            buffer[pos++] = spinner_char[spinner];
-            if (progress_current != progress_last)
-                spinner = (spinner + 1U) & 0x3U;
-        } else {
-            buffer[pos++] = '|';
-        }
-
-        float progress =
-            ((float) progress_current) * 100.0f / ((float) progress_total);
-        if (ls2_num_threads < 100) {
-            pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
-                            " %5.1f%% %2zu/%2zu thr.", progress,
-                            running, ls2_num_threads);
-        } else {
-            pos += snprintf(buffer + pos, (size_t) (DEFAULT_WIDTH - pos),
-                            " %5.1f%% %4zu thr.", progress, running);
-        }
-        pos = MIN(DEFAULT_WIDTH - 3, pos);
-        buffer[pos++] = '\r';
-        buffer[pos] = '\0';
-        if (write(STDERR_FILENO, buffer, (size_t) pos)) {}
-    } else { // Not a tty, just write the percent percentage.
-        float progress =
-            ((float) progress_current) * 100.0f / ((float) progress_total);
-        int s = snprintf(buffer, sizeof(buffer), " %5.1f%% %4zu\n",
-                         progress, running);
-        if (s > 0) {
-            if (write(STDERR_FILENO, buffer, (size_t)s)) {
-                // Do nothing.
-            }
-        }
-    }
-    fdatasync(STDERR_FILENO);
-    progress_last = progress_current;
-}
-
-
-
-
-/*
- * Register a handler for updating progress.
- */
-static void
-ls2_setup_progress_handler(void (*handler)(int, siginfo_t *, void*))
-{
-    struct sigevent sev;
-    struct itimerspec its;
-    sigset_t mask;
-    struct sigaction sa;
-
-    sa.sa_flags = SA_SIGINFO;
-    sa.sa_sigaction = handler;
-    sigemptyset(&sa.sa_mask);
-    if (sigaction(SIGRTMIN, &sa, NULL) == -1) {
-        perror("sigaction");
-        exit(EXIT_FAILURE);
-    }
-
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGRTMIN);
-    if (sigprocmask(SIG_SETMASK, &mask, NULL) == -1) {
-        perror("sigprocmask");
-        exit(EXIT_FAILURE);
-    }
-
-    sev.sigev_notify = SIGEV_SIGNAL;
-    sev.sigev_signo = SIGRTMIN;
-    sev.sigev_value.sival_ptr = &timer_id;
-    if (timer_create(CLOCK_REALTIME, &sev, &timer_id) == -1) {
-        perror("timer_create");
-        exit(EXIT_FAILURE);
-    }
-
-    /* Start the timer */
-
-    its.it_value.tv_sec = 0;
-    its.it_value.tv_nsec = 500000000;
-    its.it_interval.tv_sec = its.it_value.tv_sec;
-    its.it_interval.tv_nsec = its.it_value.tv_nsec;
-
-    if (timer_settime(timer_id, 0, &its, NULL) == -1) {
-        perror("timer_settime");
-        exit(EXIT_FAILURE);
-    }
-
-    if (sigprocmask(SIG_UNBLOCK, &mask, NULL) == -1) {
-        perror("sigprocmask");
-        exit(EXIT_FAILURE);
-    }
-}
-
-
-
-
-void
-ls2_initialize_progress_bar(size_t total, const char *name)
-{
-    spinner          = 0U;
-    progress_current = 0U;
-    progress_last    = 0U;
-    progress_total   = total;
-    display_name     = name;
-
-    ls2_setup_progress_handler(ls2_handle_progress_bar);
-    ls2_handle_progress_bar(SIGRTMIN, NULL, NULL);
-}
-
-
-static void
-ls2_teardown_progress_handler(void)
-{
-    timer_delete(timer_id);
-    signal(SIGRTMIN, SIG_IGN);
-}
-
-void
-ls2_stop_progress_bar(void)
-{
-    ls2_teardown_progress_handler();
-    ls2_handle_progress_bar(SIGRTMIN, NULL, NULL);
-    if (write(STDERR_FILENO, "\n", 1u)) {}
-    fdatasync(STDERR_FILENO);
-}
 
 
 
@@ -381,6 +169,10 @@ ls2_get_view_by_name(const char *name)
 
 /*! Whether to collect statistics about this thread */
 int ls2_verbose = 0;
+
+
+/* From progress.c */
+extern volatile size_t ls2_progress_total;
 
 
 
@@ -482,7 +274,7 @@ ls2_shooter_run(void *rr)
 #else
 	    pthread_testcancel();   // Check whether this thread is cancelled.
 
-            if (__builtin_expect(progress_total > 0, 0)) {
+            if (__builtin_expect(ls2_progress_total > 0, 0)) {
                 const uint_fast64_t step =
                     (j - params->from) * params->runs + i;
                 if (__builtin_expect((step & (DEFAULT_RUNS - 1U)) == 0, 0)) {
@@ -605,7 +397,7 @@ ls2_shooter_run(void *rr)
                 sqrtf(S_Y / (C_Y - 1.0F)); 
         }
     }
-    running--;
+    ls2_running--;
 
     if (__builtin_expect(ls2_verbose >= 2, 0)) {
         struct rusage resources;
@@ -647,7 +439,7 @@ ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
     const size_t slice = (size_t) (width * height) / ls2_num_threads;
     locbased_runparams_t *params;
 
-    running = 0;
+    ls2_running = 0;
 
 #if defined(STAND_ALONE)
     EMFUNCTION(setup)(anchors, no_anchors);
@@ -684,7 +476,7 @@ ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
                 perror("pthread_create()");
                 exit(EXIT_FAILURE);
             }
-            running++;
+            ls2_running++;
         }
 
 
@@ -696,7 +488,7 @@ ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
         /* Since there is only one thread, we call the run code directly.
          * This should make debugging simpler.
          */
-        running = 1;
+        ls2_running = 1;
         ls2_shooter_run(&(params[0]));
     }
     g_free(ls2_thread);
@@ -721,11 +513,7 @@ compute_locbased(const algorithm_t alg, const error_model_t em,
 
     cancelled = false;
 
-    spinner          = 0U;
-    progress_current = 0U;
-    progress_last    = 0U;
-    progress_total   = (size_t)(runs * width * height);
-    display_name     = NULL;
+    ls2_reset_progress_bar((size_t)(runs * width * height), NULL);
 
     // parse and normalize arguments
     anchors = g_new(vector2, (size_t) no_anchors);
@@ -818,7 +606,7 @@ static void* ls2_inverse_run(void *rr)
 	ALGORITHM_RUN(params->no_anchors, vx, vy, r, &resx, &resy);
 #else
         pthread_testcancel();
-        if (__builtin_expect(progress_total > 0, 0)) {
+        if (__builtin_expect(ls2_progress_total > 0, 0)) {
 	    if (__builtin_expect(((j + 1u) & (DEFAULT_RUNS/VECTOR_OPS-1U)) == 0, 0)) {
                 ls2_update_progress_bar(DEFAULT_RUNS);
             }
@@ -854,7 +642,7 @@ static void* ls2_inverse_run(void *rr)
         params->cy = M_Y;
         params->sy = S_Y / N;
     }
-    running--;
+    ls2_running--;
 
     if (ls2_verbose >= 2) {
         struct rusage resources;
@@ -884,7 +672,7 @@ ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
 			     float *restrict center_x, float *restrict sdev_x,
                              float *center_y, float *restrict sdev_y)
 {
-    running = 0;
+    ls2_running = 0;
 
 #if defined(STAND_ALONE)
     EMFUNCTION(setup)(anchors, no_anchors);
@@ -930,7 +718,7 @@ ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
             g_free(ls2_thread);
             exit(EXIT_FAILURE);
         }
-        running++;
+        ls2_running++;
     }
 
     // Sync Threads if work has been done
@@ -1069,7 +857,7 @@ ls2_estimator_run(void *rr)
 	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(result);
         }
     }
-    running--;
+    ls2_running--;
 
     if (ls2_verbose >= 2) {
         struct rusage resources;
@@ -1112,7 +900,7 @@ ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
     const size_t slice = (size_t) (width * height) / ls2_num_threads;
     estimator_runparams_t *params;
 
-    running = 0;
+    ls2_running = 0;
 
     params = g_new(estimator_runparams_t, ls2_num_threads);
     ls2_thread = g_new(pthread_t, ls2_num_threads);
@@ -1134,7 +922,7 @@ ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
             g_free(ls2_thread);
             exit(EXIT_FAILURE);
         }
-        running++;
+        ls2_running++;
     }
 
 

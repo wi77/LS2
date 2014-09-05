@@ -16,11 +16,10 @@
 
   You should have received a copy of the GNU General Public License
   along with LS².  If not, see <http://www.gnu.org/licenses/>.
-
  */
 
-#ifndef INCLUDED_LS2_UTIL_H
-#define INCLUDED_LS2_UTIL_H
+#ifndef INCLUDED_LS2_OPTIONS_H
+#define INCLUDED_LS2_OPTIONS_H
 
 #ifdef __cplusplus
 extern "C"
@@ -28,11 +27,13 @@ extern "C"
 #endif
 
 extern void __attribute__((__nonnull__))
-ls2_statistics(const float *values, const size_t size,
-	       float *mu, float *sigma, float *min, float *max);
+ls2_add_algorithm_option_groups(GOptionContext *context);
 
-extern void
-register_sigsegv_handler(void);
+extern void __attribute__((__nonnull__))
+ls2_add_error_model_option_groups(GOptionContext *context);
+
+extern void __attribute__((__nonnull__))
+ls2_add_estimator_option_groups(GOptionContext *context);
 
 #ifdef __cplusplus
 }

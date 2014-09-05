@@ -28,6 +28,11 @@
 #ifndef INCLUDED_LS2_BACKEND_H
 #define INCLUDED_LS2_BACKEND_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 typedef enum ls2_output_format_t {
     OUTPUT_PNG,
     OUTPUT_PDF,
@@ -180,5 +185,9 @@ ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
                        vector2 **anchors, size_t *no_anchors,
                        uint64_t **results, uint16_t *width, uint16_t *height,
                        double *center_x, double *center_y);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

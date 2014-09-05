@@ -16,23 +16,46 @@
 
   You should have received a copy of the GNU General Public License
   along with LS².  If not, see <http://www.gnu.org/licenses/>.
-
  */
 
-#ifndef INCLUDED_LS2_UTIL_H
-#define INCLUDED_LS2_UTIL_H
+#ifndef INCLUDED_LS2_PROGRESS_H
+#define INCLUDED_LS2_PROGRESS_H
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-extern void __attribute__((__nonnull__))
-ls2_statistics(const float *values, const size_t size,
-	       float *mu, float *sigma, float *min, float *max);
+
+
 
 extern void
-register_sigsegv_handler(void);
+ls2_initialize_progress_bar(size_t __total, const char *__algorithm);
+
+
+extern void
+ls2_stop_progress_bar(void);
+
+
+
+extern void
+ls2_reset_progress_bar(size_t total, const char *name);
+
+
+
+/*!
+ * Returns the progress information.
+ *
+ * \param[out] threads  The number of currently active threads.
+ * \return     Fraction of progress between 0 and 1.
+ */
+extern double
+ls2_get_progress(int *threads);
+
+
+extern void
+ls2_update_progress_bar(size_t value);
+
 
 #ifdef __cplusplus
 }

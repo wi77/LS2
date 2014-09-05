@@ -120,7 +120,7 @@ BUILT_SOURCES = ls2/ls2-config.h library.c ls2/library.h
 bin_PROGRAMS = ls2-run ls2-bounds ls2-diff ls2-h5-image
 lib_LTLIBRARIES = libls2.la libls2be.la
 nobase_include_HEADERS = ls2/ls2-config.h ls2/backend.h ls2/ls2.h \
-	ls2/library.h ls2/output-variants.h
+	ls2/library.h ls2/options.h ls2/output-variants.h ls2/progress.h
 
 AM_CFLAGS = -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
 	-Wconversion -Wpacked \
@@ -156,7 +156,7 @@ libls2be_la_CPPFLAGS = $(CAIRO_CFLAGS) $(GLIB2_CFLAGS) $(OPENEXR_CFLAGS) -DG_LOG
 libls2be_la_LDFLAGS  = -version $(LS2_LIBRARY_VERSION)
 libls2be_la_LIBADD   = $(CAIRO_LIBS) $(GLIB2_LIBS) $(OPENEXR_LIBS) $(LIBOBJS)
 
-libls2_la_SOURCES  = shooter_run.c vector_shooter.h
+libls2_la_SOURCES  = progress.c shooter_run.c vector_shooter.h
 libls2_la_CPPFLAGS = $(GLIB2_CFLAGS) $(GSL_CFLAGS) -DG_LOG_DOMAIN='"libls2"'
 libls2_la_LDFLAGS  = -version $(LS2_LIBRARY_VERSION)
 libls2_la_LIBADD   = $(GLIB2_LIBS) $(GSL_LIBS) $(LIBOBJS) -lrt
