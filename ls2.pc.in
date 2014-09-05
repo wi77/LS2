@@ -5,8 +5,8 @@ includedir=@includedir@
 
 Name: ls2
 Description: The LS2 library
-Version: @VERSION@
+Version: @PACKAGE_VERSION@
 URL: https://github.com/wi77/LS2
-Requires: cairo >= 1.8, gsl >= 1.13, OpenEXR >= 1.6
+Requires: cairo >= 1.8, gsl >= 1.13, OpenEXR >= 1.6, glib-2.0 >= 2.32
 Libs: -L${libdir} -lls2
 Cflags: -I${includedir}/ls2

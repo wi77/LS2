@@ -94,7 +94,6 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	error_model/ray_noise_em.c error_model/ray_noise_em.h \
 	error_model/rayleigh_em.c error_model/rayleigh_em.h \
 	error_model/weibull_em.c error_model/weibull_em.h \
-	gui/gls2.glade \
 	util/util_circle.c \
 	util/util_colors.c \
 	util/util_math.c \
@@ -118,7 +117,7 @@ DISTCLEANFILES = library.c ls2/library.h
 
 BUILT_SOURCES = ls2/ls2-config.h library.c ls2/library.h
 
-bin_PROGRAMS = ls2-run ls2-bounds ls2-diff ls2-h5-image gls2
+bin_PROGRAMS = ls2-run ls2-bounds ls2-diff ls2-h5-image
 lib_LTLIBRARIES = libls2.la libls2be.la
 nobase_include_HEADERS = ls2/ls2-config.h ls2/backend.h ls2/ls2.h \
 	ls2/library.h ls2/output-variants.h
@@ -148,12 +147,6 @@ ls2_h5_image_SOURCES  = ls2-h5-image.c
 ls2_h5_image_CPPFLAGS =
 ls2_h5_image_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS)
 ls2_h5_image_LDADD    = libls2be.la $(GLIB2_LIBS)
-
-gls2_SOURCES  = gls2.c util/util_crash.c
-gls2_CPPFLAGS =
-gls2_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS) $(GTK3_CFLAGS)
-gls2_LDADD    = $(LIBOBJS) $(GTK3_LIBS) $(GLIB2_LIBS)
-gls2_LDFLAGS  = -Wl,--export-dynamic
 
 libls2be_la_SOURCES = backend/backends.c backend/be_cairo.c \
 		      backend/be_openexr.c backend/be_hdf5.c \

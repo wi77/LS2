@@ -97,6 +97,7 @@ rm %{buildroot}%{_libdir}/libls2*.la
 %files devel
 %{_includedir}/*
 %{_libdir}/*.so
+%{_datadir}/pkgconfig/*.pc
 
 
 %files libs

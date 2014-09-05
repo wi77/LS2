@@ -21,6 +21,9 @@ EXTRA_DIST	= ls2.spec ls2.spec.in examples
 SUBDIRS		= src tests
 ACLOCAL_AMFLAGS	= -I m4
 
+# These may be in the builddir too
+BUILT_EXTRA_DIST = ChangeLog ls2.spec
+
 ${srcdir}/ls2.spec: ${srcdir}/ls2.spec.in ${srcdir}/configure.ac
 	sed -e 's,@VERSION\@,${VERSION},g' ${srcdir}/ls2.spec.in > /tmp/ls2.spec ; \
 	if test -f ${srcdir}/ls2.spec ; \
@@ -32,6 +35,25 @@ ${srcdir}/ls2.spec: ${srcdir}/ls2.spec.in ${srcdir}/configure.ac
 	else \
 	    mv /tmp/ls2.spec ${srcdir}/ls2.spec ; \
 	fi
+
+ChangeLog:
+	$(AM_V_GEN) if test -d "$(srcdir)/.git"; then \
+	  (GIT_DIR=$(top_srcdir)/.git ./missing --run git log GLIB_2_20_0^^.. --stat) | fmt --split-only > $@.tmp \
+	  && mv -f $@.tmp $@ \
+	  || ($(RM) $@.tmp; \
+	      echo Failed to generate ChangeLog, your ChangeLog may be outdated >&2; \
+	      (test -f $@ || echo git-log is required to generate this file >> $@)); \
+	else \
+	  test -f $@ || \
+	  (echo A git checkout and git-log is required to generate ChangeLog >&2 && \
+	  echo A git checkout and git-log is required to generate this file >> $@); \
+	fi
+
+
+pkgconfigdir = $(datadir)/pkgconfig
+pkgconfig_DATA = ls2.pc ls2be.pc
+
+$(pkgconfig_DATA): config.status
 
 html-local: Doxyfile
 	test -d docs/api || mkdir -p docs/api
