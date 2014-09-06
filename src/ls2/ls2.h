@@ -44,15 +44,6 @@ extern "C"
 #  define CLAMP(l,x,u) (((l) < (x)) ? (((x) < (u)) ? (x) : (u)) : (l))
 #endif
 
-/*! Enumerates the different variants of information gathered by
- * shooter_run().
- */
-typedef enum ls2_output_variant {
-#undef  LS2OUT_VARIANT
-#define LS2OUT_VARIANT(tag, name, h5code) tag,
-#include "ls2/output-variants.h"
-    NUM_VARIANTS
-} ls2_output_variant;
 
 typedef struct vector2 {
     float x;
@@ -89,9 +80,6 @@ get_number_of_result_views(void) __attribute__((__const__));
 
 extern ls2_output_variant
 ls2_get_view_by_name(const char *name);
-
-void ls2_initialize_progress_bar(size_t __total, const char *__algorithm);
-void ls2_stop_progress_bar(void);
 
 /*!
  * Returns the progress information.

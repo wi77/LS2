@@ -120,7 +120,8 @@ BUILT_SOURCES = ls2/ls2-config.h library.c ls2/library.h
 bin_PROGRAMS = ls2-run ls2-bounds ls2-diff ls2-h5-image
 lib_LTLIBRARIES = libls2.la libls2be.la
 nobase_include_HEADERS = ls2/ls2-config.h ls2/backend.h ls2/ls2.h \
-	ls2/library.h ls2/options.h ls2/output-variants.h ls2/progress.h
+	ls2/library.h ls2/options.h ls2/output.h ls2/output-variants.h \
+	ls2/progress.h 
 
 AM_CFLAGS = -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
 	-Wconversion -Wpacked \

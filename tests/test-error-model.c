@@ -39,6 +39,7 @@
 #include <inttypes.h>
 
 #include "ls2/library.h"
+#include "ls2/output.h"
 #include "vector_shooter.h"
 #include "ls2/ls2.h"
 

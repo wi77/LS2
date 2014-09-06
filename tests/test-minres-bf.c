@@ -36,6 +36,7 @@
 #include <glib.h>
 
 #include "ls2/library.h"
+#include "ls2/output.h"
 #include "vector_shooter.h"
 #include "util/util_misc.c"
 #include "util/util_vector.c"
