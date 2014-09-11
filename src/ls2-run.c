@@ -372,22 +372,23 @@ main(int argc, char* argv[])
 	    ls2_initialize_progress_bar((size_t) (runs * height * width),
                                         algorithm);
 	}
-	ls2_distribute_work_shooter(alg, em, num_threads, runs, seed, anchors,
-				    no_anchors, results, width, height);
+	ls2_distribute_work_shooter(NULL, alg, NULL, em, num_threads, runs,
+                                    seed, anchors, no_anchors, results,
+                                    width, height);
     } else {
 	if (ls2_progress != 0) {
 	    char buffer[32];
 	    snprintf(buffer, 31, "inverted %s", algorithm);
 	    ls2_initialize_progress_bar((size_t) runs, buffer);
 	}
-	ls2_distribute_work_inverted(alg, em, num_threads, runs, seed,
-                                     (float) tag_x, (float) tag_y,
+	ls2_distribute_work_inverted(NULL, alg, NULL, em, num_threads,
+                                     runs, seed, (float) tag_x, (float) tag_y,
 				     anchors, no_anchors, result, width,
 				     height, &centre_x, &sdev_x,
                                      &centre_y, &sdev_y);
     }
 #else
-    ls2_distribute_work_estimator(est, num_threads, anchors, no_anchors,
+    ls2_distribute_work_estimator(NULL, est, num_threads, anchors, no_anchors,
 				  results, width, height);
 #endif
 

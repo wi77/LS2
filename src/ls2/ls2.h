@@ -93,8 +93,10 @@ double get_progress(int *threads);
 /*!
  * \brief Estimates the position for each place on the playing field.
  *
+ * \param[in] alg_params Parameters to the algorithm.
  * \param[in] alg        A number that indicates the position estimation
  *                       algorithm.
+ * \param[in] em_params  Parameters to the error model.
  * \param[in] em         A number that indicates the error model.
  * \param[in] num_threads  Number of threads to use.
  * \param[in] runs      Number of runs per location on the discrete grid.
@@ -108,8 +110,9 @@ double get_progress(int *threads);
  * \param[in] width      Width of the playing field.
  * \param[in] height     Height of the playing field.
  */
-extern void __attribute__((__nonnull__))
-ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
+extern void __attribute__((__nonnull__(8,10)))
+ls2_distribute_work_shooter(void *alg_params, const algorithm_t alg,
+                            void *em_params, const error_model_t em,
                             const int num_threads, const int64_t runs,
                             const long seed,
                             const vector2* anchors, const size_t no_anchors,
@@ -134,21 +137,25 @@ ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
  * \param[in] width  Width of the playing field.
  * \param[in] height Height of the playing field.
  */
-extern int __attribute__((__nonnull__))
-compute_locbased(const algorithm_t alg, const error_model_t em,
-		 const int num_threads,
-                 const int64_t runs, const float *anchor_x,
-                 const float *anchor_y, const int no_anchors,
-                 float* results[NUM_VARIANTS], const int width,
-                 const int height);
+extern int __attribute__((__nonnull__(7,8,10)))
+ls2_compute_locbased(void *alg_params, const algorithm_t alg,
+                     void *em_params, const error_model_t em,
+		     const int num_threads,
+                     const int64_t runs, const float *anchor_x,
+                     const float *anchor_y, const int no_anchors,
+                     float* results[NUM_VARIANTS], const int width,
+                     const int height);
 
-extern void __attribute__((__nonnull__))
-ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
+extern void __attribute__((__nonnull__(10,12,15,16,17,18)))
+ls2_distribute_work_inverted(void *alg_params, const algorithm_t alg,
+                             void *em_params, const error_model_t em,
 			     const int num_threads, const int64_t runs,
                              const long seed, const float tag_x,
                              const float tag_y,
-			     const vector2 *restrict anchors, const size_t no_anchors,
-			     uint64_t *restrict result, const int width, const int height,
+			     const vector2 *restrict anchors,
+                             const size_t no_anchors,
+			     uint64_t *restrict result,
+                             const int width, const int height,
 			     float *restrict center_x, float *restrict sdev_x,
                              float *restrict center_y, float *restrict sdev_y);
 
@@ -171,15 +178,17 @@ ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
  * \arg[out] center_x  X coordinate of the center of mass of all hits.
  * \arg[out] center_y  Y coordinate of the center of mass of all hits.
  */
-extern int __attribute__((__nonnull__))
-compute_inverse(const algorithm_t alg, const error_model_t em,
-		const int num_threads,
-		const int64_t runs, const float *restrict anchor_x,
-		const float *restrict anchor_y, const int no_anchors,
-		const float tag_x, const float tag_y,
-                uint64_t *restrict result, const int width, const int height,
-		float *restrict center_x, float *restrict sdev_x,
-                float *restrict center_y, float *restrict sdev_y);
+extern int __attribute__((__nonnull__(7,8,12,15,17,18)))
+ls2_compute_inverse(void *alg_params, const algorithm_t alg,
+                    void *em_params, const error_model_t em,
+		    const int num_threads, const int64_t runs,
+                    const float *restrict anchor_x,
+		    const float *restrict anchor_y, const int no_anchors,
+		    const float tag_x, const float tag_y,
+                    uint64_t *restrict result,
+                    const int width, const int height,
+		    float *restrict center_x, float *restrict sdev_x,
+                    float *restrict center_y, float *restrict sdev_y);
 
 /*!
  * \brief Estimates the position for each place on the playing field.
@@ -193,18 +202,20 @@ compute_inverse(const algorithm_t alg, const error_model_t em,
  * \param[in] width      Width of the playing field.
  * \param[in] height     Height of the playing field.
  */
-extern void __attribute__((__nonnull__))
-ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
+extern void __attribute__((__nonnull__(4,6)))
+ls2_distribute_work_estimator(void *est_params, const estimator_t est,
+                              const int num_threads,
 			      const vector2* anchors, const size_t no_anchors,
 			      float *results[NUM_VARIANTS],
 			      const int width, const int height);
 
-extern int __attribute__((__nonnull__))
-compute_estimates(const estimator_t est, const int num_threads,
-		  const float *anchor_x, const float *anchor_y,
-		  const size_t no_anchors,
-		  float* results[NUM_VARIANTS], const int width,
-		  const int height);
+extern int __attribute__((__nonnull__(4,5,7)))
+ls2_compute_estimates(void *est_params, const estimator_t est,
+                      const int num_threads,
+		      const float *anchor_x, const float *anchor_y,
+		      const size_t no_anchors,
+		      float* results[NUM_VARIANTS], const int width,
+		      const int height);
 
 /*! Cancel a computation. */
 extern int

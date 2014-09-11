@@ -428,8 +428,9 @@ ls2_shooter_run(void *rr)
  * \param[in] width      Width of the playing field.
  * \param[in] height     Height of the playing field.
  */
-void __attribute__((__nonnull__))
-ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
+void __attribute__((__nonnull__(8,10)))
+ls2_distribute_work_shooter(void *alg_params __attribute__((__unused__)), const algorithm_t alg,
+                            void *em_params __attribute__((__unused__)), const error_model_t em,
                             const int num_threads, const int64_t runs,
                             const long seed,
                             const vector2* anchors, const size_t no_anchors,
@@ -503,12 +504,13 @@ ls2_distribute_work_shooter(const algorithm_t alg, const error_model_t em,
 /*
  * This function should only be called by tha Java api.
  */
-extern int
-compute_locbased(const algorithm_t alg, const error_model_t em,
-                 const int num_threads, const int64_t runs,
-                 const float *anchor_x, const float *anchor_y,
-                 const int no_anchors, float* results[NUM_VARIANTS],
-                 const int width, const int height)
+extern int __attribute__((__nonnull__(7,8,10)))
+ls2_compute_locbased(void *alg_params, const algorithm_t alg,
+                     void *em_params, const error_model_t em,
+                     const int num_threads, const int64_t runs,
+                     const float *anchor_x, const float *anchor_y,
+                     const int no_anchors, float* results[NUM_VARIANTS],
+                     const int width, const int height)
 {
     vector2 *anchors;
 
@@ -524,8 +526,8 @@ compute_locbased(const algorithm_t alg, const error_model_t em,
 	    anchors[i].y = anchor_y[i];
     }
 
-    ls2_distribute_work_shooter(alg, em, num_threads, runs, time(NULL),
-                                anchors, (size_t) no_anchors,
+    ls2_distribute_work_shooter(alg_params, alg, em_params, em, num_threads,
+                                runs, time(NULL), anchors, (size_t) no_anchors,
                                 results, width, height);
 
     g_free(anchors);
@@ -664,7 +666,8 @@ static void* ls2_inverse_run(void *rr)
  ************************************************************************/
 
 void
-ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
+ls2_distribute_work_inverted(void *alg_params, const algorithm_t alg,
+                             void *em_params, const error_model_t em,
 			     const int num_threads, const int64_t runs,
                              const long seed,
                              const float tag_x, const float tag_y,
@@ -770,14 +773,16 @@ ls2_distribute_work_inverted(const algorithm_t alg, const error_model_t em,
 
 
 extern int
-compute_inverse(const algorithm_t alg, const error_model_t em,
-		const int num_threads,
-                const int64_t runs, const float *restrict anchor_x,
-                const float *restrict anchor_y, const int no_anchors,
-                const float tag_x, const float tag_y,
-		uint64_t *restrict result, const int width, const int height,
-		float *restrict center_x, float *restrict sdev_x,
-                float *restrict center_y, float *restrict sdev_y)
+ls2_compute_inverse(void *alg_params, const algorithm_t alg,
+                    void *em_params, const error_model_t em,
+		    const int num_threads,
+                    const int64_t runs, const float *restrict anchor_x,
+                    const float *restrict anchor_y, const int no_anchors,
+                    const float tag_x, const float tag_y,
+		    uint64_t *restrict result,
+                    const int width, const int height,
+		    float *restrict center_x, float *restrict sdev_x,
+                    float *restrict center_y, float *restrict sdev_y)
 {
     vector2 *anchors;
 
@@ -791,9 +796,9 @@ compute_inverse(const algorithm_t alg, const error_model_t em,
 	    anchors[i].y = anchor_y[i];
     }
 
-    ls2_distribute_work_inverted(alg, em, num_threads, runs, time(NULL),
-				 tag_x, tag_y, anchors, (size_t) no_anchors,
-                                 result, width, height,
+    ls2_distribute_work_inverted(alg_params, alg, em_params, em, num_threads,
+                                 runs, time(NULL), tag_x, tag_y, anchors,
+                                 (size_t) no_anchors, result, width, height,
                                  center_x, sdev_x, center_y, sdev_y);
 
     g_free(anchors);
@@ -892,7 +897,8 @@ ls2_estimator_run(void *rr)
  * \param[in] height     Height of the playing field.
  */
 void
-ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
+ls2_distribute_work_estimator(void *est_params, const estimator_t est,
+                              const int num_threads,
 			      const vector2* anchors, const size_t no_anchors,
 			      float *results[NUM_VARIANTS],
 			      const int width, const int height)
@@ -903,6 +909,7 @@ ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
 
     ls2_running = 0;
 
+    if (est_params) { /* silence warning */ }
     params = g_new(estimator_runparams_t, ls2_num_threads);
     ls2_thread = g_new(pthread_t, ls2_num_threads);
 
@@ -940,11 +947,12 @@ ls2_distribute_work_estimator(const estimator_t est, const int num_threads,
 
 
 int
-compute_estimates(const estimator_t est, const int num_threads,
-		  const float *anchor_x, const float *anchor_y,
-		  const size_t no_anchors,
-		  float* results[NUM_VARIANTS], const int width,
-		  const int height)
+ls2_compute_estimates(void *est_params, const estimator_t est,
+                      const int num_threads,
+		      const float *anchor_x, const float *anchor_y,
+		      const size_t no_anchors,
+		      float* results[NUM_VARIANTS], const int width,
+		      const int height)
 {
     vector2 *anchors;
 
@@ -958,7 +966,7 @@ compute_estimates(const estimator_t est, const int num_threads,
 	    anchors[i].y = anchor_y[i];
     }
 
-    ls2_distribute_work_estimator(est, num_threads,
+    ls2_distribute_work_estimator(est_params, est, num_threads,
 				  anchors, no_anchors,
 				  results, width, height);
 
