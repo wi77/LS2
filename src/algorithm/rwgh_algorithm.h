@@ -22,9 +22,4 @@
 #ifndef RWGH_ALGORITHM_H_INCLUDED
 #define RWGH_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "RWGH"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

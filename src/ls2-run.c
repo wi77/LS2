@@ -57,11 +57,6 @@
 #include "util/util_math.c"
 #include "util/util_vector.c"
 
-#if defined(STAND_ALONE)
-#  include INCLUDE_EM_H(ERRORMODEL)
-#  include INCLUDE_ALG_H(ALGORITHM)
-#endif
-
 #ifndef OUTPUT_DEFAULT
 #  define OUTPUT_DEFAULT "result.png"
 #endif
@@ -141,8 +136,7 @@ main(int argc, char* argv[])
 
     /* Command line arguments. */
     static GOptionEntry entries[] = {
-#if !defined(STAND_ALONE)
-#  if !defined(ESTIMATOR)
+#if !defined(ESTIMATOR)
        { "algorithm", 'a', 0, G_OPTION_ARG_STRING, &algorithm,
           "selects the algorithm (one of: " ALGORITHMS ")", NULL },
         { "error-model", 'e', 0, G_OPTION_ARG_STRING, &error_model,
@@ -153,10 +147,9 @@ main(int argc, char* argv[])
           "Use a relative density representation", NULL },
         { "progress", 'P', 0, G_OPTION_ARG_NONE, &ls2_progress,
           "Periodically report progress", NULL },
-#  else
+#else
         { "estimator", 'e', 0, G_OPTION_ARG_STRING, &estimator,
           "selects the error model (one of: " ESTIMATORS ")", NULL },
-#  endif
 #endif
         { "height", 'h', 0, G_OPTION_ARG_INT, &arg_height,
           "height of the playing field.", NULL },

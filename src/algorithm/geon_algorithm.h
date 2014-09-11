@@ -22,9 +22,4 @@
 #ifndef GEON_ALGORITHM_H_INCLUDED
 #define GEON_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Geo-N"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

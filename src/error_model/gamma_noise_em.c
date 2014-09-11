@@ -30,9 +30,7 @@
 #include "gamma_noise_em.h"
 
 // Errormodels have to include all utils themselves
-#if defined(STAND_ALONE)
-#  include "../util/util_random.c"
-#endif
+#include "../util/util_random.c"
 
 /* Mean = shape / rate
  * Variance = shape / (rate * rate)

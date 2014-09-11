@@ -22,9 +22,4 @@
 #ifndef CONST_ALGORITHM_H_INCLUDED
 #define CONST_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Constant"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

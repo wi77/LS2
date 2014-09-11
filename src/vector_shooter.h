@@ -58,14 +58,6 @@
 #  define SIZE 1000
 #endif
 
-#if defined(STAND_ALONE)
-#  if !defined(ALGORITHM)
-#    error "You must define a valid algorithm."
-#  endif
-#  if !defined(ERRORMODEL)
-#    error "You must define a valid error model."
-#  endif
-#endif
 
 
 // This value indicates which error is considerable for your simulation

@@ -75,9 +75,7 @@ nlosp_setup(const vector2 *anchors __attribute__((__unused__)),
 
 
 // Errormodels have to include all utils themselves
-#if defined(STAND_ALONE)
-#  include "../util/util_random.c"
-#endif
+#include "../util/util_random.c"
 
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,3,8)))

@@ -22,9 +22,4 @@
 #ifndef GDOP_ALGORITHM_H_INCLUDED
 #define GDOP_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "GDOP Estimation"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

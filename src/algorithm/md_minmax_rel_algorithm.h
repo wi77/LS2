@@ -27,10 +27,6 @@ extern double md_minmax_rel_middle_left;
 extern double md_minmax_rel_middle_right;
 extern double md_minmax_rel_right;
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "MD Min-Max (relative)"
-#endif
-
 extern void __attribute__((__nonnull__))
 ls2_add_md_minmax_rel_option_group(GOptionContext *context);
 

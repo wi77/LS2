@@ -27,8 +27,4 @@ ls2_add_ray_noise_option_group(GOptionContext *context);
 
 extern void ray_noise_setup(const vector2 *, size_t);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "Raylaunching Erromodel with Map Support"
-#endif
-
 #endif

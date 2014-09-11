@@ -22,9 +22,4 @@
 #ifndef GEO3_ALGORITHM_H_INCLUDED
 #define GEO3_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Geo-3"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

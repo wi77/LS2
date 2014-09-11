@@ -27,10 +27,6 @@ extern double md_minmax_abs_middle_left;
 extern double md_minmax_abs_middle_right;
 extern double md_minmax_abs_right;
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "MD Min-Max (Absolute)"
-#endif
-
 extern void __attribute__((__nonnull__))
 ls2_add_md_minmax_abs_option_group(GOptionContext *context);
 

@@ -22,9 +22,4 @@
 #ifndef EMINMAX_W2_ALGORITHM_H_INCLUDED
 #define EMINMAX_W2_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Extended Min-Max (W2)"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

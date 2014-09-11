@@ -28,8 +28,4 @@ ls2_add_ab_nlos_option_group(GOptionContext *context);
 extern void  __attribute__((__nonnull__))
 ab_nlos_setup(const vector2 *, size_t);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "AB NLOS"
-#endif
-
 #endif

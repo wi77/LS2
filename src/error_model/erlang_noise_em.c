@@ -68,9 +68,7 @@ erlang_noise_setup(const vector2 *anchors __attribute__((__unused__)),
 
 
 // Errormodels have to include all utils themselves
-#if defined(STAND_ALONE)
-#  include "../util/util_random.c"
-#endif
+#include "../util/util_random.c"
 
 
 static inline void

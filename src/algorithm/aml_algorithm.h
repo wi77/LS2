@@ -22,9 +22,4 @@
 #ifndef AML_ALGORITHM_H_INCLUDED
 #define AML_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "AML"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

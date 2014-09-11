@@ -71,12 +71,7 @@
 #include "util/util_misc.c"
 #include "util/util_points_opt.c"
 
-#if defined(STAND_ALONE)
-#  include INCLUDE_ALG(ALGORITHM)
-#  include INCLUDE_EM(ERRORMODEL)
-#else
-#  include "library.c"
-#endif
+#include "library.c"
 
 
 #ifndef DEFAULT_RUNS
@@ -268,11 +263,6 @@ ls2_shooter_run(void *rr)
             // The results of the algorithm
             VECTOR resx, resy;
             
-#if defined(STAND_ALONE)
-            EMFUNCTION(error)(&seed, params->no_anchors, distances,
-			      vx, vy, tagx, tagy, r);
-	    ALGORITHM_RUN(params->no_anchors, vx, vy, r, &resx, &resy);
-#else
 	    pthread_testcancel();   // Check whether this thread is cancelled.
 
             if (__builtin_expect(ls2_progress_total > 0, 0)) {
@@ -287,7 +277,6 @@ ls2_shooter_run(void *rr)
                         params->no_anchors, tagx, tagy, r);
 	    algorithm(params->algorithm, vx, vy, r, params->no_anchors,
                       params->width, params->height, &resx, &resy);
-#endif
 
             // Get Errors
 	    const VECTOR errors = distance(resx, resy, tagx, tagy);
@@ -443,11 +432,7 @@ ls2_distribute_work_shooter(void *alg_params __attribute__((__unused__)), const 
 
     ls2_running = 0;
 
-#if defined(STAND_ALONE)
-    EMFUNCTION(setup)(anchors, no_anchors);
-#else
     error_model_setup(em, anchors, no_anchors);
-#endif
 
     params = g_new(locbased_runparams_t, ls2_num_threads);
     ls2_thread = g_new(pthread_t, ls2_num_threads);
@@ -603,11 +588,6 @@ static void* ls2_inverse_run(void *rr)
     for (int_fast64_t j = 0; j < runs; j++) {
         VECTOR resx, resy;
 
-#if defined(STAND_ALONE)
-	EMFUNCTION(error)(&seed, params->no_anchors, distances,
-			  vx, vy, tagx, tagy, r);
-	ALGORITHM_RUN(params->no_anchors, vx, vy, r, &resx, &resy);
-#else
         pthread_testcancel();
         if (__builtin_expect(ls2_progress_total > 0, 0)) {
 	    if (__builtin_expect(((j + 1u) & (DEFAULT_RUNS/VECTOR_OPS-1U)) == 0, 0)) {
@@ -619,7 +599,6 @@ static void* ls2_inverse_run(void *rr)
                     params->no_anchors, tagx, tagy, r);
 	algorithm(params->algorithm, vx, vy, r, params->no_anchors,
                   params->width, params->height, &resx, &resy);
-#endif
 
         // errors[j] = distance(resx[j], resy[j], tagx, tagy);
         for (int k = 0; k < VECTOR_OPS; ++k) {
@@ -678,11 +657,10 @@ ls2_distribute_work_inverted(void *alg_params, const algorithm_t alg,
 {
     ls2_running = 0;
 
-#if defined(STAND_ALONE)
-    EMFUNCTION(setup)(anchors, no_anchors);
-#else
+    if (alg_params) { /* silence warning */ }
+    if (em_params) { /* silence warning */ }
+
     error_model_setup(em, anchors, no_anchors);
-#endif
 
     // distribute work to threads
     inverted_runparams_t *params;

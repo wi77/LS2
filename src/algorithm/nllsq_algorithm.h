@@ -22,9 +22,4 @@
 #ifndef NLLSQ_ALGORITHM_H_INCLUDED
 #define NLLSQ_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Non-linear least squares"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

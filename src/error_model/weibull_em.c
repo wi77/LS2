@@ -33,9 +33,7 @@
 #include "weibull_em.h"
 
 // Errormodels have to include all utils themselves
-#if defined(STAND_ALONE)
-#  include "../util/util_random.c"
-#endif
+#include "../util/util_random.c"
 
 /* Mean value is scale * sqrtf(M_PI / 2.0f). */
 static double weibull_scale = 55.571f;

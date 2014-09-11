@@ -50,9 +50,7 @@ ls2_add_eq_noise_option_group(GOptionContext *context)
 
 
 // Errormodels have to include all utils themselves
-#if defined(STAND_ALONE)
-#  include "../util/util_random.c"
-#endif
+#include "../util/util_random.c"
 
 VECTOR eq_error_min_v;
 VECTOR eq_error_rng_v;

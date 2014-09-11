@@ -22,9 +22,4 @@
 #ifndef CENTROID_ALGORITHM_H_INCLUDED
 #define CENTROID_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Centroid"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

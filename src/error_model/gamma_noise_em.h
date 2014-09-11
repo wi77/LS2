@@ -27,8 +27,4 @@ ls2_add_gamma_noise_option_group(GOptionContext *context);
 
 extern void gamma_noise_setup(const vector2 *, size_t);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "Gamma noise"
-#endif
-
 #endif

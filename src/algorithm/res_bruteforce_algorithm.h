@@ -22,9 +22,4 @@
 #ifndef RESBRUTEFORCE_ALGORITHM_H_INCLUDED
 #define RESBRUTEFORCE_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Residual Bruteforce"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

@@ -27,8 +27,4 @@ ls2_add_nlosp_option_group(GOptionContext *context);
 
 extern void nlosp_setup(const vector2 *, size_t);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "NLOS p"
-#endif
-
 #endif

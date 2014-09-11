@@ -22,14 +22,4 @@
 #ifndef CRLB_SO_ALGORITHM_H_INCLUDED
 #define CRLB_SO_ALGORITHM_H_INCLUDED 1
 
-
-#if HAVE_POPT_H
-extern struct poptOption crlb_so_arguments[];
-#endif
-
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "CRLB H.C. So"
-#  define ALGORITHM_ARGUMENTS crlb_so_arguments
-#endif
-
 #endif

@@ -22,9 +22,7 @@
 #ifndef CRLB_MALANEY_ALGORITHM_H_INCLUDED
 #define CRLB_MALANEY_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "CRLB Malaney"
-#endif
+#define ALGORITHM_NAME "CRLB Malaney"
 
 extern void __attribute__((__nonnull__))
 ls2_add_crlb_malaney_option_group(GOptionContext *context);

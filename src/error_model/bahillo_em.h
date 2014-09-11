@@ -24,8 +24,4 @@
 
 extern void bahillo_setup(const vector2*, const size_t);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "Bahillo's NLOS"
-#endif
-
 #endif

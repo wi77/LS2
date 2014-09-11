@@ -27,8 +27,4 @@ ls2_add_rayleigh_option_group(GOptionContext *context);
 
 extern void rayleigh_setup(const vector2 *vv, size_t num);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "Rayleigh noise"
-#endif
-
 #endif

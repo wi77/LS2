@@ -85,9 +85,7 @@ ls2_add_ray_noise_option_group(GOptionContext *context)
 }
 
 
-#if defined(STAND_ALONE)
-#  include "util/util_random.c"
-#endif
+#include "util/util_random.c"
 
 VECTOR fzero;
 VECTOR minus_one;

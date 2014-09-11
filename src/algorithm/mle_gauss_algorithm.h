@@ -22,10 +22,6 @@
 #ifndef MLE_GAUSS_ALGORITHM_H_INCLUDED
 #define MLE_GAUSS_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Maximum Likelihood Estimator (Gauss)"
-#endif
-
 extern void __attribute__((__nonnull__))
 ls2_add_mle_gauss_option_group(GOptionContext *context);
 

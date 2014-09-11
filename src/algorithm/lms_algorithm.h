@@ -22,9 +22,4 @@
 #ifndef LMS_ALGORITHM_C_INCLUDED
 #define LMS_ALGORITHM_C_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "LMS"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

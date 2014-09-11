@@ -22,9 +22,4 @@
 #ifndef VBLE_ALGORITHM_H_INCLUDED
 #define VBLE_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Voting-based location estimation (VBLE)"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

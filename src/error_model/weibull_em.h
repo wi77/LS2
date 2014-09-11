@@ -27,8 +27,4 @@ ls2_add_weibull_option_group(GOptionContext *context);
 
 extern void weibull_setup(const vector2 *vv, size_t num);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "Weibull noise"
-#endif
-
 #endif

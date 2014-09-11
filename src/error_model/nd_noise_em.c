@@ -31,9 +31,7 @@
 #include "nd_noise_em.h"
 
 // Errormodels have to include all utils themselves
-#if defined(STAND_ALONE)
-#  include "../util/util_random.c"
-#endif
+#include "../util/util_random.c"
 
 static double nd_noise_mean = 50.0F;
 static double nd_noise_sdev = 25.0F;

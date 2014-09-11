@@ -27,8 +27,4 @@ ls2_add_erlang_noise_option_group(GOptionContext *context);
 
 extern void erlang_noise_setup(const vector2 *, size_t);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "Erlang noise"
-#endif
-
 #endif

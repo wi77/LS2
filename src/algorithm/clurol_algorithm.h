@@ -22,9 +22,4 @@
 #ifndef CLUROL_ALGORITHM_H_INCLUDED
 #define CLUROL_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "CLUROL"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

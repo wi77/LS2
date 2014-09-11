@@ -27,8 +27,4 @@ ls2_add_nd_noise_option_group(GOptionContext *context);
 
 extern void nd_noise_setup(const vector2 *vv, size_t num);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "Gaussian noise"
-#endif
-
 #endif

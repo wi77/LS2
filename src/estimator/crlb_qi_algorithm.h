@@ -22,10 +22,6 @@
 #ifndef CRLB_QI_ALGORITHM_H_INCLUDED
 #define CRLB_QI_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "CRLB Qi"
-#endif
-
 extern void __attribute__((__nonnull__))
 ls2_add_crlb_qi_option_group(GOptionContext *context);
 

@@ -27,8 +27,4 @@ extern void eq_noise_setup(const vector2 *, size_t);
 extern void __attribute__((__nonnull__))
 ls2_add_eq_noise_option_group(GOptionContext *context);
 
-#if defined(STAND_ALONE)
-#  define ERROR_MODEL_NAME "Uniform noise"
-#endif
-
 #endif

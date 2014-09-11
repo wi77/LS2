@@ -22,14 +22,4 @@
 #ifndef CRLB_ZHAO_ALGORITHM_H_INCLUDED
 #define CRLB_ZHAO_ALGORITHM_H_INCLUDED 1
 
-
-#if HAVE_POPT_H
-extern struct poptOption crlb_zhao_arguments[];
-#endif
-
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "CRLB Zhao"
-#  define ALGORITHM_ARGUMENTS crlb_zhao_arguments
-#endif
-
 #endif

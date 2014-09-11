@@ -22,9 +22,4 @@
 #ifndef RSLM_ALGORITHM_H_INCLUDED
 #define RSLM_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "RSLM"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

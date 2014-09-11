@@ -22,9 +22,4 @@
 #ifndef ICLA_ALGORITHM_H_INCLUDED
 #define ICLA_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "ICLA"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif

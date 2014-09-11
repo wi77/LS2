@@ -22,9 +22,4 @@
 #ifndef MINMAX_ALGORITHM_H_INCLUDED
 #define MINMAX_ALGORITHM_H_INCLUDED 1
 
-#if defined(STAND_ALONE)
-#  define ALGORITHM_NAME "Min-Max"
-#  undef ALGORITHM_ARGUMENTS
-#endif
-
 #endif
