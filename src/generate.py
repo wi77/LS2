@@ -301,6 +301,8 @@ lib.write("extern void __attribute__((__nonnull__))\nls2_add_estimator_option_gr
 for est in ests:
     args = find_command_line_arguments(estimator_file(est))
     if args:
+        lib.write("    ls2_%(est)s_init_arguments(&ls2_%(est)s_arguments);\n" %
+                  { "est" : est })
         lib.write("    ls2_add_%s_option_group(context);\n" % est)
 lib.write("\n}\n")
 

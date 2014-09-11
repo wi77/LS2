@@ -19,6 +19,14 @@
 
  */
 
+#ifdef HAVE_CONFIG_H
+#  include <ls2/ls2-config.h>
+#endif
+
+#include <glib.h>
+
+#include "crlb_so_algorithm.h"
+
 /********************************************************************
  **
  **  This file is made only for including in the lib_lat project
@@ -28,22 +36,49 @@
 
 /*******************************************************************
  ***
- ***   Cramer Rao Lower Bound by Qi and Kobayashi
+ ***   Cramer Rao Lower Bound by So
  ***
  *******************************************************************/
 
 /* @algorithm_name: CRLB (H.C. So) */
 
-static float crlb_so_sdev = 30.0f;
+typedef struct crlb_so_arguments {
+	double sdev;
+} crlb_so_arguments;
 
-#if HAVE_POPT_H
-struct poptOption crlb_so_arguments[] = {
-	{ "crlb-so-sdev", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
-          &crlb_so_sdev, 0,
+
+crlb_so_arguments ls2_crlb_so_arguments;
+
+
+void __attribute__((__nonnull__))
+ls2_crlb_so_init_arguments(crlb_so_arguments *arguments)
+{
+	arguments->sdev = 30.0;
+}
+
+
+GOptionEntry crlb_so_parameters[] = {
+	{ "crlb-so-sdev", 0, 0, G_OPTION_ARG_DOUBLE,
+          &ls2_crlb_so_arguments.sdev,
           "Standard deviation of the error model", NULL },
-        POPT_TABLEEND
+        { NULL }
 };
-#endif
+
+
+void __attribute__((__nonnull__))
+ls2_add_crlb_so_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("crlb-so",
+                                "Parameters to the CRLB model of So",
+                                "Parameters to the CRLB model of So",
+                                NULL, NULL);
+     g_option_group_add_entries(group, crlb_so_parameters);
+     g_option_context_add_group(context, group);
+}
+
+
+
 
 /*!
  * Do not use an error model with this one, it computes nonesense in this
@@ -70,7 +105,7 @@ crlb_so_run(const vector2 *anchor, const size_t num_anchors,
 {
     int s;
     float crlb;
-    const float v = crlb_so_sdev * crlb_so_sdev;
+    const float v = (float)(ls2_crlb_so_arguments.sdev * ls2_crlb_so_arguments.sdev);
     gsl_matrix *A = gsl_matrix_calloc(2, 2);
     gsl_matrix *Ai = gsl_matrix_alloc(2, 2);
     gsl_permutation *p = gsl_permutation_alloc(2);

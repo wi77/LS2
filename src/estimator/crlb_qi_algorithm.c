@@ -38,25 +38,33 @@
 
 /* @algorithm_name: CRLB (Qi, Kobayashi, Suda) */
 
+typedef struct crlb_qi_arguments {
+    double beta;
+    double su;
+    double scale;
+} crlb_qi_arguments;
 
+crlb_qi_arguments ls2_crlb_qi_arguments;
 
-// That is 5 million divided by square root of 3, as found in Qi's
-// thesis (p. 18, eq. 2.29)
-static double crlb_qi_beta = 2886751.345948129;
+void __attribute__((__nonnull__))
+ls2_crlb_qi_init_arguments(struct crlb_qi_arguments *arguments)
+{
+	// That is 5 million divided by square root of 3, as found in
+	// Qi's thesis (p. 18, eq. 2.29)
+	arguments->beta = 2886751.345948129;
+	arguments->su = 0.1;
+	arguments->scale = 1.0;
+}
 
-static double crlb_qi_su = 0.1;
-
-static double crlb_qi_scale = 1.0;
-
-GOptionEntry crlb_qi_arguments[] = {
+GOptionEntry crlb_qi_parameters[] = {
         { "bandwidth", 0, 0, G_OPTION_ARG_DOUBLE,
-          &crlb_qi_beta,
+          &ls2_crlb_qi_arguments.beta,
           "effective bandwidth of the signal waveform", NULL },
 	{ "scale", 0, 0, G_OPTION_ARG_DOUBLE,
-          &crlb_qi_scale,
+          &ls2_crlb_qi_arguments.scale,
           "scale factor for root mean square error", NULL },
 	{ "unit", 0, 0, G_OPTION_ARG_DOUBLE,
-          &crlb_qi_su,
+          &ls2_crlb_qi_arguments.su,
           "length of a simulation unit in meters", NULL },
         { NULL }
 };
@@ -69,7 +77,7 @@ ls2_add_crlb_qi_option_group(GOptionContext *context)
                                 "Parameters to the CRLB model of Qi and Kobayashi",
                                 "Parameters to the CRLB model of Qi and Kobayashi",
                                 NULL, NULL);
-     g_option_group_add_entries(group, crlb_qi_arguments);
+     g_option_group_add_entries(group, crlb_qi_parameters);
      g_option_context_add_group(context, group);
 }
 
@@ -97,10 +105,10 @@ crlb_qi_run(const vector2 *anchor, const size_t count, const vector2 *location)
 {
     const float pi = (float) M_PI;
     // speed of light in su / s, assumes su = 1dm
-    const float c = (float) (299792458.0 / crlb_qi_su);
+    const float c = (float) (299792458.0 / ls2_crlb_qi_arguments.su);
     // Constant alpha of the paper
     const float alpha =
-         (float) ((c * c) / (8.0 * pi * pi * crlb_qi_beta * crlb_qi_beta));
+         (float) ((c * c) / (8.0f * pi * pi * ls2_crlb_qi_arguments.beta * ls2_crlb_qi_arguments.beta));
 
     // Calculate the CRLB
     float numer = 0.0f;

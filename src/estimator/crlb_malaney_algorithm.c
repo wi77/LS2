@@ -39,19 +39,32 @@
 
 /* @algorithm_name: CRLB (Malaney) */
 
-static double crlb_malaney_sigma = 3.0;
-static double crlb_malaney_pathloss = 2.0;
-static double crlb_malaney_scale = 1.0;
 
-GOptionEntry crlb_malaney_arguments[] = {
+typedef struct crlb_malaney_arguments {
+    double sigma;
+    double pathloss;
+    double scale;
+} crlb_malaney_arguments;
+
+crlb_malaney_arguments ls2_crlb_malaney_arguments;
+
+void __attribute__((__nonnull__))
+ls2_crlb_malaney_init_arguments(struct crlb_malaney_arguments *arguments)
+{
+     arguments->sigma = 3.0;
+     arguments->pathloss = 2.0;
+     arguments->scale = 1.0;
+}
+
+GOptionEntry crlb_malaney_parameters[] = {
         { "crlb-malaney-noise", 0, 0, G_OPTION_ARG_DOUBLE,
-          &crlb_malaney_sigma,
+          &(ls2_crlb_malaney_arguments.sigma),
           "noise variable", NULL },
 	{ "crlb-malaney-exponent", 0, 0, G_OPTION_ARG_DOUBLE,
-          &crlb_malaney_pathloss,
+          &(ls2_crlb_malaney_arguments.pathloss),
           "path loss exponent", NULL },
 	{ "crlb-malaney-scale", 0, 0, G_OPTION_ARG_DOUBLE,
-          &crlb_malaney_scale,
+          &(ls2_crlb_malaney_arguments.scale),
           "scale factor for root mean square error", NULL },
         { NULL }
 };
@@ -65,7 +78,7 @@ ls2_add_crlb_malaney_option_group(GOptionContext *context)
                                 "Parameters to the CRLB model of Malaney",
                                 "Parameters to the CRLB model of Malaney",
                                 NULL, NULL);
-     g_option_group_add_entries(group, crlb_malaney_arguments);
+     g_option_group_add_entries(group, crlb_malaney_parameters);
      g_option_context_add_group(context, group);
 }
 
@@ -85,7 +98,7 @@ crlb_malaney_run (const vector2 *anchor, const size_t num_anchors,
 	          const vector2 *location)
 {
     const float alpha =
-        (float) ((10.0 * crlb_malaney_pathloss) / (crlb_malaney_sigma * log(10.0)));
+        (float) ((10.0 * ls2_crlb_malaney_arguments.pathloss) / (ls2_crlb_malaney_arguments.sigma * log(10.0)));
 
     // Calculate the CRLB
     float numer = 0.0f;
