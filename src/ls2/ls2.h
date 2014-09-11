@@ -117,7 +117,7 @@ ls2_distribute_work_shooter(void *alg_params, const algorithm_t alg,
                             const long seed,
                             const vector2* anchors, const size_t no_anchors,
 			    float *results[NUM_VARIANTS],
-                            const int width, const int height);
+                            const size_t width, const size_t height);
 
 /*!
  * Perform a simulation based on locations.
@@ -155,7 +155,7 @@ ls2_distribute_work_inverted(void *alg_params, const algorithm_t alg,
 			     const vector2 *restrict anchors,
                              const size_t no_anchors,
 			     uint64_t *restrict result,
-                             const int width, const int height,
+                             const size_t width, const size_t height,
 			     float *restrict center_x, float *restrict sdev_x,
                              float *restrict center_y, float *restrict sdev_y);
 

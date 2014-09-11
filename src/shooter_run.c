@@ -424,7 +424,7 @@ ls2_distribute_work_shooter(void *alg_params __attribute__((__unused__)), const 
                             const long seed,
                             const vector2* anchors, const size_t no_anchors,
 			    float *results[NUM_VARIANTS],
-                            const int width, const int height)
+                            const size_t width, const size_t height)
 {
     ls2_num_threads = (size_t) num_threads;
     const size_t slice = (size_t) (width * height) / ls2_num_threads;
@@ -513,7 +513,7 @@ ls2_compute_locbased(void *alg_params, const algorithm_t alg,
 
     ls2_distribute_work_shooter(alg_params, alg, em_params, em, num_threads,
                                 runs, time(NULL), anchors, (size_t) no_anchors,
-                                results, width, height);
+                                results, (size_t) width, (size_t) height);
 
     g_free(anchors);
 
@@ -544,7 +544,7 @@ typedef struct inverted_runparams_t {
     int_fast64_t runs;
     uint_fast64_t *result;
     float cx, sx, cy, sy, cn;
-    int width, height;
+    size_t width, height;
     algorithm_t algorithm;
     error_model_t error_model;
 } inverted_runparams_t;
@@ -598,15 +598,15 @@ static void* ls2_inverse_run(void *rr)
 	error_model(params->error_model, &seed, distances, vx, vy,
                     params->no_anchors, tagx, tagy, r);
 	algorithm(params->algorithm, vx, vy, r, params->no_anchors,
-                  params->width, params->height, &resx, &resy);
+                  (int) params->width, (int) params->height, &resx, &resy);
 
         // errors[j] = distance(resx[j], resy[j], tagx, tagy);
         for (int k = 0; k < VECTOR_OPS; ++k) {
             if (!isnan(resx[k]) && !isnan(resy[k])) {
                 const int x = (int) roundf(resx[k]);
                 const int y = (int) roundf(resy[k]);		
-		if (0 <= x && x < params->width && 0 <= y && y < params->height) {
-		    params->result[x + params->width * y] += 1;
+		if (0 <= x && x < (int) params->width && 0 <= y && y < (int) params->height) {
+		    params->result[x + (int) params->width * y] += 1;
 		}
                 N   += 1.0F;
                 M_X_old = M_X;
@@ -650,8 +650,10 @@ ls2_distribute_work_inverted(void *alg_params, const algorithm_t alg,
 			     const int num_threads, const int64_t runs,
                              const long seed,
                              const float tag_x, const float tag_y,
-			     const vector2 *restrict anchors, const size_t no_anchors,
-			     uint64_t *restrict results, const int width, const int height,
+			     const vector2 *restrict anchors,
+                             const size_t no_anchors,
+			     uint64_t *restrict results,
+                             const size_t width, const size_t height,
 			     float *restrict center_x, float *restrict sdev_x,
                              float *center_y, float *restrict sdev_y)
 {
@@ -720,7 +722,7 @@ ls2_distribute_work_inverted(void *alg_params, const algorithm_t alg,
 
     /* Accumulate all results and store them in the first thread's image. */
     for (int t = 1; t < num_threads; t++) {
-        for (int i = 0; i < width * height; i++) {
+        for (size_t i = 0; i < width * height; i++) {
             params[0].result[i] += params[t].result[i];
         }
 	*center_x += params[t].cx;
@@ -733,9 +735,9 @@ ls2_distribute_work_inverted(void *alg_params, const algorithm_t alg,
     *center_y /= ((float) num_threads);
     *sdev_y = sqrtf(*sdev_y / (float) num_threads);
 
-    for (int y = 0; y < params->height; y++) {
-        for (int x = 0; x < params->width; x++) {
-	    const int pos = x + params->width * y;
+    for (size_t y = 0; y < params->height; y++) {
+        for (size_t x = 0; x < params->width; x++) {
+	    const size_t pos = x + params->width * y;
             const uint64_t samples = (uint64_t) params[0].result[pos];
 	    results[pos] = samples;
 	}
@@ -776,7 +778,8 @@ ls2_compute_inverse(void *alg_params, const algorithm_t alg,
 
     ls2_distribute_work_inverted(alg_params, alg, em_params, em, num_threads,
                                  runs, time(NULL), tag_x, tag_y, anchors,
-                                 (size_t) no_anchors, result, width, height,
+                                 (size_t) no_anchors,
+                                 result, (size_t) width, (size_t) height,
                                  center_x, sdev_x, center_y, sdev_y);
 
     g_free(anchors);

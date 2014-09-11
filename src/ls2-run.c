@@ -327,8 +327,8 @@ main(int argc, char* argv[])
      * if the user requested an image for it or if he wants the data in
      * an HDF5 file. The later case contains all information.
      */
-    uint16_t width = (uint16_t) arg_width;
-    uint16_t height = (uint16_t) arg_height;
+    size_t width = (size_t) arg_width;
+    size_t height = (size_t) arg_height;
     memset(results, 0, sizeof(results));
 #if !defined(ESTIMATOR)
     if (inverted == 0) {
@@ -362,7 +362,7 @@ main(int argc, char* argv[])
 
     if (inverted == 0) {
 	if (ls2_progress != 0) {
-	    ls2_initialize_progress_bar((size_t) (runs * height * width),
+	    ls2_initialize_progress_bar((size_t) runs * height * width,
                                         algorithm);
 	}
 	ls2_distribute_work_shooter(NULL, alg, NULL, em, num_threads, runs,
@@ -382,7 +382,7 @@ main(int argc, char* argv[])
     }
 #else
     ls2_distribute_work_estimator(NULL, est, num_threads, anchors, no_anchors,
-				  results, width, height);
+				  results, (int) width, (int) height);
 #endif
 
     gettimeofday(&end_tv, NULL);
@@ -425,12 +425,12 @@ main(int argc, char* argv[])
             if (output[var] != NULL && *(output[var]) != '\0') {
 	      ls2_write_locbased(get_output_format(output_format), output[var],
 				 anchors, no_anchors,
-				 results[var], width, height);
+				 results[var], (uint16_t) width, (uint16_t) height);
             }
         }
         if (output_hdf5 != NULL && *output_hdf5 != '\0') {
 	    ls2_hdf5_write_locbased(output_hdf5, anchors, no_anchors, results,
-                                    width, height);
+                                    (uint16_t) width, (uint16_t) height);
         }
 #if !defined(ESTIMATOR)
     } else {
@@ -438,16 +438,17 @@ main(int argc, char* argv[])
 	    ls2_write_inverted(get_output_format(output_format), output[0],
 			       0, (float) tag_x, (float) tag_y,
                                anchors, no_anchors,
-			       result, width, height, centre_x, centre_y);
+			       result, (uint16_t) width, (uint16_t) height, centre_x, centre_y);
         } else {
 	    ls2_write_inverted(get_output_format(output_format), output[0],
 			       (uint64_t) runs, (float) tag_x, (float) tag_y,
                                anchors, no_anchors,
-			       result, width, height, centre_x, centre_y);
+			       result, (uint16_t) width, (uint16_t) height, centre_x, centre_y);
         }
         if (output_hdf5 != NULL && *output_hdf5 != '\0') {
 	    ls2_hdf5_write_inverted(output_hdf5, (float) tag_x, (float) tag_y,
-				    anchors, no_anchors, result, width, height,
+				    anchors, no_anchors,
+                                    result, (uint16_t) width, (uint16_t) height,
                                     centre_x, centre_y);
         }
     }
