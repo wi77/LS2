@@ -208,8 +208,8 @@ static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 mle_gamma_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
               size_t no_anchors,
-              int width __attribute__((__unused__)),
-              int height __attribute__((__unused__)),
+              size_t width __attribute__((__unused__)),
+              size_t height __attribute__((__unused__)),
               VECTOR *restrict resx, VECTOR *restrict resy)
 {
     /* Step 0: Set up the likelihood function. */

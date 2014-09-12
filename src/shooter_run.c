@@ -598,7 +598,7 @@ static void* ls2_inverse_run(void *rr)
 	error_model(params->error_model, &seed, distances, vx, vy,
                     params->no_anchors, tagx, tagy, r);
 	algorithm(params->algorithm, vx, vy, r, params->no_anchors,
-                  (int) params->width, (int) params->height, &resx, &resy);
+                  params->width, params->height, &resx, &resy);
 
         // errors[j] = distance(resx[j], resy[j], tagx, tagy);
         for (int k = 0; k < VECTOR_OPS; ++k) {

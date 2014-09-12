@@ -79,7 +79,7 @@ ls2_add_md_minmax_rel_option_group(GOptionContext *context)
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 md_minmax_rel_run (const VECTOR* vx, const VECTOR* vy,
-                     const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy)
+                     const VECTOR *restrict r, size_t num_anchors, size_t width __attribute__((__unused__)), size_t height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy)
 {
     const float left_rate      =
         (float)((1.00 - 0.00) / (md_minmax_rel_middle_left - md_minmax_rel_left));

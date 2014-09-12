@@ -39,7 +39,7 @@ const_run(const VECTOR *restrict vx __attribute__((__unused__)),
           const VECTOR *restrict vy __attribute__((__unused__)),
           const VECTOR *restrict r __attribute__((__unused__)),
           size_t num_anchors __attribute__((__unused__)),
-          int width, int height, VECTOR *restrict resx, VECTOR *restrict resy)
+          size_t width, size_t height, VECTOR *restrict resx, VECTOR *restrict resy)
 {
     *resx = VECTOR_BROADCASTF((float) width / 2.0f);
     *resy = VECTOR_BROADCASTF((float) height / 2.0f);

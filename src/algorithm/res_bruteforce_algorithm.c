@@ -35,7 +35,7 @@
 /* @algorithm_name: Residual-Bruteforce*/
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-res_bruteforce_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
+res_bruteforce_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, size_t width __attribute__((__unused__)), size_t height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
     float min_res;
     int minres_x = 0.0,minres_y = 0.0;
    

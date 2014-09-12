@@ -45,8 +45,8 @@
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 llsq_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
          size_t num_anchors,
-         int width __attribute__((__unused__)),
-         int height __attribute__((__unused__)),
+         size_t width __attribute__((__unused__)),
+         size_t height __attribute__((__unused__)),
          VECTOR *restrict resx,
          VECTOR *restrict resy)
 {

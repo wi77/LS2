@@ -40,7 +40,7 @@
 /* @algorithm_name: Extended MinMax W2 */
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-eminmax_w2_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
+eminmax_w2_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, size_t width __attribute__((__unused__)), size_t height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
     VECTOR east  = vx[0] + r[0];
     VECTOR west  = vx[0] - r[0];
     VECTOR south = vy[0] + r[0];

@@ -38,7 +38,7 @@
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 aml_run (const VECTOR* vx, const VECTOR* vy,
-         const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy)
+         const VECTOR *restrict r, size_t num_anchors, size_t width __attribute__((__unused__)), size_t height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy)
 {
     VECTOR intersectionx[] = { zero, zero };
     VECTOR intersectiony[] = { zero, zero };

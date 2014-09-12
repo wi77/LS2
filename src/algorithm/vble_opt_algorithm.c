@@ -272,7 +272,7 @@ multilaterate(anchor_info_t *anchors, size_t num_anchors,
 
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-vble_opt_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
+vble_opt_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, size_t width __attribute__((__unused__)), size_t height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
     if (num_anchors<3) {
         (*resx) = VECTOR_BROADCASTF(NAN);
         (*resy) = VECTOR_BROADCASTF(NAN);
@@ -550,7 +550,7 @@ multilaterate(const float* anchorsx, const float* anchorsy, const float* ranges,
 
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-vble_opt_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, int width __attribute__((__unused__)), int height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
+vble_opt_run (const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors, size_t width __attribute__((__unused__)), size_t height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy) {
     int ii;
     float l, last_l;
     const float error_threshold = 85.0F;

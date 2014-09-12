@@ -36,14 +36,14 @@
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__)) __attribute__((__always_inline__,__artificial__,__nonnull__))
 min_res1_bf_run(const VECTOR* ax, const VECTOR* ay, const VECTOR *restrict r,
-                const size_t num_anchors, const int width, const int height,
+                const size_t num_anchors, const size_t width, const size_t height,
                 VECTOR *restrict resx, VECTOR *restrict resy)
 {
     VECTOR min_res = VECTOR_BROADCASTF(FLT_MAX),
            rx = VECTOR_BROADCASTF(0.0f),
            ry = VECTOR_BROADCASTF(0.0f);
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
+    for (size_t y = 0; y < height; y++) {
+        for (size_t x = 0; x < width; x++) {
             VECTOR res = VECTOR_ZERO();
             const VECTOR vx = VECTOR_BROADCASTF((float) x),
                          vy = VECTOR_BROADCASTF((float) y);

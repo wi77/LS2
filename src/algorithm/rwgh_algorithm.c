@@ -47,7 +47,7 @@
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))
 rwgh_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
-              size_t no_anchors, int width, int height,
+              size_t no_anchors, size_t width, size_t height,
               VECTOR *restrict resx, VECTOR *restrict resy)
 {
     int s = 3;

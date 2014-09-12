@@ -42,7 +42,7 @@
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
 nllsq_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r, size_t num_anchors,
-          int width, int height, VECTOR *restrict resx, VECTOR *restrict resy)
+          size_t width, size_t height, VECTOR *restrict resx, VECTOR *restrict resy)
 {
         float load = -1.0F;
         *resx = VECTOR_BROADCAST(&load);
