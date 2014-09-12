@@ -99,9 +99,10 @@ robust_filter(size_t const count ,float *restrict resx,float *restrict resy)
             filtered_count++;
         }
     }
-    g_assert(filtered_count > 0);
-    memcpy(resx,filtered_x,sizeof(float) * filtered_count);
-    memcpy(resy,filtered_y,sizeof(float) * filtered_count);
+    if (filtered_count > 0) {
+        memcpy(resx,filtered_x, sizeof(float) * filtered_count);
+        memcpy(resy,filtered_y, sizeof(float) * filtered_count);
+    }
     return filtered_count;
 }    
 
@@ -188,17 +189,19 @@ rlsm_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
         if (int_count > 1u) {
             int_count = robust_filter(int_count, intermediatePositions_x, intermediatePositions_y);
         }
-        
-        float weights[int_count];
-        for (size_t jj = 0; jj < int_count; jj++) {
-	    weights[jj] = 1.0f;
-	}
-        // return geometric median as result
-        point_geometric_median((int) int_count, intermediatePositions_x,
-                       intermediatePositions_y,
-                       weights,
-                       &x_x, &x_y);
-     
+        if (int_count > 1u) {
+            float weights[int_count];
+            for (size_t jj = 0; jj < int_count; jj++) {
+	        weights[jj] = 1.0f;
+	    }
+            // return geometric median as result
+            point_geometric_median((int) int_count, intermediatePositions_x,
+                           intermediatePositions_y,
+                           weights,
+                           &x_x, &x_y);
+        } else {
+            g_debug("[RLSM] No points left in filter result.");
+        }
         (*resx)[ii] = x_x;
         (*resy)[ii] = x_y;
     }
