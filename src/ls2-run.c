@@ -276,7 +276,7 @@ main(int argc, char* argv[])
     const size_t no_anchors = no_anchor_args / 2;
 
     anchors = g_new(vector2, no_anchors);
-    for (int i = 0, j = 0; i < no_anchor_args; i += 2, j++) {
+    for (int i = 1, j = 0; i < no_anchor_args; i += 2, j++) {
 	    anchors[j].x = (float) strtoul(anchor[i],   NULL, 10);
 	    anchors[j].y = (float) strtoul(anchor[i+1], NULL, 10);
     }
