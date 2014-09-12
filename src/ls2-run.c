@@ -87,8 +87,8 @@ static int inverted;
 static int relative;
 static double tag_x;
 static double tag_y;
-static long seed;
-static long runs;
+static gint64 seed;
+static gint64 runs;
 #endif
 static int arg_width;
 static int arg_height;
