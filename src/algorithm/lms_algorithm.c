@@ -180,7 +180,16 @@ lms_run(const VECTOR* vx, const VECTOR* vy, const VECTOR *restrict r,
             }
         }
 
-        g_assert(count > 0);
+        if (count == 0) {
+             /* Usually, this should not happen, However, if measurements
+              * are pathologic, no points are in the threshhold. Then, we
+              * log a message and return not a number as position
+              */
+             g_debug("[LMS] No points within threshhold.");
+             (*resx)[ii] = NAN;
+             (*resy)[ii] = NAN;
+             continue;
+        }
         VECTOR anchors_x[count], anchors_y[count], ranges[count];
         int c=0;
         for (int i=0; i < N; i++) {
