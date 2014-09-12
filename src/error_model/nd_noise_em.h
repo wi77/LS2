@@ -19,8 +19,16 @@
 
  */
 
-#ifndef INCLUDED_ND_NOISE_H
-#define INCLUDED_ND_NOISE_H
+#ifndef INCLUDED_LS2_ND_NOISE_H
+#define INCLUDED_LS2_ND_NOISE_H
+
+typedef struct ls2_nd_noise_arguments {
+        double mean;
+        double sdev;
+} ls2_nd_noise_arguments;
+
+extern void __attribute__((__nonnull__))
+ls2_init_nd_noise_arguments(ls2_nd_noise_arguments *arguments);
 
 extern void __attribute__((__nonnull__))
 ls2_add_nd_noise_option_group(GOptionContext *context);

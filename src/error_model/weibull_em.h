@@ -19,8 +19,20 @@
 
  */
 
-#ifndef INCLUDED_WEIBULL_H
-#define INCLUDED_WEIBULL_H
+#ifndef INCLUDED_LS2_WEIBULL_H
+#define INCLUDED_LS2_WEIBULL_H
+
+
+
+typedef struct ls2_weibull_arguments {
+        double scale;
+        double shape;
+} ls2_weibull_arguments;
+
+
+
+extern void __attribute__((__nonnull__))
+ls2_init_weibull_arguments(ls2_weibull_arguments *arguments);
 
 extern void __attribute__((__nonnull__))
 ls2_add_weibull_option_group(GOptionContext *context);

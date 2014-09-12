@@ -24,16 +24,29 @@
 #include <glib.h>
 #include "eq_noise_em.h"
 
-double eq_error_min = 0.0F;
-double eq_error_max = 100.0F;
 
-static GOptionEntry eq_noise_arguments[] = {
-        { "eq-error-min", 0, 0, G_OPTION_ARG_DOUBLE, &eq_error_min,
+
+extern void
+ls2_init_eq_noise_arguments(ls2_eq_noise_arguments *arguments)
+{
+        arguments->min = 0.0;
+        arguments->max = 100.0;
+}
+
+
+
+ls2_eq_noise_arguments eq_noise_arguments;
+
+
+
+static GOptionEntry eq_noise_parameters[] = {
+        { "eq-noise-min", 0, 0, G_OPTION_ARG_DOUBLE, &eq_noise_arguments.min,
           "minimum value of error", NULL },
-        { "eq-error-max", 0, 0, G_OPTION_ARG_DOUBLE, &eq_error_max,
+        { "eq-noise-max", 0, 0, G_OPTION_ARG_DOUBLE, &eq_noise_arguments.max,
           "maximum value of error", NULL },
         { NULL }
 };
+
 
 
 void __attribute__((__nonnull__))
@@ -44,24 +57,26 @@ ls2_add_eq_noise_option_group(GOptionContext *context)
                                 "Parameters to the uniform distributed noise error model",
                                 "Parameters to the uniform distributed noise error model",
                                 NULL, NULL);
-     g_option_group_add_entries(group, eq_noise_arguments);
+     g_option_group_add_entries(group, eq_noise_parameters);
      g_option_context_add_group(context, group);
 }
+
 
 
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
 
-VECTOR eq_error_min_v;
-VECTOR eq_error_rng_v;
+static VECTOR eq_error_min_v;
+static VECTOR eq_error_rng_v;
 
 void
 eq_noise_setup(const vector2 *anchors __attribute__((__unused__)),
                size_t nanchors __attribute__((__unused__)))
 {
-        eq_error_min_v = VECTOR_BROADCASTF((float) eq_error_min);
-        eq_error_rng_v = VECTOR_BROADCASTF((float) (eq_error_max - eq_error_min));
+        eq_error_min_v = VECTOR_BROADCASTF((float) eq_noise_arguments.min);
+        eq_error_rng_v = VECTOR_BROADCASTF((float) (eq_noise_arguments.max - eq_noise_arguments.min));
 }
+
 
 
 static inline void

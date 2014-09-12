@@ -37,17 +37,27 @@
  *
  * The defaults result in mean = 50.0f and sigma = 28.867
  */
-static double gamma_shape = 3.0;
-static double gamma_rate = 3.0 / 50.0;   // mean = shape / rate
-static double gamma_offset = 0.0;
+extern void __attribute__((__nonnull__))
+ls2_init_gamma_noise_arguments(ls2_gamma_noise_arguments *arguments)
+{
+        arguments->shape = 3.0;
+        arguments->rate = 3.0 / 50.0;
+        arguments->offset = 0.0;
+        arguments->scale = 1.0;
+}
 
 
-static GOptionEntry gamma_noise_arguments[] = {
-    { "gamma-shape", 0, 0, G_OPTION_ARG_DOUBLE, &gamma_shape,
+
+static ls2_gamma_noise_arguments gamma_noise_arguments;
+ 
+
+
+static GOptionEntry gamma_noise_parameters[] = {
+    { "gamma-shape", 0, 0, G_OPTION_ARG_DOUBLE, &gamma_noise_arguments.shape,
       "shape of the gamma distribution", NULL },
-    { "gamma-rate", 0, 0, G_OPTION_ARG_DOUBLE, &gamma_rate,
+    { "gamma-rate", 0, 0, G_OPTION_ARG_DOUBLE, &gamma_noise_arguments.rate,
       "rate of the gamma distribution", NULL },
-    { "gamma-offset", 0, 0, G_OPTION_ARG_DOUBLE, &gamma_offset,
+    { "gamma-offset", 0, 0, G_OPTION_ARG_DOUBLE, &gamma_noise_arguments.offset,
       "additive offset to the gamma distribution", NULL },
     { NULL }
 };
@@ -61,9 +71,10 @@ ls2_add_gamma_noise_option_group(GOptionContext *context)
                                 "Parameters to the Gamma noise error model",
                                 "Parameters to the Gamma noise error model",
                                 NULL, NULL);
-     g_option_group_add_entries(group, gamma_noise_arguments);
+     g_option_group_add_entries(group, gamma_noise_parameters);
      g_option_context_add_group(context, group);
 }
+
 
 
 void
@@ -72,6 +83,8 @@ gamma_noise_setup(const vector2 *anchors __attribute__((__unused__)),
 {
   // No setup needed.
 }
+
+
 
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,3,8)))
@@ -87,7 +100,7 @@ gamma_noise_error(__m128i *restrict seed,
     for (size_t k=0; k < anchors ; k++) {
         VECTOR x = VECTOR_BROADCASTF(1.0F);
         float alpha;
-	for (alpha = (float) gamma_shape; alpha >= 1.0F; alpha -= 1.0F) {
+	for (alpha = (float) gamma_noise_arguments.shape; alpha >= 1.0F; alpha -= 1.0F) {
             x *= rnd(seed);
         }
         if (alpha > 0.0F) {
@@ -112,8 +125,8 @@ gamma_noise_error(__m128i *restrict seed,
             } while (VECTOR_TEST_ALL_ONES(VECTOR_NE(mask, VECTOR_ZERO())));
             x *= xi;
         }
-        x = (VECTOR_LOG(x) / VECTOR_BROADCASTF((float) -gamma_rate)) -
-                VECTOR_BROADCASTF((float) -gamma_offset);
+        x = (VECTOR_LOG(x) / VECTOR_BROADCASTF((float) -gamma_noise_arguments.rate)) -
+                VECTOR_BROADCASTF((float) -gamma_noise_arguments.offset);
 
       	result[k] = distances[k] + x;
     }

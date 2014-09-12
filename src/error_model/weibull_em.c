@@ -35,20 +35,29 @@
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
 
-/* Mean value is scale * sqrtf(M_PI / 2.0f). */
-static double weibull_scale = 55.571f;
-static double weibull_shape = 3.5f;
 
-static VECTOR weibull_scale_vector;
-static VECTOR weibull_shape_vector;
 
-static GOptionEntry weibull_arguments[] = {
-        { "weibull-scale", 0, 0, G_OPTION_ARG_DOUBLE, &weibull_scale,
+extern void __attribute__((__nonnull__))
+ls2_init_weibull_arguments(ls2_weibull_arguments *arguments)
+{
+        arguments->scale = 55.571;
+        arguments->shape = 3.5;
+}
+
+
+
+static ls2_weibull_arguments weibull_arguments;
+
+
+
+static GOptionEntry weibull_parameters[] = {
+        { "weibull-scale", 0, 0, G_OPTION_ARG_DOUBLE, &weibull_arguments.scale,
           "scale parameter of the Weibull noise", NULL },
-        { "weibull-shape", 0, 0, G_OPTION_ARG_DOUBLE, &weibull_shape,
+        { "weibull-shape", 0, 0, G_OPTION_ARG_DOUBLE, &weibull_arguments.shape,
           "shape parameter of the Weibull noise", NULL },
         { NULL }
 };
+
 
 
 void __attribute__((__nonnull__))
@@ -59,18 +68,22 @@ ls2_add_weibull_option_group(GOptionContext *context)
                                 "Parameters to the Weibull error model",
                                 "Parameters to the Weibull error model",
                                 NULL, NULL);
-     g_option_group_add_entries(group, weibull_arguments);
+     g_option_group_add_entries(group, weibull_parameters);
      g_option_context_add_group(context, group);
 }
 
+
+
+static VECTOR weibull_scale_vector;
+static VECTOR weibull_shape_vector;
 
 void
 weibull_setup(const vector2 *anchors __attribute__((__unused__)),
                size_t nanchors __attribute__((__unused__)))
 {
-        VECTOR t = VECTOR_CONST_BROADCAST((float) weibull_scale);
+        VECTOR t = VECTOR_CONST_BROADCAST((float) weibull_arguments.scale);
         weibull_scale_vector = t;
-        VECTOR u = VECTOR_CONST_BROADCAST((float) weibull_shape);
+        VECTOR u = VECTOR_CONST_BROADCAST((float) weibull_arguments.shape);
         weibull_shape_vector = u;
 }
 

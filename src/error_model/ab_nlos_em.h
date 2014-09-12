@@ -22,6 +22,19 @@
 #ifndef INCLUDED_AB_NLOS_EM_H
 #define INCLUDED_AB_NLOS_EM_H
 
+typedef struct ls2_ab_nlos_arguments {
+        double mean;
+        double sdev;
+        int count;
+        double rate;
+        double scale;
+        int norm;
+}  ls2_ab_nlos_arguments;
+
+extern void __attribute__((__nonnull__))
+ls2_init_ab_nlos_arguments(ls2_ab_nlos_arguments *arguments);
+
+
 extern void __attribute__((__nonnull__))
 ls2_add_ab_nlos_option_group(GOptionContext *context);
 

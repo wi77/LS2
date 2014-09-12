@@ -19,9 +19,24 @@
 
  */
 
-#ifndef INCLUDED_BAHILLO_EM_H
-#define INCLUDED_BAHILLO_EM_H
+#ifndef INCLUDED_LS2_BAHILLO_EM_H
+#define INCLUDED_LS2_BAHILLO_EM_H
 
-extern void bahillo_setup(const vector2*, const size_t);
+typedef struct ls2_bahillo_arguments {
+        double mean;
+        double sdev;
+        double ua;
+        double ub;
+} ls2_bahillo_arguments;
+
+extern void __attribute__((__nonnull__))
+ls2_init_bahillo_arguments(ls2_bahillo_arguments *arguments);
+
+extern void __attribute__((__nonnull__))
+ls2_add_bahillo_option_group(GOptionContext *context);
+
+extern void
+ls2_bahillo_setup(const vector2* __attribute__((__unused__)), const size_t);
+
 
 #endif

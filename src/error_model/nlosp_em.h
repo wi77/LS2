@@ -19,8 +19,19 @@
 
  */
 
-#ifndef INCLUDED_NLOSP_EM_H
-#define INCLUDED_NLOSP_EM_H
+#ifndef INCLUDED_LS2_NLOSP_EM_H
+#define INCLUDED_LS2_NLOSP_EM_H
+
+typedef struct ls2_nlosp_arguments {
+        double mean;
+        double sdev;
+        double nlos_p;
+        double rate;
+        double scale;
+} ls2_nlosp_arguments;
+
+extern void __attribute__((__nonnull__))
+ls2_init_nlosp_arguments(ls2_nlosp_arguments *arguments);
 
 extern void __attribute__((__nonnull__))
 ls2_add_nlosp_option_group(GOptionContext *context);

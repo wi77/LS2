@@ -28,22 +28,33 @@
 #include <glib.h>
 #include "erlang_noise_em.h"
 
-static int erlang_shape = 3;
-static double erlang_rate = 0.5228819579;
-static double erlang_offset = 3.31060119642765;
-static double erlang_scale = 50.0 / 2.85;
+extern void __attribute__((__nonnull__))
+ls2_init_erlang_noise_arguments(ls2_erlang_noise_arguments *arguments)
+{
+        arguments->shape = 3;
+        arguments->rate = 0.5228819579;
+        arguments->offset = 3.31060119642765;
+        arguments->scale = 50.0 / 2.85;
+}
 
-static GOptionEntry erlang_noise_arguments[] = {
-    { "erlang-shape", 0, 0, G_OPTION_ARG_INT, &erlang_shape,
+
+
+static ls2_erlang_noise_arguments erlang_noise_arguments;
+ 
+
+
+static GOptionEntry erlang_noise_parameters[] = {
+    { "erlang-shape", 0, 0, G_OPTION_ARG_INT, &erlang_noise_arguments.shape,
       "shape of the erlang distribution", NULL },
-    { "erlang-rate", 0, 0, G_OPTION_ARG_DOUBLE, &erlang_rate,
+    { "erlang-rate", 0, 0, G_OPTION_ARG_DOUBLE, &erlang_noise_arguments.rate,
       "rate of the erlang distribution", NULL },
-    { "erlang-offset", 0, 0, G_OPTION_ARG_DOUBLE, &erlang_offset,
+    { "erlang-offset", 0, 0, G_OPTION_ARG_DOUBLE, &erlang_noise_arguments.offset,
       "additive offset to the erlang distribution", NULL },
-    { "erlang-scale", 0, 0, G_OPTION_ARG_DOUBLE, &erlang_scale,
+    { "erlang-scale", 0, 0, G_OPTION_ARG_DOUBLE, &erlang_noise_arguments.scale,
       "multiplier to scale the erlang distribution", NULL },
     { NULL }
 };
+
 
 
 void __attribute__((__nonnull__))
@@ -54,7 +65,7 @@ ls2_add_erlang_noise_option_group(GOptionContext *context)
                                 "Parameters to the Erlang noise error model",
                                 "Parameters to the Erlang noise error model",
                                 NULL, NULL);
-     g_option_group_add_entries(group, erlang_noise_arguments);
+     g_option_group_add_entries(group, erlang_noise_parameters);
      g_option_context_add_group(context, group);
 }
 
@@ -84,13 +95,13 @@ erlang_noise_error(__m128i *restrict seed,
 {
     for (size_t k=0; k < anchors ; k++) {
 	VECTOR x = VECTOR_BROADCASTF(1.0F);
-	for (int i = 0; i < erlang_shape; i++)
+	for (int i = 0; i < erlang_noise_arguments.shape; i++)
 	    x *= rnd(seed);
-        x = VECTOR_LOG(x) / VECTOR_BROADCASTF((float) -erlang_rate);
-        x -= VECTOR_BROADCASTF((float) erlang_offset);
+        x = VECTOR_LOG(x) / VECTOR_BROADCASTF((float) -erlang_noise_arguments.rate);
+        x -= VECTOR_BROADCASTF((float) erlang_noise_arguments.offset);
 
 	// HACK: Scale it to an expected value of 50.
-        x *= VECTOR_BROADCASTF((float) erlang_scale);
+        x *= VECTOR_BROADCASTF((float) erlang_noise_arguments.scale);
       	result[k] = distances[k] + x;
     }
 }

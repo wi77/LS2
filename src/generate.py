@@ -165,7 +165,7 @@ lib.writelines([ "    NULL\n",
 lib.writelines([ 'static inline void __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__))\n',
                  'algorithm(algorithm_t alg,\n',
                  '          const VECTOR *restrict vx, const VECTOR *restrict vy, const VECTOR *restrict r,\n',
-                 '          size_t no_anchors, int width, int height,\n',
+                 '          size_t no_anchors, size_t width, size_t height,\n',
                  '          VECTOR *restrict resx, VECTOR *restrict resy)\n',
                  '{\n',
                  '    switch (alg) {\n',
@@ -295,6 +295,8 @@ lib.write("extern void __attribute__((__nonnull__))\nls2_add_error_model_option_
 for em in ems:
     args = find_command_line_arguments(error_model_file(em))
     if args:
+        lib.write("    ls2_init_%(em)s_arguments(&%(em)s_arguments);\n" %
+                  { "em" : em })
         lib.write("    ls2_add_%s_option_group(context);\n" % em)
 lib.write("\n}\n\n")
 lib.write("extern void __attribute__((__nonnull__))\nls2_add_estimator_option_groups(GOptionContext *context)\n{\n")

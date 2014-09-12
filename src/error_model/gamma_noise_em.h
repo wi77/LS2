@@ -19,8 +19,18 @@
 
  */
 
-#ifndef INCLUDED_GAMMA_NOISE_H
-#define INCLUDED_GAMMA_NOISE_H
+#ifndef INCLUDED_LS2_GAMMA_NOISE_H
+#define INCLUDED_LS2_GAMMA_NOISE_H
+
+typedef struct ls2_gamma_noise_arguments {
+        double shape;
+        double rate;
+        double offset;
+        double scale;
+} ls2_gamma_noise_arguments;
+
+extern void __attribute__((__nonnull__))
+ls2_init_gamma_noise_arguments(ls2_gamma_noise_arguments *arguments);
 
 extern void __attribute__((__nonnull__))
 ls2_add_gamma_noise_option_group(GOptionContext *context);

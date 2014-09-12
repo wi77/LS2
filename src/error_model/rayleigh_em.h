@@ -19,8 +19,15 @@
 
  */
 
-#ifndef INCLUDED_RAYLEYGH_H
-#define INCLUDED_RAYLEYGH_H
+#ifndef INCLUDED_LS2_RAYLEIGH_H
+#define INCLUDED_LS2_RAYLEIGH_H
+
+typedef struct ls2_rayleigh_arguments {
+        double scale;
+} ls2_rayleigh_arguments;
+
+extern void __attribute__((__nonnull__))
+ls2_init_rayleigh_arguments(ls2_rayleigh_arguments *arguments);
 
 extern void __attribute__((__nonnull__))
 ls2_add_rayleigh_option_group(GOptionContext *context);

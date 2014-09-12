@@ -25,10 +25,21 @@
 
 #include "const_em.h"
 
-static double const_error_value = 50.0F;
 
-static GOptionEntry const_arguments[] = {
-        { "const-error", 0, 0, G_OPTION_ARG_DOUBLE, &const_error_value,
+
+
+extern void __attribute__((__nonnull__))
+ls2_init_const_arguments(ls2_const_arguments *arguments)
+{
+        arguments->value = 50.0;
+}
+
+
+
+static ls2_const_arguments const_arguments;
+
+static GOptionEntry const_parameters[] = {
+        { "const-error", 0, 0, G_OPTION_ARG_DOUBLE, &const_arguments.value,
           "constant error", NULL },
         { NULL }
 };
@@ -41,7 +52,7 @@ ls2_add_const_option_group(GOptionContext *context)
                                 "Parameters to the constant value error model",
                                 "Parameters to the constant value error model",
                                 NULL, NULL);
-     g_option_group_add_entries(group, const_arguments);
+     g_option_group_add_entries(group, const_parameters);
      g_option_context_add_group(context, group);
 }
 
@@ -53,7 +64,7 @@ void
 const_setup(const vector2 *anchors __attribute__((__unused__)),
             size_t nanchors __attribute__((__unused__)))
 {
-    error_v = VECTOR_BROADCASTF((float) const_error_value);
+    error_v = VECTOR_BROADCASTF((float) const_arguments.value);
 }
 
 

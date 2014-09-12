@@ -19,12 +19,21 @@
 
  */
 
-#ifndef INCLUDED_EQ_NOISE_H
-#define INCLUDED_EQ_NOISE_H
+#ifndef INCLUDED_LS2_EQ_NOISE_H
+#define INCLUDED_LS2_EQ_NOISE_H
 
-extern void eq_noise_setup(const vector2 *, size_t);
+typedef struct ls2_eq_noise_arguments {
+        double min;
+        double max;
+} ls2_eq_noise_arguments;
+
+extern void
+ls2_init_eq_noise_arguments(ls2_eq_noise_arguments *arguments);
 
 extern void __attribute__((__nonnull__))
 ls2_add_eq_noise_option_group(GOptionContext *context);
+
+extern void
+eq_noise_setup(const vector2 *, size_t);
 
 #endif

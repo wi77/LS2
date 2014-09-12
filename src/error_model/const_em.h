@@ -19,12 +19,20 @@
 
  */
 
-#ifndef INCLUDED_CONST_H
-#define INCLUDED_CONST_H
+#ifndef INCLUDED_LS2_CONST_EM_H
+#define INCLUDED_LS2_CONST_EM_H
+
+typedef struct ls2_const_arguments {
+        double value;
+} ls2_const_arguments;
+
+extern void __attribute__((__nonnull__))
+ls2_init_const_arguments(ls2_const_arguments *arguments);
 
 extern void __attribute__((__nonnull__))
 ls2_add_const_option_group(GOptionContext *context);
 
-extern void const_setup(const vector2 *, size_t);
+extern void
+const_setup(const vector2 *, size_t);
 
 #endif

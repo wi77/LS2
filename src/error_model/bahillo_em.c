@@ -25,18 +25,57 @@
 
 /* @error_model_name: NLOS (Bahillo) */
 
+
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
 
-static const float mean = 5.0f;
-static const float sdev = 2.5f;
 
-/* The next two parameters specify the range of rates. Errors can be
- * huge if the rate is close to zero, in order to avoid those huge
- * values.
- */
-static float bahillo_ua = 2.38419e-07f;
-static float bahillo_ub = 3.0f;
+
+extern void __attribute__((__nonnull__))
+ls2_init_bahillo_arguments(ls2_bahillo_arguments *arguments)
+{
+        arguments->mean = 5.0;
+        arguments->sdev = 2.5;
+        arguments->ua = 2.38419e-07;
+        arguments->ub = 3.0;
+}
+
+
+
+static ls2_bahillo_arguments bahillo_arguments;
+
+
+
+static GOptionEntry bahillo_parameters[] = {
+  { "bahillo-nd-mean", 0, 0, G_OPTION_ARG_DOUBLE,
+    &bahillo_arguments.mean,
+    "mean value of the error", NULL },
+  { "bahillo-nd-sdev", 0, 0, G_OPTION_ARG_DOUBLE,
+    &bahillo_arguments.sdev,
+    "standard deviation of the error", NULL },
+  { "bahillo-rate-low", 0, 0, G_OPTION_ARG_DOUBLE,
+    &bahillo_arguments.ua,
+    "Lower value of random NLOS rate", NULL },
+  { "bahillo-rate-high", 0, 0, G_OPTION_ARG_DOUBLE,
+    &bahillo_arguments.ub,
+    "Upper value of random NLOS rate", NULL },
+  { NULL }
+};
+
+
+
+void __attribute__((__nonnull__))
+ls2_add_bahillo_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("bahillo",
+                                "Parameters to the error model of Bahillo",
+                                "Parameters to the error model of Bahillo",
+                                NULL, NULL);
+     g_option_group_add_entries(group, bahillo_parameters);
+     g_option_context_add_group(context, group);
+}
+
 
 
 void
@@ -45,6 +84,7 @@ bahillo_setup(const vector2 *anchors __attribute__((__unused__)),
 {
     /* Do nothing. */
 }
+
 
 
 /* NLOS Error model proposed by Bahillo. 
@@ -68,10 +108,10 @@ bahillo_error(__m128i *restrict seed,
 	do {
             VECTOR noise, nlos, rate;
 	    // Compute the measurement noise.
-            noise = gaussrand(seed, mean, sdev);
+            noise = gaussrand(seed, (float) bahillo_arguments.mean, (float) bahillo_arguments.sdev);
 	    // Compute the non-line-of-sight error.
-            rate = rnd(seed) * VECTOR_BROADCASTF(bahillo_ub - bahillo_ua) +
-                   VECTOR_BROADCASTF(bahillo_ua);
+            rate = rnd(seed) * VECTOR_BROADCASTF((float) (bahillo_arguments.ub - bahillo_arguments.ua)) +
+                    VECTOR_BROADCASTF((float) bahillo_arguments.ua);
             nlos = exp_rand(seed, rate);
             error = (noise + nlos) * scale;
         } while(!VECTOR_TEST_ALL_ONES(VECTOR_LE(error, threshold)));

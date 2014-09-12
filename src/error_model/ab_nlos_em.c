@@ -27,35 +27,44 @@
 // Errormodels have to include all utils themselves
 #include "../util/util_random.c"
 
-static double ab_nlos_mean   = 50.0F;
-static double ab_nlos_sdev   = 15.0F;
-static int ab_nlos_count    = 3;
-static double ab_nlos_rate   = 2.0F;
-static double ab_nlos_scale  = 100.0F;
-static VECTOR ab_nlos_oscale;
-static int ab_nlos_norm = 1;
 
-static GOptionEntry ab_nlos_arguments[] = {
+void __attribute__((__nonnull__))
+ls2_init_ab_nlos_arguments(ls2_ab_nlos_arguments *arguments)
+{
+        arguments->mean = 50.0;
+        arguments->sdev = 15.0;
+        arguments->count = 3;
+        arguments->rate = 2.0;
+        arguments->scale = 100.0;
+        arguments->norm = 1;
+}
+
+
+
+static ls2_ab_nlos_arguments ab_nlos_arguments;
+
+static GOptionEntry ab_nlos_parameters[] = {
   { "ab_nlos-nd-mean", 0, 0, G_OPTION_ARG_DOUBLE,
-    &ab_nlos_mean,
+    &ab_nlos_arguments.mean,
     "mean value of the error", NULL },
   { "ab_nlos-nd-sdev", 0, 0, G_OPTION_ARG_DOUBLE,
-    &ab_nlos_sdev,
+    &ab_nlos_arguments.sdev,
     "standard deviation of the error", NULL },
   { "ab_nlos-count", 0, 0, G_OPTION_ARG_INT,
-    &ab_nlos_count,
+    &ab_nlos_arguments.count,
     "First n anchors with NLOS ERROR", NULL },
   { "ab_nlos-norm", 0, 0, G_OPTION_ARG_INT,
-    &ab_nlos_norm,
+    &ab_nlos_arguments.norm,
     "Normalize error?", NULL },
   { "ab_nlos-rate", 0, 0, G_OPTION_ARG_DOUBLE,
-    &ab_nlos_rate,
+    &ab_nlos_arguments.rate,
     "Rate of exponential NLOS error", NULL },
   { "ab_nlos-scale", 0, 0, G_OPTION_ARG_DOUBLE,
-    &ab_nlos_scale,
+    &ab_nlos_arguments.scale,
     "Scale of exponential NLOS error", NULL },
   { NULL }
 };
+
 
 
 void __attribute__((__nonnull__))
@@ -66,34 +75,39 @@ ls2_add_ab_nlos_option_group(GOptionContext *context)
                                 "Parameters to the AB NLOS error model",
                                 "Parameters to the AB NLOS error model",
                                 NULL, NULL);
-     g_option_group_add_entries(group, ab_nlos_arguments);
+     g_option_group_add_entries(group, ab_nlos_parameters);
      g_option_context_add_group(context, group);
 }
 
 
+
+static VECTOR ab_nlos_oscale;
+
 static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,3,8)))
 ab_nlos_error(__m128i *restrict seed,
-            const size_t anchors,
-            const VECTOR *restrict distances,
-            const VECTOR *restrict vx __attribute__((__unused__)),
-            const VECTOR *restrict vy __attribute__((__unused__)),
-            const VECTOR tagx __attribute__((__unused__)),
-            const VECTOR tagy __attribute__((__unused__)),
-            VECTOR *restrict result)
+              const size_t anchors,
+              const VECTOR *restrict distances,
+              const VECTOR *restrict vx __attribute__((__unused__)),
+              const VECTOR *restrict vy __attribute__((__unused__)),
+              const VECTOR tagx __attribute__((__unused__)),
+              const VECTOR tagy __attribute__((__unused__)),
+              VECTOR *restrict result)
 {
     VECTOR rn;
     for (size_t k=0; k < anchors ; k++) {
-        if (k < (size_t)ab_nlos_count) {
-                rn = gaussrand(seed, (float) ab_nlos_mean, (float) ab_nlos_sdev);
-                VECTOR nlos = exp_rand(seed, VECTOR_BROADCASTF((float) ab_nlos_rate)) * VECTOR_BROADCASTF((float) ab_nlos_scale);
+        if (k < (size_t)ab_nlos_arguments.count) {
+                rn = gaussrand(seed, (float) ab_nlos_arguments.mean, (float) ab_nlos_arguments.sdev);
+                VECTOR nlos = exp_rand(seed, VECTOR_BROADCASTF((float) ab_nlos_arguments.rate)) * VECTOR_BROADCASTF((float) ab_nlos_arguments.scale);
 	        rn += nlos;               
         } else {
-                rn = gaussrand(seed, (float) ab_nlos_mean, (float) ab_nlos_sdev);
+                rn = gaussrand(seed, (float) ab_nlos_arguments.mean, (float) ab_nlos_arguments.sdev);
 	    }
         result[k] = distances[k] + (rn*ab_nlos_oscale);
     }
 }
+
+
 
 void
 ab_nlos_setup(const vector2 *anchors __attribute__((__unused__)), size_t nanchors)
@@ -102,7 +116,7 @@ ab_nlos_setup(const vector2 *anchors __attribute__((__unused__)), size_t nanchor
     const VECTOR d;
     VECTOR test[nanchors];
     ab_nlos_oscale = one;
-    if (!ab_nlos_norm) return;
+    if (!ab_nlos_arguments.norm) return;
     
     for (int i = 0; i < (int)nanchors; i++)
         test[i]=zero;

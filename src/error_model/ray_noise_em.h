@@ -23,6 +23,9 @@
 #define INCLUDED_RAY_NOISE_H
 
 extern void __attribute__((__nonnull__))
+ls2_init_ray_noise_arguments(void *arguments);
+
+extern void __attribute__((__nonnull__))
 ls2_add_ray_noise_option_group(GOptionContext *context);
 
 extern void ray_noise_setup(const vector2 *, size_t);

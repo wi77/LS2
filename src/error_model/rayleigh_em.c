@@ -32,17 +32,21 @@
 
 #include "rayleigh_em.h"
 
-// Errormodels have to include all utils themselves
-#include "../util/util_random.c"
-
 /* Mean value is scale * sqrtf(M_PI / 2.0f). */
-static double rayleigh_scale = 39.8942280401f;
+extern void __attribute__((__nonnull__))
+ls2_init_rayleigh_arguments(ls2_rayleigh_arguments *arguments)
+{
+        arguments->scale = 50.0 / sqrt(M_PI / 2.0);
+}
 
-static VECTOR rayleigh_scale_vector;
 
-static GOptionEntry rayleigh_arguments[] = {
-        { "rayleigh-scale", 0, 0, G_OPTION_ARG_DOUBLE, &rayleigh_scale,
-          "scale parameter of the Rayleigh noise", NULL },
+
+static ls2_rayleigh_arguments rayleigh_arguments;
+
+static GOptionEntry rayleigh_parameters[] = {
+        { "rayleigh-scale", 0, 0, G_OPTION_ARG_DOUBLE,
+          &rayleigh_arguments.scale, "scale parameter of the Rayleigh noise",
+          NULL },
         { NULL }
 };
 
@@ -55,16 +59,21 @@ ls2_add_rayleigh_option_group(GOptionContext *context)
                                 "Parameters to the Rayleigh error model",
                                 "Parameters to the Rayleigh error model",
                                 NULL, NULL);
-     g_option_group_add_entries(group, rayleigh_arguments);
+     g_option_group_add_entries(group, rayleigh_parameters);
      g_option_context_add_group(context, group);
 }
 
+
+// Errormodels have to include all utils themselves
+#include "../util/util_random.c"
+
+static VECTOR rayleigh_scale_vector;
 
 void
 rayleigh_setup(const vector2 *anchors __attribute__((__unused__)),
                size_t nanchors __attribute__((__unused__)))
 {
-        VECTOR t = VECTOR_CONST_BROADCAST((float) rayleigh_scale);
+        VECTOR t = VECTOR_CONST_BROADCAST((float) rayleigh_arguments.scale);
         rayleigh_scale_vector = t;
 }
 

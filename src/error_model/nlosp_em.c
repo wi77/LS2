@@ -32,22 +32,34 @@
 
 #include "nlosp_em.h"
 
-static double nlosp_mean   = 50.0;
-static double nlosp_sdev   = 15.0;
-static double nlosp_nlos_p = 0.1;
-static double nlosp_rate   = 2.0;
-static double nlosp_scale  = 100.0;
 
-static GOptionEntry nlosp_arguments[] = {
-  { "nlosp-nd-mean", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_mean,
+
+void __attribute__((__nonnull__))
+ls2_init_nlosp_arguments(ls2_nlosp_arguments *arguments)
+{
+        arguments->mean = 50.0;
+        arguments->sdev = 15.0;
+        arguments->nlos_p = 0.1;
+        arguments->rate = 2.0;
+        arguments->scale = 100.0;
+}
+
+
+
+static ls2_nlosp_arguments nlosp_arguments;
+
+
+
+static GOptionEntry nlosp_parameters[] = {
+  { "nlosp-nd-mean", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_arguments.mean,
     "mean value of the error", NULL },
-  { "nlosp-nd-sdev", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_sdev,
+  { "nlosp-nd-sdev", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_arguments.sdev,
     "standard deviation of the error", NULL },
-  { "nlosp-prob", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_nlos_p,
+  { "nlosp-prob", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_arguments.nlos_p,
     "Probability of an NLOS error", NULL },
-  { "nlosp-rate", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_rate,
+  { "nlosp-rate", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_arguments.rate,
     "Rate of exponential NLOS error", NULL },
-  { "nlosp-scale", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_scale,
+  { "nlosp-scale", 0, 0, G_OPTION_ARG_DOUBLE, &nlosp_arguments.scale,
     "Scale of exponential NLOS error", NULL },
   { NULL }
 };
@@ -61,7 +73,7 @@ ls2_add_nlosp_option_group(GOptionContext *context)
                                 "Parameters to the NLOSP error model",
                                 "Parameters to the NLOSP error model",
                                 NULL, NULL);
-     g_option_group_add_entries(group, nlosp_arguments);
+     g_option_group_add_entries(group, nlosp_parameters);
      g_option_context_add_group(context, group);
 }
 
@@ -89,10 +101,10 @@ nlosp_error(__m128i *restrict seed,
             VECTOR *restrict result)
 {
     for (size_t k=0; k < anchors ; k++) {
-            VECTOR rn = gaussrand(seed, (float) nlosp_mean, (float) nlosp_sdev);
-        VECTOR help = VECTOR_LT(rnd(seed), VECTOR_BROADCASTF((float) nlosp_nlos_p));
-        VECTOR nlos = exp_rand(seed, VECTOR_BROADCASTF((float) nlosp_rate)) *
-                          VECTOR_BROADCASTF((float) nlosp_scale);
+            VECTOR rn = gaussrand(seed, (float) nlosp_arguments.mean, (float) nlosp_arguments.sdev);
+        VECTOR help = VECTOR_LT(rnd(seed), VECTOR_BROADCASTF((float) nlosp_arguments.nlos_p));
+        VECTOR nlos = exp_rand(seed, VECTOR_BROADCASTF((float) nlosp_arguments.rate)) *
+                          VECTOR_BROADCASTF((float) nlosp_arguments.scale);
 	rn += VECTOR_AND(nlos, help);  // Mask out members without nlos error
         result[k] = distances[k] + rn;
     }

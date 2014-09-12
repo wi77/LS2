@@ -65,6 +65,12 @@
 /*! The name of the wall file. */
 static char const * ls2_ray_noise_walls = "wall_txt/2r_walls.txt";
 
+extern void __attribute__((__nonnull__))
+ls2_init_ray_noise_arguments(void *arguments __attribute__((__unused__)))
+{
+
+}
+
 static GOptionEntry ray_noise_arguments[] = {
         { "walls", 0, 0, G_OPTION_ARG_FILENAME, &ls2_ray_noise_walls,
           "files describing the walls", NULL },
