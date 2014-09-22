@@ -78,7 +78,7 @@ ls2_pick_color_density(const float sample, double *restrict hue,
         *lightness = 0.5;
     } else {
 	g_assert(0.0 <= sample && sample <= 1.0);
-        const double t = cbrt(1.0 - sample);
+        const double t = 0.8 * cbrt(1.0 - sample);
         if (sample <= 0.25) {
             *hue = 150.0;
         } else if (0.25 < sample && sample <= 0.5) {
