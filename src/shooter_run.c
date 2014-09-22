@@ -343,12 +343,16 @@ ls2_shooter_run(void *rr)
             }
 	}
 
+        /* Enter the result into the result arrays. */
 	const size_t pos = (size_t) (x +  y * params->width);
         if (params->results[AVERAGE_ERROR] != NULL) {
-	    params->results[AVERAGE_ERROR][pos] = M;
+            /* Set to NAN explicitely, if we are never successful.  */
+	    params->results[AVERAGE_ERROR][pos] = (cnt > 0.0F) ? M : NAN;
         }
         if (params->results[STANDARD_DEVIATION] != NULL) {
-            params->results[STANDARD_DEVIATION][pos] = sqrtf(S / (cnt - 1.0F));
+            /* Set to NAN explicitely, if we are never successful.  */
+            params->results[STANDARD_DEVIATION][pos] =
+                 (cnt > 1.0F) ? sqrtf(S / (cnt - 1.0F)) : NAN;
         }
         if (params->results[MAXIMUM_ERROR] != NULL) {
 	    params->results[MAXIMUM_ERROR][pos] =
@@ -373,18 +377,18 @@ ls2_shooter_run(void *rr)
 	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(MSE);
         }
         if (params->results[AVERAGE_X_ERROR] != NULL) {
-	    params->results[AVERAGE_X_ERROR][pos] = M_X;
+	    params->results[AVERAGE_X_ERROR][pos] = (C_X > 0.0F) ? M_X : NAN;
         }
         if (params->results[STANDARD_DEVIATION_X_ERROR] != NULL) {
 	    params->results[STANDARD_DEVIATION_X_ERROR][pos] =
-                sqrtf(S_X / (C_X - 1.0F));
+                (C_X > 1.0F) ? sqrtf(S_X / (C_X - 1.0F)) : NAN;
         }
         if (params->results[AVERAGE_Y_ERROR] != NULL) {
-	    params->results[AVERAGE_Y_ERROR][pos] = M_Y;
+	    params->results[AVERAGE_Y_ERROR][pos] = (C_Y > 0.0F) ? M_Y : NAN;
         }
         if (params->results[STANDARD_DEVIATION_Y_ERROR] != NULL) {
 	    params->results[STANDARD_DEVIATION_Y_ERROR][pos] =
-                sqrtf(S_Y / (C_Y - 1.0F)); 
+                (C_Y > 1.0F) ? sqrtf(S_Y / (C_Y - 1.0F)) : NAN;
         }
     }
     ls2_running--;
