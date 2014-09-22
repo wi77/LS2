@@ -55,37 +55,37 @@ double ls2_backend_steps = 0.0;
 int main(int argc, char **argv)
 {
     GOptionContext *opt_con;   /* context for parsing command-line options */
-    GError *error;
+    GError *error = NULL;
 
     /* Command line arguments. */
     static GOptionEntry cli_options[] = {
         { "gradation", 'G', 0, G_OPTION_ARG_DOUBLE,
           &ls2_backend_steps,
           "number of gradation steps, 0 is unlimited", "steps" },
-        { "output-average", 'o', 0, G_OPTION_ARG_STRING,
+        { "output-average", 'o', 0, G_OPTION_ARG_FILENAME,
           &(output[AVERAGE_ERROR]),
           "name of the average error output image file", "file name" },
-        { "output-maximum", 'M', 0, G_OPTION_ARG_STRING,
+        { "output-maximum", 'M', 0, G_OPTION_ARG_FILENAME,
           &(output[MAXIMUM_ERROR]),
           "name of the maximum error output image file", "file name" },
-        { "output-minimum", 'm', 0, G_OPTION_ARG_STRING,
+        { "output-minimum", 'm', 0, G_OPTION_ARG_FILENAME,
           &(output[MINIMUM_ERROR]),
           "name of the minimum error output image file", "file name" },
-        { "output-variance", 's', 0, G_OPTION_ARG_STRING,
+        { "output-variance", 's', 0, G_OPTION_ARG_FILENAME,
           &(output[STANDARD_DEVIATION]),
           "name of the output image file of the standard deviation", "file name" },
-        { "output-rmse", 'p', 0, G_OPTION_ARG_STRING,
+        { "output-rmse", 'p', 0, G_OPTION_ARG_FILENAME,
           &(output[ROOT_MEAN_SQUARED_ERROR]),
           "name of the root mean squared error output image", "file name" },
-        { "output-success", 'S', 0, G_OPTION_ARG_STRING,
+        { "output-success", 'S', 0, G_OPTION_ARG_FILENAME,
           &(output[FAILURES]),
           "name of the failure rate output image file", "file name" },
-        { "output-phase", 'z', 0, G_OPTION_ARG_STRING,
+        { "output-phase", 'z', 0, G_OPTION_ARG_FILENAME,
           &(output[AVERAGE_X_ERROR]),
           "name of the phase portrait output image", "file name" },
-        { "stride", 'S', 0, G_OPTION_ARG_INT, &stride,
+        { "stride", 0, 0, G_OPTION_ARG_INT, &stride,
           "stride of the phase portrait", "steps" },
-        { "inverted", 'i', 0, G_OPTION_ARG_STRING, &inverted,
+        { "inverted", 'i', 0, G_OPTION_ARG_FILENAME, &inverted,
           "name of the inverted density file", "file name" },
         { "maximum", 0, 0, G_OPTION_ARG_INT64, &runs,
           "maximum frequency in inverted image", "runs" },
@@ -97,18 +97,18 @@ int main(int argc, char **argv)
     opt_con = g_option_context_new(" - generate picture of spatial distribution");
     g_option_context_add_main_entries(opt_con, cli_options, NULL);
 
-    if (!g_option_context_parse( opt_con, &argc, &argv, &error)) {
+    if (!g_option_context_parse(opt_con, &argc, &argv, &error)) {
         g_print("option parsing failed: %s\n", error->message);
         g_option_context_free(opt_con);
         exit(EXIT_FAILURE);
     }
 
-    if (argc < 1) {
+    if (argc < 2) {
         g_printerr("missing input file name.\n");
         g_option_context_free(opt_con);
         exit(EXIT_FAILURE);
     }
-    if (argc > 1) {
+    if (argc > 2) {
         g_printerr("warning: too many arguments, some were ignored.\n");
     }
 
