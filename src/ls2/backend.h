@@ -160,30 +160,30 @@ ls2_openexr_write_diff(const char *filename, const vector2 *anchors,
 extern void
 ls2_hdf5_write_locbased(const char *filename, const vector2 *anchors,
                         const size_t no_anchors, float **results,
-                        const uint16_t width, const uint16_t height);
+                        const size_t width, const size_t height);
 
 extern void 
 ls2_hdf5_write_inverted(const char* filename,
                         const float tag_x, const float tag_y,
 			const vector2 *restrict anchors, const size_t no_anchors,
                         const uint64_t *restrict result,
-                        const uint16_t width, const uint16_t height,
+                        const size_t width, const size_t height,
     			const double center_x, const double center_y);
 
 extern int
 ls2_hdf5_write_diff(const char *filename, const vector2 *anchors,
                     const size_t no_anchors, const float *results[],
-                    const uint16_t width, const uint16_t height);
+                    const size_t width, const size_t height);
 
 extern int
 ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
                        vector2 **anchors, size_t *no_anchors,
-                       float **results, uint16_t *width, uint16_t *height);
+                       float **results, size_t *width, size_t *height);
 
 extern int __attribute__((__nonnull__))
 ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
                        vector2 **anchors, size_t *no_anchors,
-                       uint64_t **results, uint16_t *width, uint16_t *height,
+                       uint64_t **results, size_t *width, size_t *height,
                        double *center_x, double *center_y);
 
 #ifdef __cplusplus

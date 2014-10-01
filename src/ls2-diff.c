@@ -78,7 +78,7 @@ main(int argc, char **argv)
 {
      GOptionContext *opt_con;   /* context for parsing command-line options */
      GError *error;
-     uint16_t a_height, a_width, b_height, b_width;
+     size_t a_height, a_width, b_height, b_width;
      size_t a_no_anchors, b_no_anchors;
      vector2 *a_anchors, *b_anchors;
      float *a_results, *b_results, *results;
@@ -129,9 +129,9 @@ main(int argc, char **argv)
 	   * A negative number means that image two has the larger error.
 	   */
 	  results = g_new(float, (size_t)(a_width * a_height));
-	  for (uint16_t y = 0; y < a_height; y++) {
-	       for (uint16_t x = 0; x < a_width; x++) {
-		    const int i = x + y * a_width;
+	  for (size_t y = 0; y < a_height; y++) {
+	       for (size_t x = 0; x < a_width; x++) {
+		    const size_t i = x + y * a_width;
 		    results[i] = a_results[i] - b_results[i];
 	       }
 	  }
@@ -143,7 +143,7 @@ main(int argc, char **argv)
 		  "max = %f\n", mu, sigma, min, max);
 	  
 	  ls2_cairo_write_png_diff(compare[var], a_anchors, a_no_anchors,
-				   results, a_width, a_height,
+				   results, (uint16_t) a_width, (uint16_t) a_height,
                                    similarity, dynamic);
 	  g_free(results);
      }

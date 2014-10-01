@@ -77,6 +77,11 @@ ls2_hdf_write_anchors(hid_t file_id, const vector2 *anchors, size_t no_anchors)
     dataspace = H5Screate_simple(2, dims, NULL);
     dataset = H5Dcreate(file_id, "/Anchors", H5T_NATIVE_FLOAT,
                         dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (dataset < 0) {
+        g_printerr("cannot create dataset /Anchors\n");
+        H5Eprint(H5E_DEFAULT, stderr);
+        exit(EXIT_FAILURE);
+    }
     H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
              anchors);
     H5Sclose(dataspace);
@@ -88,30 +93,33 @@ ls2_hdf_write_anchors(hid_t file_id, const vector2 *anchors, size_t no_anchors)
 void
 ls2_hdf5_write_locbased(const char *filename, const vector2 *anchors,
                         const size_t no_anchors, float **results,
-                        const uint16_t width, const uint16_t height)
+                        const size_t width, const size_t height)
 {
-    hid_t file_id, grp, dataset, dataspace, plist_id;
-    hsize_t dims[2];
-    hsize_t chunk_dims[2] = { width, height };
+    hid_t file_id, grp, dataset, plist_id;
+    hsize_t dims[2] = { height, width };
+    hsize_t chunk_dims[2] = { height, width };
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     grp = H5Gcreate(file_id, "/Result", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     ls2_hdf_write_anchors(file_id, anchors, no_anchors);
 
-    dims[0] = height;
-    dims[1] = width;
     for (ls2_output_variant k = 0; k < NUM_VARIANTS; k++) {
         if (results[k] == NULL)
             continue;
         char name[256];
-        dataspace = H5Screate_simple(2, dims, NULL);
+        hid_t dataspace = H5Screate_simple(2, dims, NULL);
 	plist_id = H5Pcreate(H5P_DATASET_CREATE);
 	H5Pset_chunk(plist_id, 2, chunk_dims);
 	H5Pset_deflate (plist_id, 9);
         snprintf(name, 256, "/Result/%s", ls2_hdf5_variant_name(k));
         dataset = H5Dcreate(file_id, name, H5T_NATIVE_FLOAT,
                             dataspace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+        if (dataset < 0) {
+            g_printerr("\n\n\ncannot create dataset %s\n", name);
+            H5Eprint(H5E_DEFAULT, stderr);
+            exit(EXIT_FAILURE);
+        }
         H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  results[k]);
         H5Sclose(dataspace);
@@ -162,7 +170,7 @@ ls2_hdf5_read_anchors(hid_t file, vector2** anchors, size_t *no_anchors)
 int __attribute__((__nonnull__(1,5,6,7)))
 ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
                        vector2 **anchors, size_t *no_anchors,
-                       float **results, uint16_t *width, uint16_t *height)
+                       float **results, size_t *width, size_t *height)
 {
     hid_t file, dataset, dataspace, memspace;
     hsize_t dims[2];
@@ -188,8 +196,8 @@ ls2_hdf5_read_locbased(const char *filename, ls2_output_variant variant,
         return -1;
     }
     H5Sget_simple_extent_dims(dataspace, dims, NULL);
-    *width = (uint16_t) dims[1];
-    *height = (uint16_t) dims[0];
+    *width = (size_t) dims[1];
+    *height = (size_t) dims[0];
     *results = g_new(float, (size_t) (*height * *width));
     memspace = H5Screate_simple(2, dims, NULL);
     H5Dread(dataset, H5T_NATIVE_FLOAT, memspace, dataspace, H5P_DEFAULT,
@@ -210,7 +218,7 @@ ls2_hdf5_write_inverted(const char *filename,
 			const float tag_x, const float tag_y,
 			const vector2 *restrict anchors, const size_t no_anchors,
 			const uint64_t *restrict result,
-			const uint16_t width, const uint16_t height,
+			const size_t width, const size_t height,
 			const double center_x, const double center_y)
 {
     hid_t file_id, grp, dataset, dataspace, plist_id;
@@ -266,7 +274,7 @@ ls2_hdf5_write_inverted(const char *filename,
 int __attribute__((__nonnull__))
 ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
                        vector2 **anchors, size_t *no_anchors,
-                       uint64_t **results, uint16_t *width, uint16_t *height,
+                       uint64_t **results, size_t *width, size_t *height,
                        double *center_x, double *center_y)
 {
     hid_t file, dataset, dataspace, memspace;
@@ -327,8 +335,8 @@ ls2_hdf5_read_inverted(const char *filename, float *tag_x, float *tag_y,
         return -1;
     }
     H5Sget_simple_extent_dims(dataspace, dims, NULL);
-    *width = (uint16_t) dims[1];
-    *height = (uint16_t) dims[0];
+    *width = (size_t) dims[1];
+    *height = (size_t) dims[0];
     *results = g_new(uint64_t, (size_t) (*height * *width));
     memspace = H5Screate_simple(2, dims, NULL);
     H5Dread(dataset, H5T_STD_U64LE, memspace, dataspace, H5P_DEFAULT,
