@@ -249,7 +249,7 @@ main(int argc, char* argv[])
 
     // Handle the left-over arguments.
     no_anchor_args = 0;
-    while (no_anchor_args < 2 * MAX_ANCHORS && no_anchor_args < argc) {
+    while (no_anchor_args < argc && no_anchor_args <= 2 * MAX_ANCHORS) {
         anchor[no_anchor_args] = argv[no_anchor_args];
         no_anchor_args++;
     }
