@@ -41,8 +41,8 @@ vcircle_intersections(const VECTOR p1x, const VECTOR p1y, const VECTOR p2x,
                       VECTOR *restrict rx, VECTOR *restrict ry)
 {
     // Initialise result to zero
-    VECTOR result = zero;
-    rx[0] = rx[1] = ry[0] = ry[1] = zero;
+    VECTOR result = VECTOR_ZERO();
+    rx[0] = rx[1] = ry[0] = ry[1] = VECTOR_ZERO();
 
     // Compute distances
     const VECTOR d = distance(p1x, p1y, p2x, p2y);
@@ -61,12 +61,12 @@ vcircle_intersections(const VECTOR p1x, const VECTOR p1y, const VECTOR p2x,
 
     // Mask vector to mask out nonsensical values. A component is 0x00000000,
     // if the solution is to be ignored and 0xFFFFFFFF if it is valid.
-    VECTOR mask = zero;
+    VECTOR mask = VECTOR_ZERO();
 
     // Solution, because the circles are not coincident and are contained
     // within each other.
 
-    mask = VECTOR_NE(d, zero);
+    mask = VECTOR_NE(d, VECTOR_ZERO());
     mask = VECTOR_AND(mask, VECTOR_GE(r1 + r2, d));
     mask = VECTOR_AND(mask, VECTOR_LE(VECTOR_ABS(r1 - r2), d));
 
@@ -100,7 +100,7 @@ int test_vcircle_intersections(){
     
     printf("\nTesting vcircle_intersections\n");
     
-    num = vcircle_intersections(zero, zero, one, zero, one, one, ix, iy);
+    num = vcircle_intersections(VECTOR_ZERO(), VECTOR_ZERO(), one, VECTOR_ZERO(), one, one, ix, iy);
     printf("Intersection of (0,0 r:1) (1,0 r:1) should have %e intersections.", 2.0);
     if (num[0] == 0.0) printf("found no intersections\n");
     if (num[0] > 0.0) printf(" - found (%.8f,%.8f)", ix[0][0], iy[0][0]);
@@ -108,7 +108,7 @@ int test_vcircle_intersections(){
     if (num[0] > 0.0) printf(" with %e intersections\n", num[0]);
     if (num[0] != 2.0) return 0;
     
-    num = vcircle_intersections(zero, zero, three, zero, one, one, ix, iy);
+    num = vcircle_intersections(VECTOR_ZERO(), VECTOR_ZERO(), three, VECTOR_ZERO(), one, one, ix, iy);
     printf("Intersection of (0,0 r:1) (3,0 r:1) should have %e intersections.", 0.0);
     if (num[0] == 0.0) printf("found no intersections\n");
     if (num[0] > 0.0) printf(" - found (%.8f,%.8f)", ix[0][0], iy[0][0]);
@@ -116,7 +116,7 @@ int test_vcircle_intersections(){
     if (num[0] > 0.0) printf(" with %e intersections\n", num[0]);
     if (num[0] != 0.0) return 0;
 
-    num = vcircle_intersections (zero, zero, two, zero, one, one, ix, iy);
+    num = vcircle_intersections (VECTOR_ZERO(), VECTOR_ZERO(), two, VECTOR_ZERO(), one, one, ix, iy);
     printf("Intersection of (0,0 r:1) (1,0 r:1) should have %e intersections.", 1.0);
     if (num[0] == 0.0) printf(" - found no intersections\n");
     if (num[0] > 0.0) printf(" - found (%.8f,%.8f)", ix[0][0], iy[0][0]);
