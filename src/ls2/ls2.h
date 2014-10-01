@@ -29,7 +29,7 @@ extern "C"
 // The number of anchors which are supported, usually defined via makefile.
 // more anchors mean more memory consumption
 #ifndef MAX_ANCHORS
-#  define MAX_ANCHORS 16
+#  define MAX_ANCHORS 32
 #endif
 
 #ifndef MIN
