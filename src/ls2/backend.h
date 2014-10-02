@@ -49,7 +49,8 @@ extern void
 ls2_write_locbased(ls2_output_format_t format, const char *filename,
 		   const vector2 *anchors, const size_t num_anchors,
 		   const float *results, const uint16_t width,
-		   const uint16_t height);
+		   const uint16_t height,
+                   const float expectation, const float clip);
 
 extern void
 ls2_write_density(ls2_output_format_t format, const char *filename,
@@ -63,7 +64,8 @@ ls2_write_inverted(ls2_output_format_t format, const char *filename,
 		   const vector2 *restrict anchors, const size_t num_anchors,
 		   const uint64_t *restrict results, const uint16_t width,
 		   const uint16_t height,
-    		   const float center_x, float center_y);
+		   const float center_x, float center_y,
+                   const float expectation, const float clip);
 
 /*
  *
@@ -74,13 +76,15 @@ extern void
 ls2_cairo_write_pdf_locbased(const char* filename,
                              const vector2 *anchors, const size_t no_anchors,
                              const float* result, const uint16_t width,
-		             const uint16_t height);
+		             const uint16_t height,
+                             const float expectation, const float clip);
 
 extern void
 ls2_cairo_write_png_locbased(const char* filename,
                              const vector2 *anchors, const size_t no_anchors,
                              const float* result, const uint16_t width,
-		             const uint16_t height);
+		             const uint16_t height,
+                             const float expectation, const float clip);
 
 extern void
 ls2_cairo_write_pdf_density(const char* filename,
@@ -100,7 +104,8 @@ ls2_cairo_write_pdf_inverted(const char* filename,
 			     const vector2 *anchors, const size_t no_anchors, 
 			     const double *restrict result,
 			     const uint16_t width, const uint16_t height,
-			     const double center_x, const double center_y);
+			     const double center_x, const double center_y,
+                             const double expectation, const double clip);
 
 extern void
 ls2_cairo_write_png_inverted(const char* filename,
@@ -108,7 +113,8 @@ ls2_cairo_write_png_inverted(const char* filename,
 			     const vector2 *anchors, const size_t no_anchors, 
 			     const double *restrict result,
 			     const uint16_t width, const uint16_t height,
-			     const double center_x, const double center_y);
+			     const double center_x, const double center_y,
+                             const double expectation, const double clip);
 
 extern void
 ls2_cairo_write_png_phase_portrait(const char* filename,
@@ -116,7 +122,8 @@ ls2_cairo_write_png_phase_portrait(const char* filename,
 				   const size_t no_anchors, 
 				   const float* dx, const float* dy,
 				   const uint16_t width, const uint16_t height,
-				   const uint16_t stride);
+				   const uint16_t stride,
+                                   const float expectation, const float clip);
 
 extern void
 ls2_cairo_write_pdf_phase_portrait(const char* filename,
@@ -124,25 +131,27 @@ ls2_cairo_write_pdf_phase_portrait(const char* filename,
 				   const size_t no_anchors, 
 				   const float* dx, const float* dy,
 				   const uint16_t width, const uint16_t height,
-				   const uint16_t stride);
+				   const uint16_t stride,
+                                   const float expectation, const float clip);
 
 extern void
 ls2_cairo_write_pdf_diff(const char* filename, const vector2 *anchors,
                          const size_t no_anchors, const float* result,
                          const uint16_t width, const uint16_t height,
-                         const double similar, const double dynamic);
+                         const float similar, const float dynamic);
 
 extern void
 ls2_cairo_write_png_diff(const char* filename, const vector2 *anchors,
                          const size_t no_anchors, const float* result,
                          const uint16_t width, const uint16_t height,
-                         const double similar, const double dynamic);
+                         const float similar, const float dynamic);
 
 extern void
 ls2_openexr_write_locbased(const char* filename,
                            const vector2 *anchors, const size_t no_anchors,
                            const float* restrict result, const uint16_t width,
-			   const uint16_t height);
+			   const uint16_t height,
+                           const float expectation, const float clip);
 
 extern void 
 ls2_openexr_write_inverted(const char* filename,
@@ -150,12 +159,14 @@ ls2_openexr_write_inverted(const char* filename,
 			   const vector2 *anchors, const size_t no_anchors,
                            const double *restrict result,
                            const uint16_t dim_x, const uint16_t dim_y,
-    			   const double center_x, const double center_y);
+			   const double center_x, const double center_y,
+                           const double expectation, const double clip);
 
 extern int
 ls2_openexr_write_diff(const char *filename, const vector2 *anchors,
                        const size_t no_anchors, const float *results,
-                       const uint16_t width, const uint16_t height);
+                       const uint16_t width, const uint16_t height,
+                       const float similar, const float dynamic);
 
 extern void
 ls2_hdf5_write_locbased(const char *filename, const vector2 *anchors,
@@ -168,7 +179,7 @@ ls2_hdf5_write_inverted(const char* filename,
 			const vector2 *restrict anchors, const size_t no_anchors,
                         const uint64_t *restrict result,
                         const size_t width, const size_t height,
-    			const double center_x, const double center_y);
+			const double center_x, const double center_y);
 
 extern int
 ls2_hdf5_write_diff(const char *filename, const vector2 *anchors,

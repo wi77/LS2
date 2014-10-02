@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
     vector2 *anchors;
     size_t no_anchors;
-    uint16_t height, width;
+    size_t height, width;
 
     // calculate average
     if (inverted == NULL) {
@@ -135,8 +135,8 @@ int main(int argc, char **argv)
                                            NULL, NULL, &dy,
                                            &width, &height);
                     ls2_cairo_write_pdf_phase_portrait(output[var], anchors,
-						       no_anchors, dx, dy, width,
-						       height, (uint16_t) stride);
+						       no_anchors, dx, dy, (uint16_t) width,
+						       (uint16_t) height, (uint16_t) stride, 50.0, 250.0);
                     free(dx);
                     free(dy);
                 } else {
@@ -151,10 +151,10 @@ int main(int argc, char **argv)
 		            mu, sigma, min, max);
 		    if (var != FAILURES)
 			ls2_write_locbased(format, output[var], anchors, no_anchors,
-					   results, width, height);
+					   results, (uint16_t) width, (uint16_t) height, 50.0, 250.0);
  		    else
 			ls2_write_density(format, output[var], anchors, no_anchors,
-					  results, width, height);		      
+					  results, (uint16_t) width, (uint16_t) height);
                     free(results);
                 }
                 // clean-ups.
@@ -168,12 +168,12 @@ int main(int argc, char **argv)
         ls2_hdf5_read_inverted(input_hdf5, &tag_x, &tag_y, &anchors, &no_anchors,
 			       &result, &width, &height, &center_x, &center_y);
         uint64_t maximum = 0;
-        for (int i = 0; i < width * height; i++)
+        for (size_t i = 0; i < width * height; i++)
             maximum = MAX(result[i], maximum);
         g_print("Actual maximum: %" PRIu64 ", used maximum: %" PRIu64 "\n",
                 maximum, ((runs == 0) ? maximum : (uint64_t) runs));
 	ls2_write_inverted(format, inverted, (uint64_t) runs, tag_x, tag_y, anchors, no_anchors,
-			   result, width, height, (float) center_x, (float) center_y);
+			   result, (uint16_t) width, (uint16_t) height, (float) center_x, (float) center_y, 50.0, 250.0);
         free(result);
         free(anchors);
     }

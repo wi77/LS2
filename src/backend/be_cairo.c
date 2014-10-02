@@ -54,7 +54,8 @@
 static cairo_surface_t *
 ls2_draw_result_to_cairo(cairo_surface_t *surface,
 		         const float *result, const uint16_t width,
-			 const uint16_t height)
+			 const uint16_t height,
+                         const float expectation, const float clip)
 {
     cairo_t *cr;
 
@@ -71,7 +72,7 @@ ls2_draw_result_to_cairo(cairo_surface_t *surface,
 	for (uint16_t x = 0; x < width; x++) {
 	    const float sample = result[y * width + x];
             double r, g, b, a;
-            ls2_pick_color_locbased(sample, &r, &g, &b, &a);
+            ls2_pick_color_locbased(&r, &g, &b, &a, sample, expectation, clip);
 	    cairo_set_source_rgb(cr, r, g, b);
 	    cairo_rectangle(cr, x, y, 1.0, 1.0);
 	    cairo_fill(cr);
@@ -131,10 +132,11 @@ static void
 ls2_draw_to_cairo_surface_locbased(cairo_surface_t *surface,
 				   const vector2 *anchors, const size_t no_anchors,
 				   const float* result, const uint16_t width,
-				   const uint16_t height)
+				   const uint16_t height,
+                                   const float expectation, const float clip)
 {
     const double fn_size = (double) ((width < height) ? width : height) / 50.0;
-    ls2_draw_result_to_cairo(surface, result, width, height);
+    ls2_draw_result_to_cairo(surface, result, width, height, expectation, clip);
     ls2_draw_anchors_to_cairo(surface, anchors, no_anchors, 0, fn_size);
                               
 }
@@ -144,12 +146,13 @@ extern void
 ls2_cairo_write_pdf_locbased(const char* filename,
 		             const vector2 *anchors, const size_t no_anchors, 
 		             const float* result, const uint16_t width,
-		             const uint16_t height)
+		             const uint16_t height,
+                             const float expectation, const float clip)
 {
     cairo_surface_t *surface =
         cairo_pdf_surface_create(filename, width, height);
     ls2_draw_to_cairo_surface_locbased(surface, anchors, no_anchors, result,
-				       width, height);
+				       width, height, expectation, clip);
     cairo_surface_destroy(surface);
 }
 
@@ -158,12 +161,13 @@ extern void
 ls2_cairo_write_png_locbased(const char* filename,
 		             const vector2 *anchors, const size_t no_anchors, 
 		             const float* result, const uint16_t width,
-		             const uint16_t height)
+		             const uint16_t height,
+                             const float expectation, const float clip)
 {
     cairo_surface_t *surface =
         cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
     ls2_draw_to_cairo_surface_locbased(surface, anchors, no_anchors, result,
-				       width, height);
+				       width, height, expectation, clip);
     cairo_surface_write_to_png(surface, filename);
     cairo_surface_destroy(surface);
 }
@@ -322,7 +326,8 @@ ls2_cairo_draw_phase_portrait(cairo_surface_t *surface,
 			      const size_t no_anchors, 
 			      const float *dx, const float *dy,
 			      const uint16_t width, const uint16_t height,
-			      const uint16_t stride)
+			      const uint16_t stride, const float expectation,
+                              const float clip)
 {
     cairo_t *cr;
     size_t p = 0;
@@ -361,7 +366,8 @@ ls2_cairo_draw_phase_portrait(cairo_surface_t *surface,
     for (size_t i = 0; i < no_items; i++) {
         double r, g, b, a;
 
-        ls2_pick_color_locbased(items[i].length, &r, &g, &b, &a);
+        ls2_pick_color_locbased(&r, &g, &b, &a, items[i].length,
+                                expectation, clip);
         ls2_cairo_draw_arrow(cr, items[i].sx, items[i].sy,
                              items[i].ex, items[i].ey, r, g, b);
     }
@@ -379,12 +385,13 @@ ls2_cairo_write_png_phase_portrait(const char* filename,
 				   const size_t no_anchors, 
 				   const float* dx, const float* dy,
 				   const uint16_t width, const uint16_t height,
-				   const uint16_t stride)
+				   const uint16_t stride,
+                                   const float expectation, const float clip)
 {
     cairo_surface_t *surface =
         cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
     ls2_cairo_draw_phase_portrait(surface, anchors, no_anchors, dx, dy,
-				  width, height, stride);
+				  width, height, stride, expectation, clip);
     cairo_surface_write_to_png(surface, filename);
     cairo_surface_destroy(surface);
 }
@@ -397,12 +404,13 @@ ls2_cairo_write_pdf_phase_portrait(const char* filename,
 				   const size_t no_anchors, 
 				   const float* dx, const float* dy,
 				   const uint16_t width, const uint16_t height,
-				   const uint16_t stride)
+				   const uint16_t stride,
+                                   const float expectation, const float clip)
 {
     cairo_surface_t *surface =
         cairo_pdf_surface_create(filename, width, height);
     ls2_cairo_draw_phase_portrait(surface, anchors, no_anchors, dx, dy,
-				  width, height, stride);
+				  width, height, stride, expectation, clip);
     cairo_surface_destroy(surface);
 }
 
@@ -450,8 +458,8 @@ void
 ls2_cairo_write_png_diff(const char* filename,
 		         const vector2 *anchors, const size_t no_anchors, 
 		         const float* result, const uint16_t width,
-		         const uint16_t height, const double similar,
-                         const double dynamic)
+		         const uint16_t height,
+                         const float similar, const float dynamic)
 {
     cairo_surface_t *surface =
         cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
@@ -509,7 +517,9 @@ ls2_inverted_to_cairo_surface(cairo_surface_t *restrict surface,
                               const size_t no_anchors, 
 			      const double *restrict result,
 			      const uint16_t width, const uint16_t height,
-			      const double center_x, const double center_y)
+			      const double center_x, const double center_y,
+                              const double expectation,
+                              const double clip __attribute__((__unused__)))
 {
     ls2_draw_inverted_result_to_cairo(surface, result, width, height);
     cairo_t *cr = cairo_create(surface);
@@ -525,7 +535,7 @@ ls2_inverted_to_cairo_surface(cairo_surface_t *restrict surface,
     cairo_new_path(cr);
     cairo_set_line_width(cr, 2.0f);
     cairo_set_source_rgb(cr, 0.0f, 1.0f, 0.0f);
-    cairo_arc(cr, tag_x, tag_y, 50.0f, 0.0f, 2.0f * (float) M_PI);
+    cairo_arc(cr, tag_x, tag_y, expectation, 0.0f, 2.0f * (float) M_PI);
     cairo_stroke(cr);
 
     // Add a magenta circle to the center of mass
@@ -550,12 +560,14 @@ ls2_cairo_write_pdf_inverted(const char* filename,
 			     const vector2 *anchors, const size_t no_anchors, 
 			     const double *restrict result,
 			     const uint16_t width, const uint16_t height,
-			     const double center_x, const double center_y)
+			     const double center_x, const double center_y,
+                             const double expectation, const double clip)
 {
     cairo_surface_t *surface = cairo_pdf_surface_create(filename,
                                                         width, height);
     ls2_inverted_to_cairo_surface(surface, tag_x, tag_y, anchors, no_anchors,
-                                  result, width, height, center_x, center_y);
+                                  result, width, height, center_x, center_y,
+                                  expectation, clip);
     cairo_surface_destroy(surface);
 }
 
@@ -566,13 +578,15 @@ ls2_cairo_write_png_inverted(const char* filename,
 			     const vector2 *anchors, const size_t no_anchors, 
 			     const double *restrict result,
 			     const uint16_t width, const uint16_t height,
-			     const double center_x, const double center_y)
+			     const double center_x, const double center_y,
+                             const double expectation, const double clip)
 {
     cairo_surface_t *surface =
         cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
     ls2_inverted_to_cairo_surface(surface, tag_x, tag_y,
                                   anchors, no_anchors, 
-				  result, width, height, center_x, center_y);
+				  result, width, height, center_x, center_y,
+                                  expectation, clip);
     cairo_surface_write_to_png(surface, filename);
     cairo_surface_destroy(surface);
 }

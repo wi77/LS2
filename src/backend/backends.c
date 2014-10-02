@@ -64,20 +64,21 @@ void
 ls2_write_locbased(ls2_output_format_t format, const char *filename,
 		   const vector2 *anchors, const size_t num_anchors,
 		   const float *results, const uint16_t width,
-		   const uint16_t height)
+		   const uint16_t height,
+                   const float expectation, const float clip)
 {
     switch (format) {
     case OUTPUT_PNG:
 	ls2_cairo_write_png_locbased(filename, anchors, num_anchors,
-				     results, width, height);
+				     results, width, height, expectation, clip);
 	break;
     case OUTPUT_PDF:
 	ls2_cairo_write_pdf_locbased(filename, anchors, num_anchors,
-				     results, width, height);
+				     results, width, height, expectation, clip);
 	break;
     case OUTPUT_OPENEXR:
 	ls2_openexr_write_locbased(filename, anchors, num_anchors,
-				   results, width, height);
+				   results, width, height, expectation, clip);
 	break;
     case NUM_OUTPUT_FORMATS:
 	break;
@@ -120,7 +121,8 @@ ls2_write_inverted(ls2_output_format_t format, const char *filename,
 		   const vector2 *restrict anchors, const size_t num_anchors,
 		   const uint64_t *restrict result, const uint16_t width,
 		   const uint16_t height,
-    		   const float center_x, float center_y)
+    		   const float center_x, const float center_y,
+                   const float expectation, const float clip)
 {
     uint64_t maxval = 0;
     if (runs <= 0) {
@@ -146,17 +148,19 @@ ls2_write_inverted(ls2_output_format_t format, const char *filename,
     case OUTPUT_PNG:
 	ls2_cairo_write_png_inverted(filename, tag_x, tag_y, anchors,
 				     num_anchors, converted, width, height,
-				     center_x, center_y);
+				     center_x, center_y, expectation, clip);
 	break;
     case OUTPUT_PDF:
 	ls2_cairo_write_pdf_inverted(filename, tag_x, tag_y,
 				     anchors, num_anchors, converted,
-				     width, height, center_x, center_y);
+				     width, height, center_x, center_y,
+                                     expectation, clip);
 	break;
     case OUTPUT_OPENEXR:
 	ls2_openexr_write_inverted(filename, tag_x, tag_y,
 				   anchors, num_anchors, converted,
-				   width, height, center_x, center_y);
+				   width, height, center_x, center_y,
+                                   expectation, clip);
 	break;
     case NUM_OUTPUT_FORMATS:
 	break;

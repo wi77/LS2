@@ -425,7 +425,7 @@ main(int argc, char* argv[])
             if (output[var] != NULL && *(output[var]) != '\0') {
 	      ls2_write_locbased(get_output_format(output_format), output[var],
 				 anchors, no_anchors,
-				 results[var], (uint16_t) width, (uint16_t) height);
+				 results[var], (uint16_t) width, (uint16_t) height, 50.0, 250.0);
             }
         }
         if (output_hdf5 != NULL && *output_hdf5 != '\0') {
@@ -438,12 +438,12 @@ main(int argc, char* argv[])
 	    ls2_write_inverted(get_output_format(output_format), output[0],
 			       0, (float) tag_x, (float) tag_y,
                                anchors, no_anchors,
-			       result, (uint16_t) width, (uint16_t) height, centre_x, centre_y);
+			       result, (uint16_t) width, (uint16_t) height, centre_x, centre_y, 50.0, 250.0);
         } else {
 	    ls2_write_inverted(get_output_format(output_format), output[0],
 			       (uint64_t) runs, (float) tag_x, (float) tag_y,
                                anchors, no_anchors,
-			       result, (uint16_t) width, (uint16_t) height, centre_x, centre_y);
+			       result, (uint16_t) width, (uint16_t) height, centre_x, centre_y, 50.0, 250.0);
         }
         if (output_hdf5 != NULL && *output_hdf5 != '\0') {
 	    ls2_hdf5_write_inverted(output_hdf5, (float) tag_x, (float) tag_y,

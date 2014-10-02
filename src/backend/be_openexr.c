@@ -77,14 +77,15 @@ DECLARE_DRAW_RECTANGLE(ls2_draw_rectangle_to_openexr, ImfRgba *, float r, float 
 static void __attribute__((__nonnull__))
 ls2_draw_result_to_openexr(ImfRgba *restrict image,
                            const uint16_t width, const uint16_t height,
-                           const float *restrict result)
+                           const float *restrict result,
+                           const float expectation, const float clip)
 {
     for (uint16_t y = 0; y < height; y++) {
         for (uint16_t x = 0; x < width; x++) {
             const int pos = x + width * y;
 	    double r, g, b, a;
             const float sample = result[pos];
-	    ls2_pick_color_locbased(sample, &r, &g, &b, &a);
+	    ls2_pick_color_locbased(&r, &g, &b, &a, sample, expectation, clip);
 	    paint_dot_to_openexr(image, width, height, x, y,
                                  (float) r, (float) g, (float) b);
         }
@@ -129,11 +130,12 @@ extern void
 ls2_openexr_write_locbased(const char* filename,
 			   const vector2 *anchors, const size_t no_anchors, 
 			   const float* restrict result, const uint16_t width,
-			   const uint16_t height)
+			   const uint16_t height,
+                           const float expectation, const float clip)
 {
     ImfRgba *image = g_new(ImfRgba, (size_t) width * height);
 
-    ls2_draw_result_to_openexr(image, width, height, result);
+    ls2_draw_result_to_openexr(image, width, height, result, expectation, clip);
     ls2_draw_anchors_to_openexr(image, width, height, anchors, no_anchors, 0);
 
     ImfHeader *header = ImfNewHeader();
@@ -154,14 +156,16 @@ ls2_openexr_write_inverted(const char* filename,
 			   const vector2 *anchors, const size_t no_anchors,
 			   const double *restrict result,
 			   const uint16_t width, const uint16_t height,
-    			   const double center_x, const double center_y)
+    			   const double center_x, const double center_y,
+                           const double expectation,
+                           const double clip __attribute__((__unused__)))
 {
     ImfRgba *image = g_new(ImfRgba, (size_t) width * height);
 
     // Draw the result image.
     ls2_draw_inverted_to_openexr(image, width, height, result);
     ls2_draw_circle_to_openexr(image, width, height, (uint16_t) tag_x, (uint16_t) tag_y,
-                               50, 0.0F, 1.0F, 0.0F);
+                               expectation, 0.0F, 1.0F, 0.0F);
     ls2_draw_rectangle_to_openexr(image, width, height, (uint16_t) tag_x,
                                   (uint16_t) tag_y, 2, 2, 1.0F, 1.0F, 0.0F);
     ls2_draw_anchors_to_openexr(image, width, height, anchors, no_anchors, 0);
