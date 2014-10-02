@@ -51,6 +51,8 @@ static int stride = 10;
 static long runs;
 
 double ls2_backend_steps = 0.0;
+static double ls2_backend_expectation = 50.0;
+static double ls2_backend_clip = 250.0;
 
 int main(int argc, char **argv)
 {
@@ -62,6 +64,12 @@ int main(int argc, char **argv)
         { "gradation", 'G', 0, G_OPTION_ARG_DOUBLE,
           &ls2_backend_steps,
           "number of gradation steps, 0 is unlimited", "steps" },
+        { "expectation", 'E', 0, G_OPTION_ARG_DOUBLE,
+          &ls2_backend_expectation,
+          "Expected distance measurement error", "expected error" },
+        { "clip", 'C', 0, G_OPTION_ARG_DOUBLE,
+          &ls2_backend_clip,
+          "Clip all errors larger than this", "clip error value" },
         { "output-average", 'o', 0, G_OPTION_ARG_FILENAME,
           &(output[AVERAGE_ERROR]),
           "name of the average error output image file", "file name" },
@@ -136,7 +144,8 @@ int main(int argc, char **argv)
                                            &width, &height);
                     ls2_cairo_write_pdf_phase_portrait(output[var], anchors,
 						       no_anchors, dx, dy, (uint16_t) width,
-						       (uint16_t) height, (uint16_t) stride, 50.0, 250.0);
+						       (uint16_t) height, (uint16_t) stride,
+                                                       (float) ls2_backend_expectation, (float) ls2_backend_clip);
                     free(dx);
                     free(dy);
                 } else {
@@ -151,7 +160,8 @@ int main(int argc, char **argv)
 		            mu, sigma, min, max);
 		    if (var != FAILURES)
 			ls2_write_locbased(format, output[var], anchors, no_anchors,
-					   results, (uint16_t) width, (uint16_t) height, 50.0, 250.0);
+					   results, (uint16_t) width, (uint16_t) height,
+                                           (float) ls2_backend_expectation, (float) ls2_backend_clip);
  		    else
 			ls2_write_density(format, output[var], anchors, no_anchors,
 					  results, (uint16_t) width, (uint16_t) height);
@@ -173,7 +183,7 @@ int main(int argc, char **argv)
         g_print("Actual maximum: %" PRIu64 ", used maximum: %" PRIu64 "\n",
                 maximum, ((runs == 0) ? maximum : (uint64_t) runs));
 	ls2_write_inverted(format, inverted, (uint64_t) runs, tag_x, tag_y, anchors, no_anchors,
-			   result, (uint16_t) width, (uint16_t) height, (float) center_x, (float) center_y, 50.0, 250.0);
+			   result, (uint16_t) width, (uint16_t) height, (float) center_x, (float) center_y, (float) ls2_backend_expectation, (float) ls2_backend_clip);
         free(result);
         free(anchors);
     }
