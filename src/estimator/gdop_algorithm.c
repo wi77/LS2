@@ -32,44 +32,62 @@
  ***
  *******************************************************************/
 
-/* @algorithm_name: Gdop estimation */
+/* @algorithm_name: gdop estimation */
+
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_blas.h>
+
+static double ls2_gdop_scale = 10.0;
 
 static inline float
 __attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__))
 gdop_run(const vector2 *restrict anchor, const size_t num_anchors,
          const vector2 *restrict location)
 {
-    float A[num_anchors][2];
-    float At[2][num_anchors];
-    float P[2][2];
-    float AmulAt[2][2];
-
+    gsl_matrix *A = gsl_matrix_alloc(3, num_anchors);
     for (size_t i = 0; i < num_anchors; i++) {
-         A[i][0] = (anchor[i].x - location->x) / distance_v(location, &(anchor[i]));
-         A[i][1] = (anchor[i].y - location->y) / distance_v(location, &(anchor[i]));
+         const float d = distance_v(location, anchor + i);
+         gsl_matrix_set(A, 0, i, (anchor[i].x - location->x) / d);
+         gsl_matrix_set(A, 1, i, (anchor[i].y - location->y) / d);
+         gsl_matrix_set(A, 2, i, -1.0);
     }
 
     // transpose
-    for (size_t i = 0; i< num_anchors; i++) {
-        for (int j = 0; j < 2; j++) {
-            At[j][i] = A[i][j];
-        }
+    gsl_matrix *At = gsl_matrix_alloc(num_anchors, 3);
+    gsl_matrix_transpose_memcpy(At, A);
+
+    // Multiply
+    gsl_matrix *AAt = gsl_matrix_alloc(3, 3);
+    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A, At, 0.0, AAt);
+
+    // invert
+    int s;
+    gsl_matrix *Q = gsl_matrix_alloc(3, 3);
+    gsl_permutation *perm = gsl_permutation_alloc(3);
+
+    gsl_linalg_LU_decomp(AAt, perm, &s);
+
+    // Test if AAt is singular. If so, return NAN
+    float gdop;
+    if (gsl_linalg_LU_det(AAt, s) == 0.0) {
+        gdop = NAN;
+        goto cleanup;
     }
 
-    // multiply
-    AmulAt[0][0] = At[0][0] * A[0][0] + At[0][1] * A[1][0] + At[0][2] * A[2][0];
-    AmulAt[0][1] = At[0][0] * A[0][1] + At[0][1] * A[1][1] + At[0][2] * A[2][1];
-    AmulAt[1][0] = At[1][0] * A[0][0] + At[1][1] * A[1][0] + At[1][2] * A[2][0];
-    AmulAt[1][1] = At[1][0] * A[0][1] + At[1][1] * A[1][1] + At[1][2] * A[2][1];
-    
-    // invert
-    float det = AmulAt[0][0] * AmulAt[1][1] - AmulAt[0][1] * AmulAt[1][0];
-    
-    P[0][0] = 1.0f/det * AmulAt[1][1];
-    P[0][1] = -1.0f/det * AmulAt[0][1];
-    P[1][0] = -1.0f/det * AmulAt[1][0];
-    P[1][1] = 1.0f/det * AmulAt[0][0];
+    gsl_linalg_LU_invert(AAt, perm, Q);
+    double trace = 0;
+    for (size_t i = 0; i < 3; i++) {
+        trace += gsl_matrix_get(Q, i, i);
+    }
+    gdop = (float) (ls2_gdop_scale * sqrt(trace));
 
-    float gdop = sqrtf(P[0][0] + P[1][1]);
+  cleanup:
+    gsl_matrix_free(Q);
+    gsl_permutation_free(perm);
+    gsl_matrix_free(AAt);
+    gsl_matrix_free(At);
+    gsl_matrix_free(A);
+
     return gdop;
 }
