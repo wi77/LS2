@@ -49,6 +49,59 @@
 
 
 /*!
+ * Add a color bar
+ */
+static cairo_surface_t *
+ls2_draw_colorbar_to_cairo(cairo_surface_t *surface,
+                           const uint16_t x, const uint16_t y,
+                           const uint16_t width, const uint16_t height,
+                           const double font_size,
+                           const float expectation, const float clip)
+{
+    cairo_t *cr;
+    cr = cairo_create(surface);
+ 
+    for (uint16_t i = 0; i <= height; i++) {
+        const float sample = ((float) clip * (float) i) / (float) (height);
+        double r, g, b, a;
+
+        ls2_pick_color_locbased(&r, &g, &b, &a, sample, expectation, clip);
+	cairo_set_source_rgb(cr, r, g, b);
+	cairo_rectangle(cr, x, y + height - i, width, 1.0);
+	cairo_fill(cr);
+
+        if (fabs(sample) < 1e-5 ||
+            fabs(sample - expectation) < 0.5 ||
+            fabs(fmodf(sample, clip * 0.2f)) < 0.5 ||
+            fabs(sample - clip) < 1e-5) {
+            // Add a label.
+            char buffer[8];
+
+            cairo_select_font_face(cr, "sans-serif",
+			           CAIRO_FONT_SLANT_NORMAL,
+			           CAIRO_FONT_WEIGHT_NORMAL);
+            cairo_set_font_size(cr, font_size);
+
+	    cairo_text_extents_t te;
+	    cairo_new_path(cr);
+	    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+	    snprintf(buffer, 8, "%3.0f", round(sample));
+
+	    cairo_text_extents(cr, buffer, &te);
+	    cairo_move_to(cr, x + width + te.x_bearing + 8.0,
+		          y + height - i - (te.height / 2.0) - te.y_bearing);
+	    cairo_show_text(cr, buffer);
+        }
+    }
+
+    cairo_destroy(cr);
+    cairo_surface_flush(surface);
+
+    return surface;
+}
+
+
+/*!
  * Draw a result image to a surface.
  */
 static cairo_surface_t *
@@ -164,10 +217,35 @@ ls2_cairo_write_png_locbased(const char* filename,
 		             const uint16_t height,
                              const float expectation, const float clip)
 {
+    // Add some room for a color bar
+    uint16_t cb_width, cb_height;
+    const double font_size = 12.0;
+
+    cb_width = 20 + 10 * (uint16_t) font_size / 2;
+
+    if (clip > height) {
+        cb_height = height;
+    } else {
+        cb_height = (uint16_t) ceilf(clip);
+    }
+
     cairo_surface_t *surface =
-        cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+        cairo_image_surface_create(CAIRO_FORMAT_RGB24, width + cb_width, height);
+    cairo_t *cr = cairo_create(surface);
+    cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+    cairo_rectangle(cr, 0, 0, width + cb_width, height);
+    cairo_fill(cr);
+    cairo_destroy(cr);
+    cairo_surface_flush(surface);
+
     ls2_draw_to_cairo_surface_locbased(surface, anchors, no_anchors, result,
 				       width, height, expectation, clip);
+    g_message("Height is %i", cb_height);
+    ls2_draw_colorbar_to_cairo(surface,
+                               (uint16_t)(width + 10),
+                               (uint16_t)((height - cb_height) / 2),
+                               10, cb_height,
+                               font_size, expectation, clip);
     cairo_surface_write_to_png(surface, filename);
     cairo_surface_destroy(surface);
 }
