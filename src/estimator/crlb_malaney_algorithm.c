@@ -74,7 +74,7 @@ void __attribute__((__nonnull__))
 ls2_add_crlb_malaney_option_group(GOptionContext *context)
 {
      GOptionGroup *group;
-     group = g_option_group_new("crlb-qi",
+     group = g_option_group_new("crlb-malaney",
                                 "Parameters to the CRLB model of Malaney",
                                 "Parameters to the CRLB model of Malaney",
                                 NULL, NULL);
