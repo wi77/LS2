@@ -82,6 +82,8 @@ EXTRA_DIST = algorithm/aml_algorithm.c \
 	estimator/crlb_zhao_algorithm.c \
 	estimator/gdop_algorithm.c \
 	estimator/gdop_algorithm.h \
+	estimator/pdop_algorithm.c \
+	estimator/pdop_algorithm.h \
 	error_model/ab_nlos_em.c \
 	error_model/ab_nlos_em.h \
 	error_model/bahillo_em.c error_model/bahillo_em.h \

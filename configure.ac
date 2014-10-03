@@ -21,7 +21,9 @@
 #
 
 AC_PREREQ([2.67])
-AC_INIT([LS2], [0.2], [heiko.will@fu-berlin.de])
+AC_INIT([LS2], [0.2.90])
+AC_PACKAGE_BUGREPORT([marcel.kyas@fu-berlin.de])
+AC_PACKAGE_URL([http://github.org/wi77/LS2])
 AC_CONFIG_SRCDIR([src/vector_shooter.h])
 AM_INIT_AUTOMAKE
 AM_SILENT_RULES([yes])
