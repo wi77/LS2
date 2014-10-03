@@ -311,32 +311,51 @@ ls2_shooter_run(void *rr)
 	const size_t pos = (size_t) (x +  y * params->width);
 
         /* Set to NAN explicitely, if we are never successful.  */
-	params->results[AVERAGE_ERROR][pos] = (cnt > 0.0F) ? M : NAN;
+        if (params->results[AVERAGE_ERROR] != NULL) {
+	    params->results[AVERAGE_ERROR][pos] = (cnt > 0.0F) ? M : NAN;
+        }
+        if (params->results[STANDARD_DEVIATION] != NULL) {
+            params->results[STANDARD_DEVIATION][pos] =
+                 (cnt > 1.0F) ? sqrtf(S / (cnt - 1.0F)) : NAN;
+        }
+	if (params->results[MAXIMUM_ERROR] != NULL) {
+	    params->results[MAXIMUM_ERROR][pos] =
+                vector_max_ps(max_error, 0.0F);
+        }
+        if (params->results[MINIMUM_ERROR] != NULL) {
+	    params->results[MINIMUM_ERROR][pos] =
+                vector_min_ps(min_error, FLT_MAX);
+        }
+        if (params->results[FAILURES] != NULL) {
+	    params->results[FAILURES][pos] =
+                ((float) failures) / ((float) params->runs);
+        }
+        if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
+	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(MSE);
+        }
+        if (params->results[AVERAGE_X_ERROR] != NULL) {
+	    params->results[AVERAGE_X_ERROR][pos] = (C_X > 0.0F) ? M_X : NAN;
+        }
+        if (params->results[STANDARD_DEVIATION_X_ERROR] != NULL) {
+	    params->results[STANDARD_DEVIATION_X_ERROR][pos] =
+                (C_X > 1.0F) ? sqrtf(S_X / (C_X - 1.0F)) : NAN;
+        }
+	if (params->results[AVERAGE_Y_ERROR] != NULL) {
+	    params->results[AVERAGE_Y_ERROR][pos] = (C_Y > 0.0F) ? M_Y : NAN;
+        }
+        if (params->results[STANDARD_DEVIATION_Y_ERROR] != NULL) {
+	    params->results[STANDARD_DEVIATION_Y_ERROR][pos] =
+                (C_Y > 1.0F) ? sqrtf(S_Y / (C_Y - 1.0F)) : NAN;
+        }
 
-        /* Set to NAN explicitely, if we are never successful.  */
-        params->results[STANDARD_DEVIATION][pos] =
-             (cnt > 1.0F) ? sqrtf(S / (cnt - 1.0F)) : NAN;
-
-	params->results[MAXIMUM_ERROR][pos] = vector_max_ps(max_error, 0.0F);
-	params->results[MINIMUM_ERROR][pos] = vector_min_ps(min_error, FLT_MAX);
-
-	params->results[FAILURES][pos] =
-            ((float) failures) / ((float) params->runs);
+        /* Spam the user with failure messages. */
         if (__builtin_expect(ls2_verbose > 0, 0)) {
-            if (__builtin_expect(params->results[FAILURES][pos] > 0.0, 0)) {
+            if (__builtin_expect(failures > 0, 0)) {
                 g_warning("%" PRIuFAST64 " of %" PRIuFAST64
                           " runs failed at (%d, %d)\n",
                           failures, params->runs, x, y);
             }
         }
-
-	params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(MSE);
-	params->results[AVERAGE_X_ERROR][pos] = (C_X > 0.0F) ? M_X : NAN;
-	params->results[STANDARD_DEVIATION_X_ERROR][pos] =
-            (C_X > 1.0F) ? sqrtf(S_X / (C_X - 1.0F)) : NAN;
-	params->results[AVERAGE_Y_ERROR][pos] = (C_Y > 0.0F) ? M_Y : NAN;
-	params->results[STANDARD_DEVIATION_Y_ERROR][pos] =
-            (C_Y > 1.0F) ? sqrtf(S_Y / (C_Y - 1.0F)) : NAN;
     }
     ls2_running--;
 
