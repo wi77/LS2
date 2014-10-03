@@ -58,7 +58,7 @@
 #include "util/util_vector.c"
 
 #ifndef OUTPUT_DEFAULT
-#  define OUTPUT_DEFAULT "result.png"
+#  define OUTPUT_DEFAULT "ls2.h5"
 #endif
 
 #ifndef ALGORITHM_DEFAULT
@@ -97,9 +97,7 @@ static int num_threads;
 static int ls2_progress;
 #endif
 
-static char const *output_format;             /* Format of the output files. */ 
-static char const *output[NUM_VARIANTS];      /* Names of output files.      */
-static char const *output_hdf5;               /* Names of raw output files.  */
+static char const *output_file;               /* Names of raw output files.  */
 
 double ls2_backend_steps;
 
@@ -155,32 +153,8 @@ main(int argc, char* argv[])
           "height of the playing field.", NULL },
         { "width", 'w', 0, G_OPTION_ARG_INT, &arg_width,
           "width of the playing field.", NULL },
-        { "gradation", 'G', 0, G_OPTION_ARG_DOUBLE, &ls2_backend_steps,
-         "number of gradation steps, 0 is unlimited", "steps" },
-#if !defined(ESTIMATOR)
-        { "output-average", 'o', 0, G_OPTION_ARG_STRING,
-          &(output[AVERAGE_ERROR]),
-          "name of the average error output image file", "file name" },
-        { "output-maximum", 'M', 0, G_OPTION_ARG_STRING,
-          &(output[MAXIMUM_ERROR]),
-          "name of the maximum error output image file", "file name" },
-        { "output-minimum", 'm', 0, G_OPTION_ARG_STRING,
-          &(output[MINIMUM_ERROR]),
-          "name of the minimum error output image file", "file name" },
-        { "output-sdev", 's', 0, G_OPTION_ARG_STRING,
-          &(output[STANDARD_DEVIATION]),
-          "name of the output image file for the standard deviation",
-          "file name" },
-        { "output-rmse", 'p', 0, G_OPTION_ARG_STRING,
-          &(output[ROOT_MEAN_SQUARED_ERROR]),
-          "name of the root mean squared error output image", "file name" },
-#else
-        { "output", 'o', 0, G_OPTION_ARG_STRING,
-          &(output[ROOT_MEAN_SQUARED_ERROR]),
-          "name of the output image file", "file name" },
-#endif
-        { "output-hdf5", 'H', 0, G_OPTION_ARG_STRING, &output_hdf5,
-          "name of the hdf output file for raw result data", "file name" },
+        { "output", 'o', 0, G_OPTION_ARG_FILENAME, &output_file,
+          "name of the output HDF5 file", "file name" },
 #if !defined(ESTIMATOR)
         { "seed", 0, 0, G_OPTION_ARG_INT64, &seed,
           "seed to use for the pseudo random number generators. Default"
@@ -207,18 +181,18 @@ main(int argc, char* argv[])
 #else
     num_threads = NUM_THREADS;
 #endif
-    output_format = "png";
+
+    output_file = OUTPUT_DEFAULT;
+
 #if !defined(ESTIMATOR)
     algorithm = ALGORITHM_DEFAULT;
     error_model = ERROR_MODEL_DEFAULT;
     tag_x = (float) arg_width / 2.0F;
     tag_y = (float) arg_height / 2.0F;
-    output[AVERAGE_ERROR] = OUTPUT_DEFAULT;
     runs = RUNS;
     seed = time(NULL);
 #else
     estimator = ESTIMATOR_DEFAULT;
-    output[ROOT_MEAN_SQUARED_ERROR] = OUTPUT_DEFAULT;
 #endif
 
     opt_con = g_option_context_new(" - lateration spacial simulator");
@@ -333,10 +307,7 @@ main(int argc, char* argv[])
 #if !defined(ESTIMATOR)
     if (inverted == 0) {
         for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
-            if ((output[var] != NULL && *output[var] != '\0') ||
-                (output_hdf5 != NULL && *output_hdf5 != '\0')) {
-		results[var] = g_new0(float, width * height);
-            }
+	    results[var] = g_new0(float, width * height);
         }
     } else {
 	result = g_new(uint64_t, width * height);
@@ -421,32 +392,14 @@ main(int argc, char* argv[])
 #if !defined(ESTIMATOR)
     if (inverted == 0) {
 #endif
-        for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++) {
-            if (output[var] != NULL && *(output[var]) != '\0') {
-	      ls2_write_locbased(get_output_format(output_format), output[var],
-				 anchors, no_anchors,
-				 results[var], (uint16_t) width, (uint16_t) height, 50.0, 250.0);
-            }
-        }
-        if (output_hdf5 != NULL && *output_hdf5 != '\0') {
-	    ls2_hdf5_write_locbased(output_hdf5, anchors, no_anchors, results,
+        if (output_file != NULL && *output_file != '\0') {
+	    ls2_hdf5_write_locbased(output_file, anchors, no_anchors, results,
                                     (uint16_t) width, (uint16_t) height);
         }
 #if !defined(ESTIMATOR)
     } else {
-        if (relative) {
-	    ls2_write_inverted(get_output_format(output_format), output[0],
-			       0, (float) tag_x, (float) tag_y,
-                               anchors, no_anchors,
-			       result, (uint16_t) width, (uint16_t) height, centre_x, centre_y, 50.0, 250.0);
-        } else {
-	    ls2_write_inverted(get_output_format(output_format), output[0],
-			       (uint64_t) runs, (float) tag_x, (float) tag_y,
-                               anchors, no_anchors,
-			       result, (uint16_t) width, (uint16_t) height, centre_x, centre_y, 50.0, 250.0);
-        }
-        if (output_hdf5 != NULL && *output_hdf5 != '\0') {
-	    ls2_hdf5_write_inverted(output_hdf5, (float) tag_x, (float) tag_y,
+        if (output_file != NULL && *output_file != '\0') {
+	    ls2_hdf5_write_inverted(output_file, (float) tag_x, (float) tag_y,
 				    anchors, no_anchors,
                                     result, (uint16_t) width, (uint16_t) height,
                                     centre_x, centre_y);

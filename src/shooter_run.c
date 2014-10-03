@@ -226,17 +226,6 @@ ls2_shooter_run(void *rr)
         vy[i] = VECTOR_BROADCASTF(params->anchors[i].y);
     }
 
-    // Precalculate whether we are in the common case of running for the
-    // common case.
-    const long shortcut =
-        (params->results[AVERAGE_ERROR] ||
-          params->results[STANDARD_DEVIATION]) &&
-          !(params->results[ROOT_MEAN_SQUARED_ERROR] ||
-            params->results[AVERAGE_X_ERROR] ||
-            params->results[STANDARD_DEVIATION_X_ERROR] ||
-            params->results[AVERAGE_Y_ERROR] ||
-            params->results[STANDARD_DEVIATION_Y_ERROR]);
-
     // Calculation for every pixel
     for (size_t j = params->from; j < params->from + params->count; j++) {
 	const uint16_t x = (uint16_t) (j % params->width);
@@ -278,118 +267,76 @@ ls2_shooter_run(void *rr)
 	    algorithm(params->algorithm, vx, vy, r, params->no_anchors,
                       params->width, params->height, &resx, &resy);
 
-            // Get Errors
+            // Calculate errors and update statistics.
 	    const VECTOR errors = distance(resx, resy, tagx, tagy);
+            const VECTOR sqerror = errors * errors;
 
             max_error = VECTOR_MAX(errors, max_error);
 	    min_error = VECTOR_MIN(errors, min_error);
 
-            if (params->results[AVERAGE_ERROR] != NULL ||
-                params->results[STANDARD_DEVIATION] != NULL) {
-                for (int k = 0; k < VECTOR_OPS; k++) {
-                    if (__builtin_expect(isnan(errors[k]), 0)) {
-                        failures += 1;
-                    } else {
-                        cnt += 1.0F;
-                        M_old = M;
-                        M += (errors[k] - M) / cnt;
-                        if (params->results[STANDARD_DEVIATION] != NULL)
-                            S += (errors[k] - M) * (errors[k] - M_old);
-                    }
+            for (int k = 0; k < VECTOR_OPS; k++) {
+                if (isnan(errors[k]) == 0) {
+                    cnt += 1.0F;
+                    M_old = M;
+                    M += (errors[k] - M) / cnt;
+                    if (params->results[STANDARD_DEVIATION] != NULL)
+                        S += (errors[k] - M) * (errors[k] - M_old);
+                } else {
+                    failures += 1;
                 }
-            }
 
-            // The common case is to compute the average error, so we
-            // optimise for this case by not testing all cases below.
-            if (__builtin_expect(shortcut, 1))
-                continue;
-
-            if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
-                VECTOR sqerror = errors * errors;
-                for (int k = 0; k < VECTOR_OPS; k++) {
-                    if (__builtin_expect(isnan(sqerror[k]) == 0, 1)) {
-                        C_MSE += 1.0F;
-                        MSE_old = MSE;
-                        MSE += (sqerror[k] - MSE_old) / C_MSE;
-                    }
+                if (isnan(sqerror[k]) == 0) {
+                    C_MSE += 1.0F;
+                    MSE_old = MSE;
+                    MSE += (sqerror[k] - MSE_old) / C_MSE;
                 }
-            }
 
-            if (params->results[AVERAGE_X_ERROR] != NULL ||
-                params->results[STANDARD_DEVIATION_X_ERROR] != NULL) {
-                for (int k = 0; k < VECTOR_OPS; k++) {
-                    if (__builtin_expect(isnan(resx[k]) == 0, 1)) {
-                        C_X += 1.0F;
-                        M_X_old = M_X;
-			const float dx = resx[k] - x;
-                        M_X += (dx - M_X_old) / C_X;
-                        if (params->results[STANDARD_DEVIATION_X_ERROR] != NULL)
-                            S_X += (dx - M_X) * (dx - M_X_old);
-                     }
-                }
-            }
-            if (params->results[AVERAGE_Y_ERROR] != NULL ||
-                params->results[STANDARD_DEVIATION_Y_ERROR] != NULL) {
-                for (int k = 0; k < VECTOR_OPS; k++) {
-                    if (__builtin_expect(isnan(resy[k]) == 0, 1)) {
-                        C_Y += 1.0F;
-                        M_Y_old = M_Y;
-			const float dy = resy[k] - y;
-                        M_Y += (dy - M_Y_old) / C_Y;
-                        if (params->results[STANDARD_DEVIATION_Y_ERROR] != NULL)
-                            S_Y += (dy - M_Y) * (dy - M_Y_old);
-                     }
+                if (isnan(resx[k]) == 0 && isnan(resy[k]) == 0) {
+                    C_X += 1.0F;
+                    M_X_old = M_X;
+		    const float dx = resx[k] - x;
+                    M_X += (dx - M_X_old) / C_X;
+                    S_X += (dx - M_X) * (dx - M_X_old);
+
+                    C_Y += 1.0F;
+                    M_Y_old = M_Y;
+		    const float dy = resy[k] - y;
+                    M_Y += (dy - M_Y_old) / C_Y;
+                    S_Y += (dy - M_Y) * (dy - M_Y_old);
                 }
             }
 	}
 
-        /* Enter the result into the result arrays. */
+        /* Enter the results into the result arrays. */
 	const size_t pos = (size_t) (x +  y * params->width);
-        if (params->results[AVERAGE_ERROR] != NULL) {
-            /* Set to NAN explicitely, if we are never successful.  */
-	    params->results[AVERAGE_ERROR][pos] = (cnt > 0.0F) ? M : NAN;
-        }
-        if (params->results[STANDARD_DEVIATION] != NULL) {
-            /* Set to NAN explicitely, if we are never successful.  */
-            params->results[STANDARD_DEVIATION][pos] =
-                 (cnt > 1.0F) ? sqrtf(S / (cnt - 1.0F)) : NAN;
-        }
-        if (params->results[MAXIMUM_ERROR] != NULL) {
-	    params->results[MAXIMUM_ERROR][pos] =
-                vector_max_ps(max_error, 0.0F);
-        }
-        if (params->results[MINIMUM_ERROR] != NULL) {
-	    params->results[MINIMUM_ERROR][pos] =
-                vector_min_ps(min_error, FLT_MAX);
-        }
-        if (params->results[FAILURES] != NULL) {
-	    params->results[FAILURES][pos] =
-                ((float) failures) / ((float) params->runs);
-            if (__builtin_expect(ls2_verbose > 0, 0)) {
-                if (__builtin_expect(params->results[FAILURES][pos] > 0.0, 0)) {
-                    g_warning("%" PRIuFAST64 " of %" PRIuFAST64
-                              " runs failed at (%d, %d)\n",
-                              failures, params->runs, x, y);
-                }
+
+        /* Set to NAN explicitely, if we are never successful.  */
+	params->results[AVERAGE_ERROR][pos] = (cnt > 0.0F) ? M : NAN;
+
+        /* Set to NAN explicitely, if we are never successful.  */
+        params->results[STANDARD_DEVIATION][pos] =
+             (cnt > 1.0F) ? sqrtf(S / (cnt - 1.0F)) : NAN;
+
+	params->results[MAXIMUM_ERROR][pos] = vector_max_ps(max_error, 0.0F);
+	params->results[MINIMUM_ERROR][pos] = vector_min_ps(min_error, FLT_MAX);
+
+	params->results[FAILURES][pos] =
+            ((float) failures) / ((float) params->runs);
+        if (__builtin_expect(ls2_verbose > 0, 0)) {
+            if (__builtin_expect(params->results[FAILURES][pos] > 0.0, 0)) {
+                g_warning("%" PRIuFAST64 " of %" PRIuFAST64
+                          " runs failed at (%d, %d)\n",
+                          failures, params->runs, x, y);
             }
         }
-        if (params->results[ROOT_MEAN_SQUARED_ERROR] != NULL) {
-	    params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(MSE);
-        }
-        if (params->results[AVERAGE_X_ERROR] != NULL) {
-	    params->results[AVERAGE_X_ERROR][pos] = (C_X > 0.0F) ? M_X : NAN;
-        }
-        if (params->results[STANDARD_DEVIATION_X_ERROR] != NULL) {
-	    params->results[STANDARD_DEVIATION_X_ERROR][pos] =
-                (C_X > 1.0F) ? sqrtf(S_X / (C_X - 1.0F)) : NAN;
-        }
-        if (params->results[AVERAGE_Y_ERROR] != NULL) {
-	    params->results[AVERAGE_Y_ERROR][pos] = (C_Y > 0.0F) ? M_Y : NAN;
-        }
-        if (params->results[STANDARD_DEVIATION_Y_ERROR] != NULL) {
-	    params->results[STANDARD_DEVIATION_Y_ERROR][pos] =
-                (C_Y > 1.0F) ? sqrtf(S_Y / (C_Y - 1.0F)) : NAN;
-        }
+
+	params->results[ROOT_MEAN_SQUARED_ERROR][pos] = sqrtf(MSE);
+	params->results[AVERAGE_X_ERROR][pos] = (C_X > 0.0F) ? M_X : NAN;
+	params->results[STANDARD_DEVIATION_X_ERROR][pos] =
+            (C_X > 1.0F) ? sqrtf(S_X / (C_X - 1.0F)) : NAN;
+	params->results[AVERAGE_Y_ERROR][pos] = (C_Y > 0.0F) ? M_Y : NAN;
+	params->results[STANDARD_DEVIATION_Y_ERROR][pos] =
+            (C_Y > 1.0F) ? sqrtf(S_Y / (C_Y - 1.0F)) : NAN;
     }
     ls2_running--;
 
