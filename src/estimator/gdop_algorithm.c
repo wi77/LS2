@@ -38,7 +38,37 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
 
-static double ls2_gdop_scale = 10.0;
+typedef struct gdop_arguments {
+    double scale;
+} gdop_arguments;
+
+gdop_arguments ls2_gdop_arguments;
+
+void __attribute__((__nonnull__))
+ls2_gdop_init_arguments(struct gdop_arguments *arguments)
+{
+	arguments->scale = 1.0;
+}
+
+GOptionEntry gdop_parameters[] = {
+	{ "gdop-scale", 0, 0, G_OPTION_ARG_DOUBLE,
+          &ls2_gdop_arguments.scale,
+          "scale factor to the root error", NULL },
+        { NULL }
+};
+
+void __attribute__((__nonnull__))
+ls2_add_gdop_option_group(GOptionContext *context)
+{
+     GOptionGroup *group;
+     group = g_option_group_new("gdop",
+                                "Parameters to the GDOP calculation",
+                                "Parameters to the GDOP calculation",
+                                NULL, NULL);
+     g_option_group_add_entries(group, gdop_parameters);
+     g_option_context_add_group(context, group);
+}
+
 
 static inline float
 __attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__))
@@ -80,7 +110,7 @@ gdop_run(const vector2 *restrict anchor, const size_t num_anchors,
     for (size_t i = 0; i < 3; i++) {
         trace += gsl_matrix_get(Q, i, i);
     }
-    gdop = (float) (ls2_gdop_scale * sqrt(trace));
+    gdop = (float) (ls2_gdop_arguments.scale * sqrt(trace));
 
   cleanup:
     gsl_matrix_free(Q);
