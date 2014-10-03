@@ -60,18 +60,21 @@ ls2_draw_colorbar_to_cairo(cairo_surface_t *surface,
 {
     cairo_t *cr;
     cr = cairo_create(surface);
+    const double f_height = ((double) height) / ((double) (clip + 1));
  
-    for (uint16_t i = 0; i <= height; i++) {
-        const float sample = ((float) clip * (float) i) / (float) (height);
+    for (uint16_t i = 0; i <= clip; i++) {
+        const float sample = (float) i;
         double r, g, b, a;
 
         ls2_pick_color_locbased(&r, &g, &b, &a, sample, expectation, clip);
 	cairo_set_source_rgb(cr, r, g, b);
-	cairo_rectangle(cr, x, y + height - i, width, 1.0);
+
+        const double ty = y + height - sample * f_height;
+	cairo_rectangle(cr, x, ty, width, f_height);
 	cairo_fill(cr);
 
         if (fabs(sample) < 1e-5 ||
-            fabs(sample - expectation) < 0.5 ||
+            (fabs(sample - expectation) < 0.5) ||
             fabs(fmodf(sample, clip * 0.2f)) < 0.5 ||
             fabs(sample - clip) < 1e-5) {
             // Add a label.
@@ -89,7 +92,7 @@ ls2_draw_colorbar_to_cairo(cairo_surface_t *surface,
 
 	    cairo_text_extents(cr, buffer, &te);
 	    cairo_move_to(cr, x + width + te.x_bearing + 8.0,
-		          y + height - i - (te.height / 2.0) - te.y_bearing);
+		          ty - (te.height * 0.5) - te.y_bearing);
 	    cairo_show_text(cr, buffer);
         }
     }
@@ -219,14 +222,14 @@ ls2_cairo_write_png_locbased(const char* filename,
 {
     // Add some room for a color bar
     uint16_t cb_width, cb_height;
-    const double font_size = 12.0;
+    const double font_size = 16.0;
 
-    cb_width = 20 + 10 * (uint16_t) font_size / 2;
+    cb_width = 42 + 5 * (uint16_t) font_size;
 
     if (clip > height) {
         cb_height = height;
     } else {
-        cb_height = (uint16_t) ceilf(clip);
+        cb_height = MAX((uint16_t) ceilf(clip), (uint16_t) (3 * height / 4));
     }
 
     cairo_surface_t *surface =
@@ -242,9 +245,9 @@ ls2_cairo_write_png_locbased(const char* filename,
 				       width, height, expectation, clip);
     g_message("Height is %i", cb_height);
     ls2_draw_colorbar_to_cairo(surface,
-                               (uint16_t)(width + 10),
+                               (uint16_t)(width + 32),
                                (uint16_t)((height - cb_height) / 2),
-                               10, cb_height,
+                               32, cb_height,
                                font_size, expectation, clip);
     cairo_surface_write_to_png(surface, filename);
     cairo_surface_destroy(surface);

@@ -48,12 +48,13 @@ ls2_pick_color_locbased(double *r, double *g, double *b,
         *r = 1.0; *g = 0.0; *b = 1.0;
     } else if (sample < good_color) {
         // Use a very good color.
-        const double t = ls2_gradation(sample / good_color);
+        const double s = sample / good_color;
+        const double t = 0.8 * ls2_gradation(s);
         *r = t; *g = 1.0; *b = t;
     } else if (sample < bad_color) {
         // Use a good color.
-        const double t =
-             ls2_gradation(1.0 - (sample - good_color) / (bad_color - good_color));
+        const double s = 1.0 - (sample - good_color) / (bad_color - good_color);
+        const double t = 0.8 * ls2_gradation(s);
         *r = t; *g = t; *b = t;
     } else {
         // Error too large
