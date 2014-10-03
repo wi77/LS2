@@ -156,7 +156,7 @@ main(int argc, char* argv[])
         { "output", 'o', 0, G_OPTION_ARG_FILENAME, &output_file,
           "name of the output HDF5 file", "file name" },
 #if !defined(ESTIMATOR)
-        { "seed", 0, 0, G_OPTION_ARG_INT64, &seed,
+        { "seed", 's', 0, G_OPTION_ARG_INT64, &seed,
           "seed to use for the pseudo random number generators. Default"
           "is based on the current time.",
           "seed" },
