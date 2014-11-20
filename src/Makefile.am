@@ -17,6 +17,8 @@
 # along with LS².  If not, see <http://www.gnu.org/licenses/>.
 #
 
+AUTOMAKE_OPTIONS = subdir-objects
+
 EXTRA_DIST = algorithm/aml_algorithm.c \
 	algorithm/aml_algorithm.h \
 	algorithm/bilateration_algorithm.c \
@@ -125,11 +127,18 @@ nobase_include_HEADERS = ls2/ls2-config.h ls2/backend.h ls2/ls2.h \
 	ls2/library.h ls2/options.h ls2/output.h ls2/output-variants.h \
 	ls2/progress.h 
 
+noinst_PROGRAMS = ls2-generate
+
 AM_CFLAGS = -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-align \
 	-Wconversion -Wpacked \
 	-Winline -fdiagnostics-show-option \
 	@ARCH_CFLAGS@ @RDRND_FLAGS@ -pthread \
 	-ffast-math -fpredictive-commoning -ftree-vectorize
+
+ls2_generate_SOURCES  = generate.c
+ls2_generate_CPPFLAGS =
+ls2_generate_CFLAGS   = $(AM_CFLAGS) $(GLIB2_CFLAGS) $(JSON_GLIB_CFLAGS)
+ls2_generate_LDADD    = $(LIBOBJS) $(GLIB2_LIBS) $(JSON_GLIB_LIBS)
 
 ls2_run_SOURCES  = ls2-run.c util/util_crash.c
 ls2_run_CPPFLAGS =
