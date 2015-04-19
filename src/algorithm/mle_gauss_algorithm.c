@@ -71,7 +71,7 @@ static double mle_gauss_deviation  = MLE_GAUSS_DEFAULT_DEVIATION;
 static double mle_gauss_epsilon    = MLE_GAUSS_DEFAULT_EPSILON;
 static    int mle_gauss_iterations = MLE_GAUSS_DEFAULT_ITERATIONS;
 
-
+#if HAVE_POPT_H
 struct poptOption mle_gauss_arguments[] = {
         { "mle-gauss-deviation", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
           &mle_gauss_deviation, 0,
@@ -87,6 +87,7 @@ struct poptOption mle_gauss_arguments[] = {
           "maximum number of iterations before termination", NULL },
         POPT_TABLEEND
 };
+#endif
 
 
 struct mle_gauss_point2d {

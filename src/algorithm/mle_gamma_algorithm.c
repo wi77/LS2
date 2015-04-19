@@ -78,7 +78,7 @@ static double mle_gamma_epsilon    = MLE_GAMMA_DEFAULT_EPSILON;
 static    int mle_gamma_iterations = MLE_GAMMA_DEFAULT_ITERATIONS;
 
 
-
+#if HAVE_POPT_H
 struct poptOption mle_gamma_arguments[] = {
         { "mle-gamma-rate", 0, POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
           &mle_gamma_rate, 0,
@@ -97,6 +97,7 @@ struct poptOption mle_gamma_arguments[] = {
           "maximum number of iterations before termination", NULL },
         POPT_TABLEEND
 };
+#endif
 
 
 struct mle_gamma_point2d {

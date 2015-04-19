@@ -56,6 +56,7 @@ static float md_minmax_abs_middle_left  = 50.0f;
 static float md_minmax_abs_middle_right = 50.0f;
 static float md_minmax_abs_right        = 150.0f;
 
+#if HAVE_POPT_H
 struct poptOption md_minmax_abs_arguments[] = {
         { "mf-left", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
           &md_minmax_abs_left, 0,
@@ -71,6 +72,7 @@ struct poptOption md_minmax_abs_arguments[] = {
           "right value of the membership function", NULL },
         POPT_TABLEEND
 };
+#endif
 
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))

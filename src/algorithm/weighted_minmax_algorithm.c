@@ -47,6 +47,7 @@ static float md_minmax_rel_middle_left  = 50;
 static float md_minmax_rel_middle_right = 50;
 static float md_minmax_rel_right        = 125;
 
+#if HAVE_POPT_H
 struct poptOption md_minmax_rel_arguments[] = {
         { "mf-left", 0, POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
           &md_minmax_rel_left, 0,
@@ -62,6 +63,7 @@ struct poptOption md_minmax_rel_arguments[] = {
           "middle right value of the membership function", NULL },
         POPT_TABLEEND
 };
+#endif
 
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))

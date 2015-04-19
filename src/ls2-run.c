@@ -115,7 +115,10 @@ int
 main(int argc, const char* argv[])
 {
     struct timeval start_tv, end_tv; /* For measuring the wall-clock time   */
+#if HAVE_POPT_H
     poptContext opt_con;        /* context for parsing command-line options */
+    int rc;
+#endif
     char const* anchor[MAX_ANCHORS*2+1];/* anchor parameters                */
     float *results[NUM_VARIANTS]; /* Array holding the results. */
 #if !defined(ESITMATOR)
@@ -127,9 +130,9 @@ main(int argc, const char* argv[])
     float center_x, sdev_x, center_y, sdev_y;
 #endif
     vector2 *anchors;
-    int rc;
 
-#if !defined(ESTIMATOR)
+#if HAVE_POPT_H
+#  if !defined(ESTIMATOR)
     /* Command line options specific to the inverted shooter. */
     static struct poptOption inverted_arguments[] = {
         { "x", 'x', POPT_ARG_FLOAT | POPT_ARGFLAG_SHOW_DEFAULT,
@@ -140,12 +143,12 @@ main(int argc, const char* argv[])
           "Y coordinate of the tag.", NULL },
         POPT_TABLEEND
     };
-#endif
+#  endif
 
     /* Command line arguments. */
     static struct poptOption cli_options[] = {
-#if !defined(STAND_ALONE)
-#  if !defined(ESTIMATOR)
+#  if !defined(STAND_ALONE)
+#    if !defined(ESTIMATOR)
        { "algorithm", 'a', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &algorithm, 0,
           "selects the algorithm (one of: " ALGORITHMS ")", NULL },
@@ -160,12 +163,12 @@ main(int argc, const char* argv[])
           "Use a relative density representation", NULL },
         { "progress", 'P', POPT_ARG_NONE, &ls2_progress, 0,
           "Periodically report progress", NULL },
-#  else
+#    else
         { "estimator", 'e', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &estimator, 0,
           "selects the error model (one of: " ESTIMATORS ")", NULL },
+#    endif
 #  endif
-#endif
         { "height", 'h', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
           &arg_height, 0,
           "height of the playing field.", NULL },
@@ -176,7 +179,7 @@ main(int argc, const char* argv[])
           POPT_ARG_DOUBLE | POPT_ARGFLAG_SHOW_DEFAULT,
           &ls2_backend_steps, 0,
          "number of gradation steps, 0 is unlimited", "steps" },
-#if !defined(ESTIMATOR)
+#  if !defined(ESTIMATOR)
         { "output-average", 'o',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[AVERAGE_ERROR]), 0,
@@ -198,17 +201,17 @@ main(int argc, const char* argv[])
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[ROOT_MEAN_SQUARED_ERROR]), 0,
           "name of the root mean squared error output image", "file name" },
-#else
+#  else
         { "output", 'o',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &(output[ROOT_MEAN_SQUARED_ERROR]), 0,
           "name of the output image file", "file name" },
-#endif
+#  endif
         { "output-hdf5", 'H',
           POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT,
           &output_hdf5, 0,
           "name of the hdf output file for raw result data", "file name" },
-#if !defined(ESTIMATOR)
+#  if !defined(ESTIMATOR)
         { "seed", 0, POPT_ARG_LONG, &seed, 0,
           "seed to use for the pseudo random number generators. Default"
           "is based on the current time.",
@@ -217,27 +220,28 @@ main(int argc, const char* argv[])
           &runs, 0,
           "number of runs per pixel (must be divisible by 8)",
           "number of runs" },
-#endif
+#  endif
         { "threads", 't', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
           &num_threads, 0,
           "number of threads to use", "number of threads" },
         { "verbose", 'v', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT,
           &ls2_verbose, 0,
           "be verbose, argument indicates the amount of information", NULL },
-#if !defined(ESTIMATOR)
+#  if !defined(ESTIMATOR)
         { NULL, '\0', POPT_ARG_INCLUDE_TABLE, inverted_arguments, 0,
           "Options of the inverted algorithm", NULL },
         { NULL, '\0', POPT_ARG_INCLUDE_TABLE, algorithm_arguments, 0,
           "Options of the algorithm", NULL },
         { NULL, '\0', POPT_ARG_INCLUDE_TABLE, error_model_arguments, 0,
           "Options of the error model", NULL },
-#else
+#  else
         { NULL, '\0', POPT_ARG_INCLUDE_TABLE, estimator_arguments, 0,
           "Options of the estimators", NULL },
-#endif
+#  endif
         POPT_AUTOHELP
         POPT_TABLEEND
     };
+#endif
 
     register_sigsegv_handler();
 
@@ -263,6 +267,7 @@ main(int argc, const char* argv[])
     output[ROOT_MEAN_SQUARED_ERROR] = OUTPUT_DEFAULT;
 #endif
 
+#if HAVE_POPT_H
     opt_con = poptGetContext(NULL, argc, argv, cli_options, 0);
     poptSetOtherOptionHelp(opt_con, "[OPTIONS] [ANCHORX ANCHORY]{3,}");
 
@@ -313,6 +318,7 @@ main(int argc, const char* argv[])
         poptFreeContext(opt_con);
         exit(EXIT_FAILURE);
     }
+#endif
 
     // parse and normalize anchor coordinates
     const size_t no_anchors = no_anchor_args / 2;
@@ -510,6 +516,8 @@ main(int argc, const char* argv[])
     for (ls2_output_variant var = 0; var < NUM_VARIANTS; var++)
         free(results[var]);
     free(result);
+#if HAVE_POPT_H
     poptFreeContext(opt_con);
+#endif
     exit(EXIT_SUCCESS);
 }
