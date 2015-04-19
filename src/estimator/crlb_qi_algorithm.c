@@ -100,5 +100,5 @@ crlb_qi_run(const vector2 *anchor, const size_t count, const vector2 *location)
                        distance_v(location, &(anchor[j])) * a * a;
 	}
     }
-    return alpha * numer / denom;
+    return crlb_qi_scale * alpha * numer / denom;
 }

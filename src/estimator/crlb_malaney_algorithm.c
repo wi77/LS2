@@ -89,5 +89,5 @@ crlb_malaney_run (const vector2 *anchor, const size_t num_anchors,
 	    denom += a * a / (d * d * e * e);
 	}
     }
-    return numer / (alpha * alpha * denom);
+    return crlb_malaney_scale * numer / (alpha * alpha * denom);
 }
