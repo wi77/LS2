@@ -51,6 +51,7 @@ PKG_CHECK_MODULES([GLIB2], [glib-2.0 >= 2.32])
 PKG_CHECK_MODULES([GSL], [gsl >= 1.13])
 PKG_CHECK_MODULES([CAIRO], [cairo >= 1.8])
 PKG_CHECK_MODULES([OPENEXR], [OpenEXR >= 1.6])
+PKG_CHECK_MODULES([JSON_GLIB], [json-glib-1.0 >= 1.0])
 
 AC_CHECK_LIB([hdf5], [H5Fcreate], [], [AC_MSG_FAILURE([You need to install libhdf5.so and hdf5.h])])
 AC_CHECK_HEADERS([hdf5.h])
