@@ -23,7 +23,7 @@
 AC_PREREQ([2.67])
 AC_INIT([LS2], [0.2], [heiko.will@fu-berlin.de])
 AC_CONFIG_SRCDIR([src/vector_shooter.h])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
 AC_CONFIG_HEADERS([src/ls2/ls2-config.h])
 AC_CONFIG_MACRO_DIR([m4])
