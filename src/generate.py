@@ -134,7 +134,7 @@ head.writelines([ "} algorithm_t;\n",
                   "\n"
                 ])
 
-head.write('\n#define ALGORITHMS \"' + string.join([ '\\\"' + alg.replace('_', '-') + '\\\"' for alg in algs], ', ') + '\"\n\n')
+head.write('\n#define ALGORITHMS \"' + ', '.join([ '\\\"' + alg.replace('_', '-') + '\\\"' for alg in algs]) + '\"\n\n')
 lib.writelines([ '\nconst char* const algorithm_short_name[] = {\n' ])
 lib.writelines([ '    "' + alg.replace('_', '-') + '",\n' for alg in algs ])
 lib.writelines([ "    NULL\n",
@@ -183,7 +183,7 @@ head.writelines([ "} estimator_t;\n",
                   "\n"
                 ])
 
-head.write('\n#define ESTIMATORS \"' + string.join([ '\\\"' + est.replace('_', '-') + '\\\"' for est in ests], ', ') + '\"\n\n')
+head.write('\n#define ESTIMATORS \"' + ', '.join([ '\\\"' + est.replace('_', '-') + '\\\"' for est in ests]) + '\"\n\n')
 lib.writelines([ '\nconst char* const estimator_short_name[] = {\n' ])
 lib.writelines([ '    "' + est.replace('_', '-') + '",\n' for est in ests ])
 lib.writelines([ "    NULL\n",
@@ -230,7 +230,7 @@ head.writelines([ "} error_model_t;\n",
                   "\n"
                 ])
 
-head.write('\n#define ERROR_MODELS \"' + string.join([ '\\\"' + em.replace('_', '-') + '\\\"' for em in ems ], ', ') + '\"\n\n')
+head.write('\n#define ERROR_MODELS \"' + ', '.join([ '\\\"' + em.replace('_', '-') + '\\\"' for em in ems ]) + '\"\n\n')
 lib.writelines([ 'const char* const error_model_short_name[] = {\n' ])
 lib.writelines([ '    "' + em.replace('_', '-') + '",\n' for em in ems ])
 lib.writelines([ "    NULL\n",
