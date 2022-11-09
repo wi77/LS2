@@ -144,7 +144,7 @@ main(int argc, char **argv)
 	  
 	  ls2_cairo_write_png_diff(compare[var], a_anchors, a_no_anchors,
 				   results, (uint16_t) a_width, (uint16_t) a_height,
-                                   similarity, dynamic);
+                                   (float) similarity, (float) dynamic);
 	  g_free(results);
      }
      exit(EXIT_SUCCESS);
