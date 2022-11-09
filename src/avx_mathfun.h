@@ -570,7 +570,7 @@ v8sf cos256_ps(v8sf x) { // any x
 
 /* since sin256_ps and cos256_ps are almost identical, sincos256_ps could replace both of them..
    it is almost as fast, and gives you a free cosine with your sine */
-static inline __attribute__((always_inline,const,artificial))
+static inline __attribute__((always_inline,artificial))
 void sincos256_ps(v8sf x, v8sf *s, v8sf *c) {
 
   v8sf xmm1, xmm2, xmm3 = _mm256_setzero_ps(), sign_bit_sin, y;

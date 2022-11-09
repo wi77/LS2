@@ -41,7 +41,7 @@
 /* @algorithm_name: Geolateration (3 anchors only) */
 
 static inline void __attribute__((__always_inline__,__gnu_inline__,__nonnull__,__artificial__))
-geo3_run(const const VECTOR* vx, const VECTOR* vy,
+geo3_run(const VECTOR* vx, const VECTOR* vy,
          const VECTOR *restrict r, size_t num_anchors, size_t width __attribute__((__unused__)), size_t height __attribute__((__unused__)), VECTOR *restrict resx, VECTOR *restrict resy)
 {
     if (num_anchors<3) return;

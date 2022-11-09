@@ -37,7 +37,7 @@ static inline double ls2_gradation(double value)
  *
  */
 static inline void
-__attribute__((__nonnull__,__gnu_inline__,__always_inline__,__const__))
+__attribute__((__nonnull__,__gnu_inline__,__always_inline__))
 ls2_pick_color_locbased(double *r, double *g, double *b,
                         double __attribute__((__unused__)) *a,
                         const float sample,
@@ -69,7 +69,7 @@ ls2_pick_color_locbased(double *r, double *g, double *b,
  *
  */
 static inline void
-__attribute__((__nonnull__,__gnu_inline__,__always_inline__,__const__))
+__attribute__((__nonnull__,__gnu_inline__,__always_inline__))
 ls2_pick_color_density(const float sample, double *restrict hue,
                        double *restrict saturation, double *restrict lightness)
 {
@@ -109,7 +109,7 @@ ls2_pick_color_density(const float sample, double *restrict hue,
  *
  */
 static inline void
-__attribute__((__nonnull__,__gnu_inline__,__always_inline__,__const__))
+__attribute__((__nonnull__,__gnu_inline__,__always_inline__))
 ls2_pick_color_diff(const double sample, const double similar,
 		    const double dynamic, double *restrict hue,
 		    double *restrict saturation, double *restrict lightness)
@@ -168,7 +168,7 @@ ls2_pick_color_diff(const double sample, const double similar,
  *
  */
 static inline void
-__attribute__((__nonnull__,__gnu_inline__,__always_inline__,__const__))
+__attribute__((__nonnull__,__gnu_inline__,__always_inline__))
 ls2_pick_color_inverted(const double sample, double *restrict h,
 			double *restrict s, double *restrict l)
 {

@@ -32,7 +32,7 @@
  ***
  *******************************************************************/
 
-static inline void  __attribute__((__const__,__always_inline__))
+static inline void  __attribute__((__always_inline__))
 hsl_to_rgb(const double h, const double s, const double l,
 	   double *r, double *g, double *b)
 {
@@ -75,7 +75,7 @@ hsl_to_rgb(const double h, const double s, const double l,
     *b += m;
 }
 
-static inline void  __attribute__((__const__,__always_inline__))
+static inline void  __attribute__((__always_inline__))
 hsl_to_rgbf(const float h, const float s, const float l,
 	    float *r, float *g, float *b)
 {
