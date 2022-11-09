@@ -77,7 +77,7 @@ fmedian_s(const size_t length, float const * const values)
 
 SELECT_TEMPLATE(double, select_s)
 
-/* Compute the media. */
+/* Compute the median. */
 static inline double
 __attribute__((__always_inline__,__gnu_inline__,__pure__,__nonnull__,__artificial__))
 median_s(const size_t length, double const * const values)
