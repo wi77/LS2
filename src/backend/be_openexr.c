@@ -164,8 +164,9 @@ ls2_openexr_write_inverted(const char* filename,
 
     // Draw the result image.
     ls2_draw_inverted_to_openexr(image, width, height, result);
-    ls2_draw_circle_to_openexr(image, width, height, (uint16_t) tag_x, (uint16_t) tag_y,
-                               expectation, 0.0F, 1.0F, 0.0F);
+    ls2_draw_circle_to_openexr(image, width, height, (uint16_t) tag_x,
+		               (uint16_t) tag_y, (uint16_t) expectation,
+			       0.0F, 1.0F, 0.0F);
     ls2_draw_rectangle_to_openexr(image, width, height, (uint16_t) tag_x,
                                   (uint16_t) tag_y, 2, 2, 1.0F, 1.0F, 0.0F);
     ls2_draw_anchors_to_openexr(image, width, height, anchors, no_anchors, 0);
