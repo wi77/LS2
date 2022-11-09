@@ -172,7 +172,7 @@ ls2_draw_anchors_to_cairo(cairo_surface_t *surface,
 	cairo_text_extents_t te;
 	cairo_new_path(cr);
 	cairo_set_source_rgb(cr, 1.0, 0.0, 0.0);
-	snprintf(buffer, 8, "%zu", i + 1);
+	snprintf(buffer, 20, "%zu", i + 1);
 
 	cairo_text_extents(cr, buffer, &te);
 	cairo_move_to(cr, x - te.width - te.x_bearing - 8.0,
