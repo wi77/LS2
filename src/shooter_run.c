@@ -202,7 +202,6 @@ static void*
 __attribute__((__nonnull__,__hot__,__flatten__))
 ls2_shooter_run(void *rr)
 {
-    g_assert(rr != NULL);
     locbased_runparams_t *params = (locbased_runparams_t *) rr;
 
     VECTOR vx[MAX_ANCHORS];
