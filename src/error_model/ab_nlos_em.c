@@ -87,12 +87,12 @@ static inline void
 __attribute__((__always_inline__,__gnu_inline__,__artificial__,__nonnull__(1,3,8)))
 ab_nlos_error(__m128i *restrict seed,
               const size_t anchors,
-              const VECTOR *restrict distances,
+              const VECTOR * distances,
               const VECTOR *restrict vx __attribute__((__unused__)),
               const VECTOR *restrict vy __attribute__((__unused__)),
               const VECTOR tagx __attribute__((__unused__)),
               const VECTOR tagy __attribute__((__unused__)),
-              VECTOR *restrict result)
+              VECTOR * result)
 {
     VECTOR rn;
     for (size_t k=0; k < anchors ; k++) {
@@ -131,7 +131,7 @@ ab_nlos_setup(const vector2 *anchors __attribute__((__unused__)), size_t nanchor
     seed = _mm_set_epi32(seed0, seed1, seed2, seed3);
 
     for (int i=0; i < TESTRUNS; i++){
-        ab_nlos_error(&seed,nanchors,test,&d,&d,d,d,test);
+        ab_nlos_error(&seed, nanchors, test, &d, &d, d, d, test);
         for (int a=0; a<(int)nanchors; a++) {
             test[a] /= TESTRUNS;
             for (int ii=0; ii < VECTOR_OPS; ii++) {
